@@ -13,6 +13,7 @@ import Signup from './pages/Signup';
 import UserDashboard from './pages/UserDashboard';
 import Explorer from './pages/Explorer';
 import Visualizations from './pages/Visualizations';
+import ChatAssistant from './pages/ChatAssistant';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminMetrics from './pages/AdminMetrics';
 import AdminUsers from './pages/AdminUsers';
@@ -58,8 +59,12 @@ function App() {
                 <Visualizations />
               </ProtectedRoute>
             } />
+            <Route path="/chat" element={
+              <ProtectedRoute role="user">
+                <ChatAssistant />
+              </ProtectedRoute>
+            } />
 
-            
             {/* Admin Protected Routes */}
             <Route path="/admin" element={
               <ProtectedRoute role="admin">

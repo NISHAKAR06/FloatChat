@@ -1,114 +1,44 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { ScrollArea } from './ui/scroll-area';
-import { 
-  MessageCircle, 
-  X, 
-  Send, 
-  Mic, 
-  BarChart3, 
-  Map, 
-  FileText,
-  Sparkles,
-  Bot
-} from 'lucide-react';
+import { Alert, AlertDescription } from './ui/alert';
+import { MessageCircle, X, Send, Bot, Sparkles } from 'lucide-react';
+import useChatStore from '../store/chatStore';
+import ChatMessage from './ChatMessage';
+import ChatInput from './ChatInput';
+import QuickTemplates from './QuickTemplates';
+import LoadingIndicator from './LoadingIndicator';
 import { useToast } from '../hooks/use-toast';
 
 const FloatingChatButton = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [message, setMessage] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'assistant',
-      content: "Hello! I'm your AI ocean data assistant. I can help you explore datasets, create visualizations, and answer questions about oceanographic data. What would you like to know?",
-      timestamp: new Date(),
-      suggestions: [
-        "Show me temperature data for the Gulf Stream",
-        "Create a chart of salinity changes",
-        "Find anomalies in current data",
-        "Export recent measurements"
-      ]
+  const { 
+    isOpen, 
+    toggleChat, 
+    messages, 
+    sendMessage,
+    isLoading,
+    error,
+    initializeChat
+  } = useChatStore();
+  
+  const scrollRef = React.useRef(null);
+
+  // Initialize chat if needed
+  React.useEffect(() => {
+    initializeChat();
+  }, [initializeChat]);
+
+  // Auto-scroll to bottom when messages change
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  ]);
+  }, [messages]);
 
-  const { toast } = useToast();
 
-  const handleSendMessage = async () => {
-    if (!message.trim()) return;
-
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: message,
-      timestamp: new Date()
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setMessage('');
-
-    // Mock AI response
-    setTimeout(() => {
-      const responses = [
-        {
-          content: "I found 15 temperature datasets for the Gulf Stream region. The average temperature has increased by 0.8°C over the last month. Would you like me to create a visualization?",
-          suggestions: ["Create temperature chart", "Show detailed data", "Compare with historical", "Export as CSV"]
-        },
-        {
-          content: "Here's what I found about current patterns in that region. The data shows unusual velocity changes that might indicate a seasonal shift. Let me generate a map for you.",
-          suggestions: ["View on map", "Get more details", "Set up alert", "Compare regions"]
-        },
-        {
-          content: "I've analyzed the salinity data and found some interesting patterns. There's a 0.3 PSU decrease in the northern regions. This could be related to recent precipitation patterns.",
-          suggestions: ["Show salinity map", "Historical comparison", "Related datasets", "Create report"]
-        }
-      ];
-
-      const response = responses[Math.floor(Math.random() * responses.length)];
-      
-      const assistantMessage = {
-        id: Date.now() + 1,
-        type: 'assistant',
-        content: response.content,
-        timestamp: new Date(),
-        suggestions: response.suggestions
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-    }, 1000);
-  };
-
-  const handleVoiceInput = () => {
-    setIsListening(!isListening);
-    toast({
-      title: isListening ? "Voice input stopped" : "Voice input started",
-      description: isListening ? "Processing your voice input..." : "Speak now to ask your question",
-    });
-
-    if (!isListening) {
-      // Mock voice input
-      setTimeout(() => {
-        setMessage("Show me the latest temperature data for the Atlantic Ocean");
-        setIsListening(false);
-      }, 2000);
-    }
-  };
-
-  const handleSuggestionClick = (suggestion) => {
-    setMessage(suggestion);
-  };
-
-  const quickTemplates = [
-    { icon: <BarChart3 className="h-4 w-4" />, label: "Temperature Analysis", query: "Analyze temperature trends in the Pacific Ocean" },
-    { icon: <Map className="h-4 w-4" />, label: "Current Mapping", query: "Show current patterns in the Atlantic" },
-    { icon: <FileText className="h-4 w-4" />, label: "Data Export", query: "Export salinity data for the last month" },
-    { icon: <Sparkles className="h-4 w-4" />, label: "Anomaly Detection", query: "Find unusual patterns in recent data" }
-  ];
 
   return (
     <>
@@ -120,7 +50,7 @@ const FloatingChatButton = () => {
         transition={{ type: "spring", stiffness: 200, damping: 20 }}
       >
         <Button
-          onClick={() => setIsOpen(true)}
+          onClick={() => toggleChat()}
           className="h-14 w-14 rounded-full bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-300"
         >
           <MessageCircle className="h-6 w-6 text-white" />
@@ -159,7 +89,7 @@ const FloatingChatButton = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => toggleChat()}
                     className="text-white hover:bg-white/20"
                   >
                     <X className="h-4 w-4" />
@@ -172,91 +102,35 @@ const FloatingChatButton = () => {
               </CardHeader>
 
               <CardContent className="p-0 h-[calc(100%-140px)] flex flex-col bg-white dark:bg-slate-800">
+                {error && (
+                  <Alert variant="destructive" className="m-2">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
                 {/* Messages */}
-                <ScrollArea className="flex-1 p-4">
+                <ScrollArea ref={scrollRef} className="flex-1 p-4">
                   <div className="space-y-4">
-                    {messages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[80%] p-3 rounded-lg ${
-                            msg.type === 'user'
-                              ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white'
-                              : 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200'
-                          }`}
-                        >
-                          <p className="text-sm">{msg.content}</p>
-                          {msg.suggestions && (
-                            <div className="mt-3 space-y-1">
-                              {msg.suggestions.map((suggestion, index) => (
-                                <Button
-                                  key={index}
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleSuggestionClick(suggestion)}
-                                  className="w-full justify-start text-xs bg-white/20 hover:bg-white/30 text-slate-700 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-200 dark:bg-slate-600/50 dark:hover:bg-slate-600"
-                                >
-                                  {suggestion}
-                                </Button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                    {messages.map((message) => (
+                      <ChatMessage
+                        key={message.id}
+                        message={message}
+                        onSuggestionClick={(suggestion) => sendMessage(suggestion)}
+                      />
                     ))}
+                    {isLoading && <LoadingIndicator />}
                   </div>
                 </ScrollArea>
 
                 {/* Quick Templates */}
-                <div className="p-3 border-t border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-700/50">
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">Quick Actions:</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {quickTemplates.map((template, index) => (
-                      <Button
-                        key={index}
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleSuggestionClick(template.query)}
-                        className="justify-start text-xs hover:bg-cyan-50 hover:text-cyan-700 dark:hover:bg-cyan-900/20 dark:hover:text-cyan-400 dark:text-slate-400"
-                      >
-                        {template.icon}
-                        <span className="ml-1 truncate">{template.label}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+                <QuickTemplates
+                  onTemplateSelect={sendMessage}
+                  className="p-3 border-t border-slate-200/60 dark:border-slate-700/60 bg-slate-50/50 dark:bg-slate-700/50"
+                />
 
                 {/* Input */}
                 <div className="p-4 border-t border-slate-200/60 dark:border-slate-700/60">
-                  <div className="flex space-x-2">
-                    <div className="flex-1 relative">
-                      <Input
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                        placeholder="Ask about ocean data..."
-                        className="pr-10 border-cyan-200 focus:border-cyan-400 dark:border-cyan-700 dark:focus:border-cyan-500 dark:bg-slate-700 dark:text-slate-200"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleVoiceInput}
-                        className={`absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 ${
-                          isListening ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'
-                        }`}
-                      >
-                        <Mic className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Button
-                      onClick={handleSendMessage}
-                      className="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <ChatInput onSubmit={sendMessage} />
                 </div>
               </CardContent>
             </Card>
