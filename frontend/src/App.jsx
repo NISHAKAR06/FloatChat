@@ -13,7 +13,6 @@ import Signup from './pages/Signup';
 import UserDashboard from './pages/UserDashboard';
 import Explorer from './pages/Explorer';
 import Visualizations from './pages/Visualizations';
-import Alert from './pages/Alert';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminMetrics from './pages/AdminMetrics';
 import AdminUsers from './pages/AdminUsers';
@@ -36,7 +35,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="App min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="App min-h-screen bg-background">
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Landing />} />
@@ -59,11 +58,7 @@ function App() {
                 <Visualizations />
               </ProtectedRoute>
             } />
-            <Route path="/alerts" element={
-              <ProtectedRoute role="user">
-                <Alert />
-              </ProtectedRoute>
-            } />
+
             
             {/* Admin Protected Routes */}
             <Route path="/admin" element={

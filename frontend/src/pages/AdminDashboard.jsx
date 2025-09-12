@@ -101,11 +101,11 @@ const AdminDashboard = () => {
           >
             {/* Header */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center">
+              <h1 className="text-3xl font-bold text-foreground mb-2 flex items-center">
                 <Shield className="h-8 w-8 text-orange-600 dark:text-orange-400 mr-3" />
                 Admin Dashboard
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-muted-foreground">
                 System overview and management controls
               </p>
             </div>
@@ -123,7 +123,7 @@ const AdminDashboard = () => {
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
                         {stat.icon}
-                        <Badge variant={stat.trend === 'up' ? 'default' : 'secondary'} className="text-xs dark:bg-slate-700 dark:text-slate-300">
+                        <Badge variant={stat.trend === 'up' ? 'default' : 'secondary'} className="text-xs">
                           {stat.change}
                         </Badge>
                       </div>
@@ -146,7 +146,7 @@ const AdminDashboard = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
-                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
+                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                   <CardHeader>
                     <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
                       <AlertTriangle className="h-5 w-5 text-orange-500 dark:text-orange-400 mr-2" />
@@ -156,7 +156,7 @@ const AdminDashboard = () => {
                   <CardContent>
                     <div className="space-y-4">
                       {systemAlerts.map((alert) => (
-                        <div key={alert.id} className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                        <div key={alert.id} className="flex items-start space-x-4 p-4 rounded-lg border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
                           <Badge className={getSeverityColor(alert.severity)}>
                             {alert.severity}
                           </Badge>
@@ -181,25 +181,25 @@ const AdminDashboard = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
-                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 mb-6">
+                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 mb-6 hover:shadow-lg transition-all duration-300">
                   <CardHeader>
                     <CardTitle className="text-slate-800 dark:text-slate-200">Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <Button variant="outline" className="w-full justify-start border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700 dark:hover:bg-cyan-900/20 dark:text-slate-300">
+                      <Button variant="outline" className="w-full justify-start border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700/50 dark:hover:bg-cyan-900/30 dark:text-slate-200">
                         <Users className="h-4 w-4 mr-2" />
                         Manage Users
                       </Button>
-                      <Button variant="outline" className="w-full justify-start border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700 dark:hover:bg-cyan-900/20 dark:text-slate-300">
+                      <Button variant="outline" className="w-full justify-start border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700/50 dark:hover:bg-cyan-900/30 dark:text-slate-200">
                         <Database className="h-4 w-4 mr-2" />
                         Database Status
                       </Button>
-                      <Button variant="outline" className="w-full justify-start border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700 dark:hover:bg-cyan-900/20 dark:text-slate-300">
+                      <Button variant="outline" className="w-full justify-start border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700/50 dark:hover:bg-cyan-900/30 dark:text-slate-200">
                         <FileText className="h-4 w-4 mr-2" />
                         View Logs
                       </Button>
-                      <Button variant="outline" className="w-full justify-start border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700 dark:hover:bg-cyan-900/20 dark:text-slate-300">
+                      <Button variant="outline" className="w-full justify-start border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700/50 dark:hover:bg-cyan-900/30 dark:text-slate-200">
                         <Activity className="h-4 w-4 mr-2" />
                         System Health
                       </Button>
@@ -208,7 +208,7 @@ const AdminDashboard = () => {
                 </Card>
 
                 {/* System Performance */}
-                <Card className="bg-gradient-to-br from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 text-white">
+                <Card className="bg-gradient-to-br from-cyan-500 to-blue-600 dark:from-cyan-600 dark:to-blue-700 text-white hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div>
@@ -242,7 +242,7 @@ const AdminDashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
             >
-              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
                   <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
                     <Users className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
@@ -252,7 +252,7 @@ const AdminDashboard = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {recentUsers.map((user) => (
-                      <div key={user.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                      <div key={user.id} className="flex items-center justify-between p-4 rounded-lg border border-slate-200/50 dark:border-slate-700/50 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
                         <div className="flex items-center space-x-4">
                           <div className="h-10 w-10 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full flex items-center justify-center">
                             <Users className="h-5 w-5 text-white" />

@@ -49,7 +49,7 @@ const AdminSettings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <Navbar />
       <div className="flex">
         <Sidebar collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} />
@@ -63,13 +63,13 @@ const AdminSettings = () => {
             <div className="mb-8">
               <div className="flex justify-between items-center">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center">
-                    <Settings className="h-8 w-8 text-slate-600 mr-3" />
+                  <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center">
+                    <Settings className="h-8 w-8 text-blue-600 dark:text-blue-400 mr-3" />
                     System Settings
                   </h1>
-                  <p className="text-slate-600">Configure system parameters and preferences</p>
+                  <p className="text-slate-600 dark:text-slate-400">Configure system parameters and preferences</p>
                 </div>
-                <Button onClick={handleSave} className="bg-gradient-to-r from-cyan-600 to-blue-700 text-white">
+                <Button onClick={handleSave} className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-300">
                   <Save className="h-4 w-4 mr-2" />
                   Save Changes
                 </Button>
@@ -78,38 +78,38 @@ const AdminSettings = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* API Configuration */}
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Key className="h-5 w-5 text-cyan-600 mr-2" />
+                  <CardTitle className="flex items-center text-slate-800 dark:text-slate-100">
+                    <Key className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
                     API Configuration
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label htmlFor="apiKey">API Key</Label>
+                    <Label className="text-slate-800 dark:text-slate-200" htmlFor="apiKey">API Key</Label>
                     <div className="flex space-x-2">
                       <Input
                         id="apiKey"
                         value={settings.apiKey}
                         onChange={(e) => handleSettingChange('apiKey', e.target.value)}
-                        className="border-cyan-200 focus:border-cyan-400"
                         type="password"
+                        className="bg-white/50 dark:bg-slate-900/50"
                       />
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
                         <RefreshCw className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
                   
                   <div>
-                    <Label htmlFor="refreshInterval">Refresh Interval (seconds)</Label>
+                    <Label className="text-slate-800 dark:text-slate-200" htmlFor="refreshInterval">Refresh Interval (seconds)</Label>
                     <Input
                       id="refreshInterval"
                       type="number"
                       value={settings.apiRefreshInterval}
                       onChange={(e) => handleSettingChange('apiRefreshInterval', parseInt(e.target.value))}
-                      className="border-cyan-200 focus:border-cyan-400"
+                      className="bg-white/50 dark:bg-slate-900/50"
                     />
                   </div>
 
@@ -125,10 +125,10 @@ const AdminSettings = () => {
               </Card>
 
               {/* System Limits */}
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Shield className="h-5 w-5 text-orange-600 mr-2" />
+                  <CardTitle className="flex items-center text-slate-800 dark:text-slate-100">
+                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
                     System Limits
                   </CardTitle>
                 </CardHeader>
@@ -163,7 +163,9 @@ const AdminSettings = () => {
                         checked={settings.maintenanceMode}
                         onCheckedChange={(checked) => handleSettingChange('maintenanceMode', checked)}
                       />
-                      <Badge className={settings.maintenanceMode ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}>
+                      <Badge className={settings.maintenanceMode 
+                        ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' 
+                        : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}>
                         {settings.maintenanceMode ? 'On' : 'Off'}
                       </Badge>
                     </div>
@@ -172,16 +174,16 @@ const AdminSettings = () => {
               </Card>
 
               {/* Notifications */}
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Bell className="h-5 w-5 text-blue-600 mr-2" />
+                  <CardTitle className="flex items-center text-slate-800 dark:text-slate-100">
+                    <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
                     Notifications
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="notifications">Enable System Notifications</Label>
+                    <Label className="text-foreground" htmlFor="notifications">Enable System Notifications</Label>
                     <Switch
                       id="notifications"
                       checked={settings.enableNotifications}
@@ -190,19 +192,19 @@ const AdminSettings = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <p className="text-sm font-medium text-slate-700">Notification Types:</p>
+                    <p className="text-sm font-medium text-foreground">Notification Types:</p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">System Alerts</span>
-                        <Badge className="bg-green-100 text-green-800">Enabled</Badge>
+                        <span className="text-sm text-muted-foreground">System Alerts</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Enabled</Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">User Activity</span>
-                        <Badge className="bg-green-100 text-green-800">Enabled</Badge>
+                        <span className="text-sm text-muted-foreground">User Activity</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Enabled</Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">Performance Alerts</span>
-                        <Badge className="bg-yellow-100 text-yellow-800">Disabled</Badge>
+                        <span className="text-sm text-muted-foreground">Performance Alerts</span>
+                        <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">Disabled</Badge>
                       </div>
                     </div>
                   </div>
@@ -210,16 +212,16 @@ const AdminSettings = () => {
               </Card>
 
               {/* Database Settings */}
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Database className="h-5 w-5 text-green-600 mr-2" />
+                  <CardTitle className="flex items-center text-slate-800 dark:text-slate-100">
+                    <Database className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
                     Database Settings
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="autoBackup">Enable Auto Backup</Label>
+                    <Label className="text-foreground" htmlFor="autoBackup">Enable Auto Backup</Label>
                     <Switch
                       id="autoBackup"
                       checked={settings.enableAutoBackup}
@@ -228,27 +230,27 @@ const AdminSettings = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <p className="text-sm font-medium text-slate-700">Database Status:</p>
+                    <p className="text-sm font-medium text-foreground">Database Status:</p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">Connection</span>
-                        <Badge className="bg-green-100 text-green-800">
-                          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                        <span className="text-sm text-muted-foreground">Connection</span>
+                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                          <div className="h-2 w-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse mr-2"></div>
                           Connected
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">Storage Used</span>
-                        <span className="text-sm font-medium">45.2 TB</span>
+                        <span className="text-sm text-muted-foreground">Storage Used</span>
+                        <span className="text-sm font-medium text-foreground">45.2 TB</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-slate-600">Last Backup</span>
-                        <span className="text-sm font-medium">2 hours ago</span>
+                        <span className="text-sm text-muted-foreground">Last Backup</span>
+                        <span className="text-sm font-medium text-foreground">2 hours ago</span>
                       </div>
                     </div>
                   </div>
 
-                  <Button variant="outline" className="w-full border-green-200 text-green-700 hover:bg-green-50">
+                  <Button variant="outline" className="w-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
                     <Database className="h-4 w-4 mr-2" />
                     Backup Now
                   </Button>
@@ -263,16 +265,16 @@ const AdminSettings = () => {
               transition={{ delay: 0.5 }}
               className="mt-8"
             >
-              <Card className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+              <Card className="bg-primary text-primary-foreground">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-semibold mb-2">Configuration Status</h3>
-                      <p className="text-cyan-100">All systems operational. Settings can be modified in real-time.</p>
+                      <p className="text-primary-foreground/80">All systems operational. Settings can be modified in real-time.</p>
                     </div>
                     <Button 
                       onClick={handleSave}
-                      className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+                      variant="secondary"
                     >
                       <Save className="h-4 w-4 mr-2" />
                       Apply Changes

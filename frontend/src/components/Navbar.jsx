@@ -13,7 +13,6 @@ import {
 import { 
   Waves, 
   Search, 
-  Bell, 
   User, 
   Settings, 
   LogOut, 
@@ -21,8 +20,10 @@ import {
   Moon,
   Shield,
   Database,
-  AlertTriangle,
-  Users
+  Users,
+  Bell,
+  MessageSquare,
+  UserCheck
 } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import useAuthStore from '../store/authStore';
@@ -55,20 +56,36 @@ const Navbar = () => {
     }
   };
 
-  const notifications = [
-    { id: 1, title: "Temperature Alert", message: "Anomaly detected in Gulf Stream", time: "2h ago", type: "alert" },
-    { id: 2, title: "Data Update", message: "New satellite data available", time: "4h ago", type: "info" },
-    { id: 3, title: "System Maintenance", message: "Scheduled maintenance tonight", time: "1d ago", type: "warning" }
-  ];
+
 
   const getResultIcon = (type) => {
     switch (type) {
       case 'dataset': return <Database className="h-4 w-4 text-cyan-600" />;
       case 'user': return <Users className="h-4 w-4 text-blue-600" />;
-      case 'alert': return <AlertTriangle className="h-4 w-4 text-orange-600" />;
       default: return <Search className="h-4 w-4" />;
     }
   };
+
+  const [notifications] = useState([
+    { 
+      id: 1, 
+      type: 'access', 
+      title: 'Dataset Access Granted', 
+      message: 'You now have access to the Gulf Stream dataset',
+      time: '2h ago',
+      sender: 'System Admin',
+      icon: <UserCheck className="h-4 w-4 text-green-500" />
+    },
+    { 
+      id: 2, 
+      type: 'message', 
+      title: 'New Message from Admin',
+      message: 'Please review the updated data usage guidelines',
+      time: '4h ago',
+      sender: 'Admin',
+      icon: <MessageSquare className="h-4 w-4 text-blue-500" />
+    }
+  ]);
 
   const navigateToResult = (result) => {
     setShowSearchResults(false);
@@ -83,16 +100,13 @@ const Navbar = () => {
           navigate('/admin/users');
         }
         break;
-      case 'alert':
-        navigate('/alerts');
-        break;
       default:
         break;
     }
   };
 
   return (
-    <nav className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-700/60 sticky top-0 z-50">
+    <nav className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-700/60 sticky top-0 z-50 select-none">
       <div className="max-w-full mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -133,7 +147,7 @@ const Navbar = () => {
             
             {/* Search Results Dropdown */}
             {showSearchResults && results.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50 select-none">
                 {results.slice(0, 8).map((result, index) => (
                   <div
                     key={`${result.type}-${result.id || index}`}
@@ -193,30 +207,57 @@ const Navbar = () => {
                   className="relative text-slate-600 hover:text-cyan-600 dark:text-slate-300 dark:hover:text-cyan-400"
                 >
                   <Bell className="h-4 w-4" />
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-red-500 text-white text-xs">
-                    {notifications.length}
-                  </Badge>
+                  {notifications.length > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-blue-600 text-white text-xs">
+                      {notifications.length}
+                    </Badge>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <div className="p-2 border-b">
-                  <p className="font-medium text-sm">Notifications</p>
+              <DropdownMenuContent align="end" className="w-80 select-none">
+                <div className="p-3 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold text-sm text-slate-800 dark:text-slate-200">Notifications</p>
+                    {notifications.length > 0 && (
+                      <Badge variant="secondary" className="text-xs">
+                        {notifications.length} new
+                      </Badge>
+                    )}
+                  </div>
                 </div>
-                {notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="p-3 cursor-pointer">
-                    <div className="w-full">
-                      <div className="flex justify-between items-start mb-1">
-                        <p className="font-medium text-sm">{notification.title}</p>
-                        <span className="text-xs text-slate-500">{notification.time}</span>
-                      </div>
-                      <p className="text-sm text-slate-600">{notification.message}</p>
+                <div className="max-h-[300px] overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-slate-500">
+                      No new notifications
                     </div>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-center text-cyan-600 cursor-pointer">
-                  View all notifications
-                </DropdownMenuItem>
+                  ) : (
+                    notifications.map((notification) => (
+                      <DropdownMenuItem key={notification.id} className="p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+                        <div className="flex space-x-3">
+                          <div className="flex-shrink-0 mt-1">
+                            {notification.icon}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between mb-1">
+                              <p className="font-medium text-sm text-slate-800 dark:text-slate-200">{notification.title}</p>
+                              <span className="text-xs text-slate-500 whitespace-nowrap ml-2">{notification.time}</span>
+                            </div>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">{notification.message}</p>
+                            <p className="text-xs text-slate-500 mt-1">From: {notification.sender}</p>
+                          </div>
+                        </div>
+                      </DropdownMenuItem>
+                    ))
+                  )}
+                </div>
+                {notifications.length > 0 && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem className="p-2 text-center text-sm text-blue-600 dark:text-blue-400 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+                      Mark all as read
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -236,7 +277,7 @@ const Navbar = () => {
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className="w-56 select-none">
                 <div className="p-2 border-b">
                   <p className="font-medium text-sm">{user?.name || 'User'}</p>
                   <p className="text-xs text-slate-500">{user?.email}</p>

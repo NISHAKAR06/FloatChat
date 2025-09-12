@@ -26,7 +26,7 @@ const AdminMetrics = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 transition-colors duration-300">
       <Navbar />
       <div className="flex">
         <Sidebar collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} />
@@ -40,18 +40,18 @@ const AdminMetrics = () => {
             <div className="mb-8">
               <div className="flex justify-between items-center">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center">
-                    <BarChart3 className="h-8 w-8 text-cyan-600 mr-3" />
+                  <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center">
+                    <BarChart3 className="h-8 w-8 text-blue-600 dark:text-blue-400 mr-3" />
                     System Metrics
                   </h1>
-                  <p className="text-slate-600">Performance analytics and system monitoring</p>
+                  <p className="text-slate-600 dark:text-slate-400">Performance analytics and system monitoring</p>
                 </div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Refresh
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -68,14 +68,14 @@ const AdminMetrics = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+                  <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm text-slate-600">{metric.title}</p>
-                        <Badge className="text-xs">{metric.change}</Badge>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">{metric.title}</p>
+                        <Badge variant={metric.change.startsWith('+') ? 'default' : 'secondary'} className="text-xs">{metric.change}</Badge>
                       </div>
-                      <p className="text-2xl font-bold text-slate-800 mb-1">{metric.value}</p>
-                      <p className="text-xs text-slate-500">{metric.period}</p>
+                      <p className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-1">{metric.value}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-500">{metric.period}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -84,35 +84,35 @@ const AdminMetrics = () => {
 
             {/* Charts Placeholder */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <TrendingUp className="h-5 w-5 text-blue-600 mr-2" />
+                  <CardTitle className="flex items-center text-slate-800 dark:text-slate-100">
+                    <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
                     API Usage Trends
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg h-64 flex items-center justify-center">
+                  <div className="bg-slate-100/30 dark:bg-slate-700/30 rounded-lg h-64 flex items-center justify-center">
                     <div className="text-center">
-                      <BarChart3 className="h-16 w-16 text-cyan-600 mx-auto mb-4" />
-                      <p className="text-slate-600">API Usage Chart</p>
+                      <BarChart3 className="h-16 w-16 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+                      <p className="text-slate-600 dark:text-slate-400">API Usage Chart</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Database className="h-5 w-5 text-green-600 mr-2" />
+                  <CardTitle className="flex items-center text-slate-800 dark:text-slate-100">
+                    <Database className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
                     Database Performance
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-gradient-to-br from-green-100 to-emerald-100 rounded-lg h-64 flex items-center justify-center">
+                  <div className="bg-slate-100/30 dark:bg-slate-700/30 rounded-lg h-64 flex items-center justify-center">
                     <div className="text-center">
-                      <Database className="h-16 w-16 text-green-600 mx-auto mb-4" />
-                      <p className="text-slate-600">Database Metrics</p>
+                      <Database className="h-16 w-16 text-blue-600 dark:text-blue-400 mx-auto mb-4" />
+                      <p className="text-slate-600 dark:text-slate-400">Database Metrics</p>
                     </div>
                   </div>
                 </CardContent>

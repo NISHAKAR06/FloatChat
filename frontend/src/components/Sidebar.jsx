@@ -7,7 +7,6 @@ import {
   LayoutDashboard, 
   Database, 
   Map, 
-  Bell, 
   Users,
   BarChart3,
   Settings,
@@ -30,7 +29,6 @@ const Sidebar = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', badge: null },
     { icon: Database, label: 'Explorer', path: '/explorer', badge: 'New' },
     { icon: Map, label: 'Visualizations', path: '/visualizations', badge: null },
-    { icon: Bell, label: 'Alerts', path: '/alerts', badge: '3' },
   ];
 
   const adminMenuItems = [
@@ -52,7 +50,7 @@ const Sidebar = () => {
       initial={{ width: collapsed ? 64 : 256 }}
       animate={{ width: collapsed ? 64 : 256 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="fixed left-0 top-16 h-[calc(100vh-64px)] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-r border-slate-200/60 dark:border-slate-700/60 z-40"
+      className="fixed left-0 top-16 h-[calc(100vh-64px)] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-r border-slate-200/60 dark:border-slate-700/60 z-40 select-none"
     >
       <div className="flex flex-col h-full">
         {/* Collapse Toggle */}

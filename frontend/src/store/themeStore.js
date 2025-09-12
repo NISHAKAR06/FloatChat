@@ -4,7 +4,11 @@ import { persist } from 'zustand/middleware';
 const useThemeStore = create(
   persist(
     (set, get) => ({
-      theme: 'light',
+      theme: typeof window !== 'undefined' 
+        ? window.matchMedia('(prefers-color-scheme: dark)').matches 
+          ? 'dark' 
+          : 'light'
+        : 'light',
       toggleTheme: () => {
         const newTheme = get().theme === 'light' ? 'dark' : 'light';
         set({ theme: newTheme });

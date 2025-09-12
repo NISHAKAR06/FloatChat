@@ -67,11 +67,11 @@ const AdminLogs = () => {
 
   const getLevelColor = (level) => {
     switch (level) {
-      case 'error': return 'bg-red-100 text-red-800';
-      case 'warning': return 'bg-orange-100 text-orange-800';
-      case 'info': return 'bg-blue-100 text-blue-800';
-      case 'success': return 'bg-green-100 text-green-800';
-      default: return 'bg-slate-100 text-slate-800';
+      case 'error': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
+      case 'warning': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300';
+      case 'info': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+      case 'success': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
@@ -86,7 +86,7 @@ const AdminLogs = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
       <Navbar />
       <div className="flex">
         <Sidebar collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} />
@@ -100,18 +100,18 @@ const AdminLogs = () => {
             <div className="mb-8">
               <div className="flex justify-between items-center">
                 <div>
-                  <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center">
-                    <FileText className="h-8 w-8 text-slate-600 mr-3" />
+                  <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center">
+                    <FileText className="h-8 w-8 text-blue-600 dark:text-blue-400 mr-3" />
                     System Logs
                   </h1>
-                  <p className="text-slate-600">Monitor system activity and troubleshoot issues</p>
+                  <p className="text-slate-600 dark:text-slate-400">Monitor system activity and troubleshoot issues</p>
                 </div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
                     <Filter className="h-4 w-4 mr-2" />
                     Filter
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -120,16 +120,16 @@ const AdminLogs = () => {
             </div>
 
             {/* Search and Filter */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20 mb-6">
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300 mb-6">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" />
                     <Input
                       placeholder="Search logs..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 border-cyan-200 focus:border-cyan-400"
+                      className="pl-10 bg-white/50 dark:bg-slate-900/50"
                     />
                   </div>
                   <div className="flex space-x-2">
@@ -139,7 +139,10 @@ const AdminLogs = () => {
                         variant={logType === type ? 'default' : 'outline'}
                         size="sm"
                         onClick={() => setLogType(type)}
-                        className={logType === type ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white' : ''}
+                        className={logType === type ? 
+                          'bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600' : 
+                          'hover:bg-slate-100 dark:hover:bg-slate-700'
+                        }
                       >
                         {type.charAt(0).toUpperCase() + type.slice(1)}
                       </Button>
@@ -150,12 +153,12 @@ const AdminLogs = () => {
             </Card>
 
             {/* Logs List */}
-            <Card className="bg-white/80 backdrop-blur-sm border-white/20">
+            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex items-center justify-between text-slate-800 dark:text-slate-100">
                   <span>Recent Logs</span>
-                  <Badge className="bg-green-100 text-green-800">
-                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                    <div className="h-2 w-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse mr-2"></div>
                     Live
                   </Badge>
                 </CardTitle>
@@ -168,7 +171,7 @@ const AdminLogs = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="border border-slate-200 rounded-lg p-4 hover:bg-slate-50 transition-colors"
+                      className="border border-white/20 dark:border-slate-700/20 rounded-lg p-4 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
@@ -176,18 +179,18 @@ const AdminLogs = () => {
                             {getLevelIcon(log.level)}
                             <span className="ml-1">{log.level}</span>
                           </Badge>
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                             {log.category}
                           </Badge>
                         </div>
-                        <div className="flex items-center text-xs text-slate-500">
+                        <div className="flex items-center text-xs text-slate-500 dark:text-slate-400">
                           <Clock className="h-3 w-3 mr-1" />
                           {new Date(log.timestamp).toLocaleString()}
                         </div>
                       </div>
                       
-                      <p className="font-medium text-slate-800 mb-2">{log.message}</p>
-                      <p className="text-sm text-slate-600 bg-slate-50 rounded p-2 font-mono">
+                      <p className="font-medium text-slate-800 dark:text-slate-200 mb-2">{log.message}</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-700/50 rounded p-2 font-mono">
                         {log.details}
                       </p>
                     </motion.div>
@@ -195,7 +198,7 @@ const AdminLogs = () => {
                 </div>
                 
                 <div className="mt-6 text-center">
-                  <Button variant="outline" className="border-cyan-200 text-cyan-700 hover:bg-cyan-50">
+                  <Button variant="outline" className="border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
                     Load More Logs
                   </Button>
                 </div>
