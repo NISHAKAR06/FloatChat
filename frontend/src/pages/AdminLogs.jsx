@@ -107,11 +107,19 @@ const AdminLogs = () => {
                   <p className="text-slate-600 dark:text-slate-400">Monitor system activity and troubleshoot issues</p>
                 </div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-slate-200/60 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:border-slate-600/60 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 transition-all hover:shadow-sm"
+                  >
                     <Filter className="h-4 w-4 mr-2" />
                     Filter
                   </Button>
-                  <Button variant="outline" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-slate-200/60 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:border-slate-600/60 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 transition-all hover:shadow-sm"
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -120,7 +128,7 @@ const AdminLogs = () => {
             </div>
 
             {/* Search and Filter */}
-            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300 mb-6">
+            <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white/95 dark:hover:bg-slate-800/95 hover:shadow-lg transition-all duration-300 mb-6">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1 relative">
@@ -129,7 +137,7 @@ const AdminLogs = () => {
                       placeholder="Search logs..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-white/50 dark:bg-slate-900/50"
+                      className="pl-10 bg-white/95 dark:bg-slate-900/95 border-slate-200/60 hover:border-cyan-300 focus:border-cyan-400 dark:border-slate-600/60 dark:hover:border-cyan-600 dark:focus:border-cyan-500 transition-colors"
                     />
                   </div>
                   <div className="flex space-x-2">
@@ -153,7 +161,7 @@ const AdminLogs = () => {
             </Card>
 
             {/* Logs List */}
-            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
+            <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white/95 dark:hover:bg-slate-800/95 hover:shadow-lg transition-all duration-300">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between text-slate-800 dark:text-slate-100">
                   <span>Recent Logs</span>
@@ -171,7 +179,7 @@ const AdminLogs = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="border border-white/20 dark:border-slate-700/20 rounded-lg p-4 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors"
+                      className="border border-slate-200/60 dark:border-slate-700/60 rounded-lg p-4 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 transition-colors"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
@@ -198,7 +206,7 @@ const AdminLogs = () => {
                 </div>
                 
                 <div className="mt-6 text-center">
-                  <Button variant="outline" className="border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
+                  <Button variant="outline" className="border-slate-200/60 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:border-slate-600/60 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 transition-all hover:shadow-sm">
                     Load More Logs
                   </Button>
                 </div>

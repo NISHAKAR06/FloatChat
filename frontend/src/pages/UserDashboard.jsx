@@ -26,7 +26,35 @@ const UserDashboard = () => {
 
   // Navigation handlers
   const handleNavigation = (path) => {
-    navigate(path);
+    try {
+      // Check if path is valid
+      if (!path) {
+        console.error('Invalid navigation path');
+        return;
+      }
+
+      // Map of path aliases to actual routes
+      const routeMap = {
+        '/explorer': '/explorer',
+        '/visualizations': '/visualizations',
+        '/chat-assistant': '/chat',
+        '/chat': '/chat'
+      };
+      
+      // Get the actual route from the map, or use the original path
+      const actualPath = routeMap[path] || path;
+
+      // Log navigation attempt
+      console.log(`Navigating to: ${actualPath}`);
+
+      // Use navigate with state to preserve history
+      navigate(actualPath, {
+        replace: false,
+        state: { from: 'dashboard' }
+      });
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
   };
 
   // Mock data
@@ -73,7 +101,7 @@ const UserDashboard = () => {
     { 
       title: "Chat with AI", 
       icon: <Waves className="h-4 w-4" />, 
-      action: "/chat-assistant",
+      action: "/chat",
       description: "Get AI-powered insights"
     }
   ];
@@ -112,18 +140,18 @@ const UserDashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg hover:bg-white/90 dark:hover:bg-slate-800/90 transition-all duration-300">
+                  <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white/95 dark:hover:bg-slate-800/95 hover:shadow-lg transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <div className="p-2 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+                        <div className="p-2 bg-cyan-50/90 dark:bg-cyan-900/30 rounded-lg">
                           {stat.icon}
                         </div>
                         <Badge 
                           variant={stat.trend === 'up' ? 'default' : 'secondary'} 
                           className={`text-xs ${
                             stat.trend === 'up' 
-                              ? 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300' 
-                              : 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
+                              ? 'bg-cyan-100/90 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300' 
+                              : 'bg-slate-100/90 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
                           }`}
                         >
                           {stat.change}
@@ -148,7 +176,7 @@ const UserDashboard = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
-                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
+                <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white/95 dark:hover:bg-slate-800/95">
                   <CardHeader>
                     <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
                       <Activity className="h-5 w-5 text-cyan-600 dark:text-cyan-400 mr-2" />
@@ -161,8 +189,15 @@ const UserDashboard = () => {
                         <Button
                           key={action.title}
                           variant="outline"
-                          className="w-full justify-start gap-3 border-cyan-200 hover:bg-cyan-50 hover:border-cyan-300 dark:border-cyan-800/50 dark:hover:bg-cyan-900/20 dark:hover:border-cyan-700"
-                          onClick={() => handleNavigation(action.action)}
+                          className="w-full justify-start gap-3 bg-white/95 dark:bg-slate-800/95 border-slate-200/60 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:border-slate-600/60 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 hover:shadow-sm transition-all"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log(`Clicked ${action.title}`);
+                            handleNavigation(action.action);
+                          }}
+                          role="link"
+                          aria-label={`Go to ${action.title}`}
                         >
                           <div className="p-1.5 bg-cyan-100 dark:bg-cyan-900/50 rounded-lg">
                             {action.icon}
@@ -176,9 +211,15 @@ const UserDashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </motion.div>
 
-                {/* Ocean Conditions Widget */}
-                <Card className="bg-gradient-to-br from-cyan-500 to-blue-600 dark:from-cyan-600 dark:to-blue-700 text-white mt-6 overflow-hidden relative">
+              {/* Ocean Conditions Widget */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <Card className="bg-gradient-to-br from-cyan-500 to-blue-600 dark:from-cyan-600 dark:to-blue-700 text-white h-full overflow-hidden relative">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent"></div>
                   <CardContent className="p-6 relative">
                     <div className="flex items-center justify-between mb-6">
@@ -215,7 +256,7 @@ const UserDashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
             >
-              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
+              <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white/95 dark:hover:bg-slate-800/95">
                 <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
                     <TrendingUp className="h-5 w-5 text-cyan-600 dark:text-cyan-400 mr-2" />
@@ -224,7 +265,7 @@ const UserDashboard = () => {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300"
+                    className="bg-white/95 dark:bg-slate-800/95 border-slate-200/60 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:border-slate-600/60 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 hover:shadow-sm transition-all"
                     onClick={() => handleNavigation('/admin/settings')}
                   >
                     <Settings2 className="h-4 w-4 mr-2" />
@@ -247,7 +288,7 @@ const UserDashboard = () => {
                         </p>
                         <div className="flex items-center justify-center gap-3">
                           <Button 
-                            className="bg-gradient-to-r from-cyan-600 to-blue-700 text-white hover:from-cyan-700 hover:to-blue-800"
+                            className="bg-gradient-to-r from-cyan-600 to-blue-700 text-white hover:from-cyan-700 hover:to-blue-800 hover:shadow-lg transition-all"
                             onClick={() => handleNavigation('/explorer')}
                           >
                             <Eye className="h-4 w-4 mr-2" />
@@ -255,7 +296,7 @@ const UserDashboard = () => {
                           </Button>
                           <Button 
                             variant="outline" 
-                            className="border-cyan-200 hover:bg-cyan-50 dark:border-cyan-800 dark:hover:bg-cyan-900/20"
+                            className="bg-white/95 dark:bg-slate-800/95 border-slate-200/60 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:border-slate-600/60 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 hover:shadow-sm transition-all"
                             onClick={() => handleNavigation('/visualizations')}
                           >
                             <TrendingUp className="h-4 w-4 mr-2" />

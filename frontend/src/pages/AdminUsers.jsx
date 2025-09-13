@@ -54,7 +54,7 @@ const AdminUsers = () => {
                   </h1>
                   <p className="text-slate-600 dark:text-slate-400">Manage user accounts and permissions</p>
                 </div>
-                <Button className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors duration-300">
+                <Button className="bg-gradient-to-r from-cyan-600 to-blue-700 text-white hover:from-cyan-700 hover:to-blue-800 hover:shadow-md dark:from-cyan-600/90 dark:to-blue-700/90 dark:hover:from-cyan-700/90 dark:hover:to-blue-800/90 transition-all">
                   <Plus className="h-4 w-4 mr-2" />
                   Add User
                 </Button>
@@ -62,7 +62,7 @@ const AdminUsers = () => {
             </div>
 
             {/* Search and Stats */}
-            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300 mb-6">
+            <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white/95 dark:hover:bg-slate-800/95 hover:shadow-lg transition-all duration-300 mb-6">
               <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row gap-4 items-center">
                   <div className="flex-1 relative">
@@ -71,7 +71,7 @@ const AdminUsers = () => {
                       placeholder="Search users..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-white/50 dark:bg-slate-900/50"
+                      className="pl-10 bg-white/95 dark:bg-slate-900/95 border-slate-200/60 hover:border-cyan-300 focus:border-cyan-400 dark:border-slate-600/60 dark:hover:border-cyan-600 dark:focus:border-cyan-500 transition-colors"
                     />
                   </div>
                   <div className="flex space-x-6 text-sm">
@@ -97,9 +97,9 @@ const AdminUsers = () => {
             </Card>
 
             {/* Users Table */}
-            <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
+            <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white/95 dark:hover:bg-slate-800/95 hover:shadow-lg transition-all duration-300">
               <CardHeader>
-                <CardTitle className="text-slate-800 dark:text-slate-100">All Users</CardTitle>
+                <CardTitle className="text-slate-800 dark:text-slate-100 hover:text-slate-900 dark:hover:text-white transition-colors">All Users</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -109,23 +109,23 @@ const AdminUsers = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.1 }}
-                      className="flex items-center justify-between p-4 rounded-lg border border-white/20 dark:border-slate-700/20 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors"
+                      className="flex items-center justify-between p-4 rounded-lg border border-slate-200/60 dark:border-slate-700/60 hover:bg-slate-100/90 dark:hover:bg-slate-700/90 hover:border-slate-300/60 dark:hover:border-slate-600/60 transition-all duration-300 group"
                     >
                       <div className="flex items-center space-x-4">
                         <div className="h-12 w-12 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center">
                           <Users className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                          <p className="font-medium text-slate-800 dark:text-slate-100">{user.name}</p>
-                          <p className="text-sm text-slate-600 dark:text-slate-400">{user.email}</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-500">{user.institution}</p>
+                          <p className="font-medium text-slate-800 dark:text-slate-100 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{user.name}</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">{user.email}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-400 transition-colors">{user.institution}</p>
                         </div>
                       </div>
                       
                       <div className="flex items-center space-x-4">
                         <div className="text-right">
-                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300">{user.datasetsAccessed} datasets</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-500">
+                          <p className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">{user.datasetsAccessed} datasets</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-400 transition-colors">
                             Last login: {new Date(user.lastLogin).toLocaleDateString()}
                           </p>
                         </div>
@@ -141,10 +141,18 @@ const AdminUsers = () => {
                         </div>
                         
                         <div className="flex space-x-1">
-                          <Button variant="ghost" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 transition-all hover:shadow-sm"
+                          >
                             {user.status === 'active' ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
                           </Button>
-                          <Button variant="ghost" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 transition-all hover:shadow-sm"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </div>

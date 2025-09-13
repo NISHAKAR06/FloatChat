@@ -18,7 +18,16 @@ const useChatStore = create(
           messages: [...state.messages, { ...message, id: Date.now() }],
         })),
 
-      clearMessages: () => set({ messages: [] }),
+      clearCurrentChat: () => {
+        const state = get();
+        // Keep the welcome message if it exists
+        const welcomeMessage = state.messages.find(m => m.type === 'assistant' && m.content.includes("Hello! I'm your AI ocean data assistant"));
+        set({ 
+          messages: welcomeMessage ? [welcomeMessage] : [],
+          error: null,
+          isLoading: false
+        });
+      },
 
       // UI Actions
       toggleChat: () => set((state) => ({ isOpen: !state.isOpen })),

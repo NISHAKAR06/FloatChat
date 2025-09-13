@@ -106,7 +106,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-700/60 sticky top-0 z-50 select-none">
+    <nav className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-700/60 sticky top-0 z-50 select-none shadow-sm">
       <div className="max-w-full mx-auto px-6">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -135,7 +135,7 @@ const Navbar = () => {
                   onChange={(e) => setQuery(e.target.value)}
                   onFocus={() => setShowSearchResults(true)}
                   onBlur={() => setTimeout(() => setShowSearchResults(false), 200)}
-                  className="pl-10 border-slate-200 focus:border-cyan-400 bg-slate-50/50 dark:bg-slate-800/50 dark:border-slate-600"
+                  className="pl-10 border-slate-200/60 focus:border-cyan-500 bg-white/50 dark:bg-slate-800/50 dark:border-slate-700/50 dark:focus:border-cyan-400 hover:bg-white/80 dark:hover:bg-slate-800/80 transition-colors"
                 />
                 {isLoading && (
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -147,12 +147,12 @@ const Navbar = () => {
             
             {/* Search Results Dropdown */}
             {showSearchResults && results.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50 select-none">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-slate-800/95 border border-slate-200/60 dark:border-slate-700/60 rounded-lg shadow-lg backdrop-blur-sm max-h-96 overflow-y-auto z-50 select-none">
                 {results.slice(0, 8).map((result, index) => (
                   <div
                     key={`${result.type}-${result.id || index}`}
                     onClick={() => navigateToResult(result)}
-                    className="flex items-center space-x-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer border-b border-slate-100 dark:border-slate-600 last:border-0"
+                    className="flex items-center space-x-3 p-3 hover:bg-slate-50/90 dark:hover:bg-slate-700/90 cursor-pointer border-b border-slate-200/60 dark:border-slate-700/60 last:border-0 transition-colors"
                   >
                     {getResultIcon(result.type)}
                     <div className="flex-1 min-w-0">
@@ -214,12 +214,12 @@ const Navbar = () => {
                   )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80 select-none">
-                <div className="p-3 border-b border-slate-200 dark:border-slate-700">
+              <DropdownMenuContent align="end" className="w-80 select-none bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60">
+                <div className="p-3 border-b border-slate-200/60 dark:border-slate-700/60">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-sm text-slate-800 dark:text-slate-200">Notifications</p>
                     {notifications.length > 0 && (
-                      <Badge variant="secondary" className="text-xs">
+                      <Badge variant="secondary" className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                         {notifications.length} new
                       </Badge>
                     )}
@@ -232,7 +232,7 @@ const Navbar = () => {
                     </div>
                   ) : (
                     notifications.map((notification) => (
-                      <DropdownMenuItem key={notification.id} className="p-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+                      <DropdownMenuItem key={notification.id} className="p-3 cursor-pointer hover:bg-slate-50/90 dark:hover:bg-slate-700/90 transition-colors">
                         <div className="flex space-x-3">
                           <div className="flex-shrink-0 mt-1">
                             {notification.icon}
@@ -277,11 +277,11 @@ const Navbar = () => {
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 select-none">
-                <div className="p-2 border-b">
-                  <p className="font-medium text-sm">{user?.name || 'User'}</p>
-                  <p className="text-xs text-slate-500">{user?.email}</p>
-                  <Badge className="mt-1 text-xs" variant={user?.role === 'admin' ? 'default' : 'secondary'}>
+              <DropdownMenuContent align="end" className="w-56 select-none bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60">
+                <div className="p-2 border-b border-slate-200/60 dark:border-slate-700/60">
+                  <p className="font-medium text-sm text-slate-800 dark:text-slate-200">{user?.name || 'User'}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
+                  <Badge className="mt-1 text-xs bg-cyan-100 dark:bg-cyan-900/50 text-cyan-800 dark:text-cyan-300" variant={user?.role === 'admin' ? 'default' : 'secondary'}>
                     {user?.role || 'user'}
                   </Badge>
                 </div>

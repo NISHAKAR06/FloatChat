@@ -20,18 +20,62 @@ const ChatInput = ({ onSubmit }) => {
   };
 
   const handleVoiceInput = () => {
-    setVoiceInputActive(!isVoiceInputActive);
-    toast({
-      title: isVoiceInputActive ? "Voice input stopped" : "Voice input started",
-      description: isVoiceInputActive ? "Processing your voice input..." : "Speak now to ask your question",
-    });
-
     if (!isVoiceInputActive) {
-      // Mock voice input - replace with actual voice recognition
-      setTimeout(() => {
-        setInput("Show me the latest temperature data for the Atlantic Ocean");
+      // Start voice recognition
+      const recognition = new (window.webkitSpeechRecognition || window.SpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setVoiceInputActive(true);
+        toast({
+          title: "Voice input started",
+          description: "Speak now to ask your question",
+        });
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        toast({
+          title: "Voice input received",
+          description: "Your question was captured successfully",
+        });
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        toast({
+          title: "Voice input error",
+          description: "There was an error with voice recognition. Please try again.",
+          variant: "destructive",
+        });
         setVoiceInputActive(false);
-      }, 2000);
+      };
+
+      recognition.onend = () => {
+        setVoiceInputActive(false);
+      };
+
+      try {
+        recognition.start();
+      } catch (error) {
+        console.error('Speech recognition error:', error);
+        toast({
+          title: "Voice input error",
+          description: "Could not start voice recognition. Please try again.",
+          variant: "destructive",
+        });
+        setVoiceInputActive(false);
+      }
+    } else {
+      // Stop voice recognition
+      setVoiceInputActive(false);
+      toast({
+        title: "Voice input stopped",
+        description: "Voice input has been cancelled",
+      });
     }
   };
 
@@ -50,7 +94,7 @@ const ChatInput = ({ onSubmit }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about ocean data..."
-          className="pr-10 border-cyan-200 focus:border-cyan-400 dark:border-cyan-700 dark:focus:border-cyan-500 dark:bg-slate-700 dark:text-slate-200"
+          className="pr-10 bg-white/95 dark:bg-slate-700/95 border-slate-200/60 hover:border-cyan-300 focus:border-cyan-400 dark:border-slate-600/60 dark:hover:border-cyan-600 dark:focus:border-cyan-500 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-colors"
         />
         <motion.div
           animate={isVoiceInputActive ? { scale: 1.2 } : { scale: 1 }}
@@ -60,8 +104,8 @@ const ChatInput = ({ onSubmit }) => {
             variant="ghost"
             size="sm"
             onClick={handleVoiceInput}
-            className={`absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 ${
-              isVoiceInputActive ? 'text-red-500' : 'text-slate-400 dark:text-slate-500'
+            className={`absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-slate-100/80 dark:hover:bg-slate-700/80 ${
+              isVoiceInputActive ? 'text-red-500 hover:text-red-600' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
             }`}
           >
             <Mic className="h-4 w-4" />
@@ -70,7 +114,7 @@ const ChatInput = ({ onSubmit }) => {
       </div>
       <Button
         type="submit"
-        className="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white"
+        className="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white hover:shadow-md dark:from-cyan-600/90 dark:to-blue-700/90 dark:hover:from-cyan-700/90 dark:hover:to-blue-800/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         disabled={!input.trim()}
       >
         <Send className="h-4 w-4" />

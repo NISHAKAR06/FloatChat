@@ -21,8 +21,35 @@ const ChatAssistant = () => {
     sendMessage,
     isLoading,
     error,
-    initializeChat
+    initializeChat,
+    clearCurrentChat
   } = useChatStore();
+
+  const handleClearChat = () => {
+    if (window.confirm('Are you sure you want to clear the current chat?')) {
+      clearCurrentChat();
+    }
+  };
+  
+  const handleDownloadChat = () => {
+    // Create chat transcript
+    const transcript = messages.map(msg => {
+      const role = msg.role === 'user' ? 'User' : 'Assistant';
+      return `${role}: ${msg.content}\n`;
+    }).join('\n');
+
+    // Create download
+    const blob = new Blob([transcript], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    a.href = url;
+    a.download = `chat-transcript-${timestamp}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
   
   const scrollRef = React.useRef(null);
 
@@ -62,98 +89,77 @@ const ChatAssistant = () => {
             </div>
 
             {/* Chat Interface */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Main Chat Panel */}
-              <div className="lg:col-span-3">
-                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle className="flex items-center text-slate-800 dark:text-slate-200">
-                      <Bot className="h-5 w-5 text-cyan-600 dark:text-cyan-400 mr-2" />
-                      Conversation
-                    </CardTitle>
-                    <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="outline" className="dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {error && (
-                      <Alert variant="destructive" className="mb-4">
-                        <AlertDescription>{error}</AlertDescription>
-                      </Alert>
-                    )}
+            <div className="w-full max-w-5xl mx-auto">
+              <Card className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 hover:bg-white/95 dark:hover:bg-slate-800/95 transition-all duration-300">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center text-slate-800 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <Bot className="h-5 w-5 text-cyan-600 dark:text-cyan-400 mr-2" />
+                    Conversation
+                  </CardTitle>
+                  <div className="flex space-x-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-slate-200/60 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:border-slate-600/60 dark:text-orange-400 dark:hover:bg-orange-900/20 dark:hover:text-orange-300 transition-colors"
+                      onClick={handleClearChat}
+                      title="Clear current chat"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                        <path d="M3 6h18"></path>
+                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-slate-200/60 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:border-slate-600/60 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 transition-colors"
+                      onClick={handleDownloadChat}
+                      title="Download chat transcript"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="border-slate-200/60 text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 dark:border-slate-600/60 dark:text-slate-300 dark:hover:bg-slate-700/80 dark:hover:text-slate-100 transition-colors"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {error && (
+                    <Alert variant="destructive" className="mb-4">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
 
-                    {/* Messages Area */}
-                    <div ref={scrollRef} className="h-[500px] overflow-y-auto mb-4">
-                      <div className="space-y-4 p-4">
-                        {messages.map((message) => (
-                          <ChatMessage
-                            key={message.id}
-                            message={message}
-                            onSuggestionClick={(suggestion) => sendMessage(suggestion)}
-                          />
-                        ))}
-                        {isLoading && <LoadingIndicator />}
-                      </div>
+                  {/* Messages Area */}
+                  <div ref={scrollRef} className="h-[600px] overflow-y-auto mb-4">
+                    <div className="space-y-4 p-4">
+                      {messages.map((message) => (
+                        <ChatMessage
+                          key={message.id}
+                          message={message}
+                          onSuggestionClick={(suggestion) => sendMessage(suggestion)}
+                        />
+                      ))}
+                      {isLoading && <LoadingIndicator />}
                     </div>
+                  </div>
 
-                    {/* Input Area */}
-                    <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-4">
-                      <ChatInput 
-                        onSubmit={sendMessage}
-                        placeholder="Ask about ocean data..."
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Side Panel */}
-              <div className="space-y-6">
-                {/* Quick Actions */}
-                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-slate-800 dark:text-slate-200">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <QuickTemplates
-                      onTemplateSelect={sendMessage}
-                      variant="vertical"
-                      className="space-y-2"
+                  {/* Input Area */}
+                  <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-4">
+                    <ChatInput 
+                      onSubmit={sendMessage}
+                      placeholder="Ask about ocean data..."
                     />
-                  </CardContent>
-                </Card>
-
-                {/* Chat Statistics */}
-                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-slate-800 dark:text-slate-200">Statistics</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Messages:</span>
-                      <Badge variant="secondary">{messages.length}</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Response Time:</span>
-                      <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                        ~2s
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Status:</span>
-                      <div className="flex items-center space-x-1">
-                        <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-green-600 dark:text-green-400">Online</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </motion.div>
         </main>

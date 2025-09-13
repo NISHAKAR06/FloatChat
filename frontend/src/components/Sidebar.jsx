@@ -56,7 +56,7 @@ const Sidebar = () => {
       initial={{ width: collapsed ? 64 : 256 }}
       animate={{ width: collapsed ? 64 : 256 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="fixed left-0 top-16 h-[calc(100vh-64px)] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-r border-slate-200/60 dark:border-slate-700/60 z-40 select-none"
+      className="fixed left-0 top-16 h-[calc(100vh-64px)] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-r border-slate-200/60 dark:border-slate-700/60 z-40 select-none shadow-sm"
     >
       <div className="flex flex-col h-full">
         {/* Collapse Toggle */}
@@ -65,12 +65,12 @@ const Sidebar = () => {
             variant="ghost"
             size="sm"
             onClick={toggleCollapsed}
-            className="w-full h-8 justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+            className="w-full h-8 justify-center hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors"
           >
             {collapsed ? (
-              <ChevronRight className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+              <ChevronRight className="h-4 w-4 text-slate-700 dark:text-slate-300" />
             ) : (
-              <ChevronLeft className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+              <ChevronLeft className="h-4 w-4 text-slate-700 dark:text-slate-300" />
             )}
           </Button>
         </div>
@@ -111,8 +111,8 @@ const Sidebar = () => {
                   variant={isActivePath(item.path) ? 'default' : 'ghost'}
                   className={`w-full h-11 transition-all duration-200 group ${
                     isActivePath(item.path)
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white shadow-md hover:from-cyan-700 hover:to-blue-800'
-                      : 'text-slate-600 hover:text-cyan-600 hover:bg-cyan-50 dark:text-slate-300 dark:hover:text-cyan-400 dark:hover:bg-slate-700/50'
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white shadow-md hover:shadow-lg hover:from-cyan-700 hover:to-blue-800 dark:from-cyan-600/90 dark:to-blue-700/90 dark:hover:from-cyan-700/90 dark:hover:to-blue-800/90'
+                      : 'text-slate-700 hover:text-cyan-700 hover:bg-cyan-50/90 dark:text-slate-300 dark:hover:text-cyan-300 dark:hover:bg-slate-800/90'
                   } ${collapsed ? 'justify-center px-2' : 'justify-start px-3'}`}
                 >
                   <div className={`flex items-center ${collapsed ? 'w-full justify-center' : 'w-full'}`}>
@@ -130,8 +130,8 @@ const Sidebar = () => {
                           <Badge 
                             className={`ml-2 text-xs flex-shrink-0 ${
                               isActivePath(item.path)
-                                ? 'bg-white/20 text-white hover:bg-white/30'
-                                : 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300'
+                                ? 'bg-white/20 text-white hover:bg-white/40'
+                                : 'bg-cyan-100 text-cyan-700 hover:bg-cyan-200 dark:bg-cyan-900/50 dark:text-cyan-300 dark:hover:bg-cyan-900/70'
                             }`}
                           >
                             {item.badge}
@@ -183,9 +183,9 @@ const Sidebar = () => {
           className={`${collapsed ? 'p-3' : 'p-4'} border-t border-slate-200/60 dark:border-slate-700/60`}
         >
           {!collapsed ? (
-            <div className="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 rounded-lg p-3 border border-green-200/50 dark:border-green-700/50">
+            <div className="bg-gradient-to-r from-green-100/90 to-emerald-100/90 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-200/50 dark:border-green-700/30 backdrop-blur-sm">
               <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse flex-shrink-0"></div>
+                <div className="h-2 w-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">System Online</span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
