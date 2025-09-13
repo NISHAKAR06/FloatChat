@@ -14,11 +14,14 @@ import UserDashboard from './pages/UserDashboard';
 import Explorer from './pages/Explorer';
 import Visualizations from './pages/Visualizations';
 import ChatAssistant from './pages/ChatAssistant';
+import ProfileViewer from './pages/ProfileViewer';
+import CompareParameters from './pages/CompareParameters';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminMetrics from './pages/AdminMetrics';
 import AdminUsers from './pages/AdminUsers';
 import AdminLogs from './pages/AdminLogs';
 import AdminSettings from './pages/AdminSettings';
+import AdminDatasetMonitor from './pages/AdminDatasetMonitor';
 
 // Utils
 import ProtectedRoute from './utils/ProtectedRoute';
@@ -64,6 +67,16 @@ function App() {
                 <ChatAssistant />
               </ProtectedRoute>
             } />
+            <Route path="/profiles" element={
+              <ProtectedRoute role="user">
+                <ProfileViewer />
+              </ProtectedRoute>
+            } />
+            <Route path="/compare" element={
+              <ProtectedRoute role="user">
+                <CompareParameters />
+              </ProtectedRoute>
+            } />
 
             {/* Admin Protected Routes */}
             <Route path="/admin" element={
@@ -89,6 +102,11 @@ function App() {
             <Route path="/admin/settings" element={
               <ProtectedRoute role="admin">
                 <AdminSettings />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/dataset" element={
+              <ProtectedRoute role="admin">
+                <AdminDatasetMonitor />
               </ProtectedRoute>
             } />
             

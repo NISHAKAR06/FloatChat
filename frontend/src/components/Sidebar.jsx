@@ -31,6 +31,8 @@ const Sidebar = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', badge: null },
     { icon: Database, label: 'Explorer', path: '/explorer', badge: 'New' },
     { icon: Map, label: 'Visualizations', path: '/visualizations', badge: null },
+    { icon: BarChart3, label: 'Profile Viewer', path: '/profiles', badge: null },
+    { icon: FileText, label: 'Compare', path: '/compare', badge: null },
     { icon: MessageCircle, label: 'Chat Assistant', path: '/chat', badge: 'AI', fullWidth: true },
   ];
 
@@ -40,6 +42,7 @@ const Sidebar = () => {
     { icon: Users, label: 'Users', path: '/admin/users', badge: '12' },
     { icon: FileText, label: 'Logs', path: '/admin/logs', badge: null },
     { icon: Settings, label: 'Settings', path: '/admin/settings', badge: null },
+    { icon: Database, label: 'Dataset Monitor', path: '/admin/dataset', badge: 'New' },
   ];
 
   const menuItems = isAdmin ? adminMenuItems : userMenuItems;

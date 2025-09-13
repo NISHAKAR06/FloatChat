@@ -6,7 +6,8 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
-import { Waves, User, Shield, ArrowLeft, Sun, Moon } from 'lucide-react';
+import { Waves, ArrowLeft, Sun, Moon } from 'lucide-react';
+import RoleSelector from '../components/RoleSelector';
 import { useToast } from '../hooks/use-toast';
 import useAuthStore from '../store/authStore';
 import useThemeStore from '../store/themeStore';
@@ -109,36 +110,11 @@ const Login = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Role Selection */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <Button
-                type="button"
-                variant={formData.role === 'user' ? 'default' : 'outline'}
-                className={`h-auto p-4 flex flex-col items-center space-y-2 ${
-                  formData.role === 'user' 
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white' 
-                    : 'border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700 dark:hover:bg-cyan-900/20 dark:text-slate-300'
-                }`}
-                onClick={() => handleRoleChange('user')}
-              >
-                <User className="h-6 w-6" />
-                <span className="font-medium">User</span>
-                <span className="text-xs opacity-80">Explore & Analyze</span>
-              </Button>
-              <Button
-                type="button"
-                variant={formData.role === 'admin' ? 'default' : 'outline'}
-                className={`h-auto p-4 flex flex-col items-center space-y-2 ${
-                  formData.role === 'admin' 
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-700 text-white' 
-                    : 'border-cyan-200 hover:bg-cyan-50 dark:border-cyan-700 dark:hover:bg-cyan-900/20 dark:text-slate-300'
-                }`}
-                onClick={() => handleRoleChange('admin')}
-              >
-                <Shield className="h-6 w-6" />
-                <span className="font-medium">Admin</span>
-                <span className="text-xs opacity-80">Manage & Monitor</span>
-              </Button>
-            </div>
+            <RoleSelector
+              selectedRole={formData.role}
+              onRoleSelect={handleRoleChange}
+              className="mb-6"
+            />
 
             <div className="flex items-center justify-center">
               <Badge variant="secondary" className="bg-cyan-100 text-cyan-800 dark:bg-cyan-900/50 dark:text-cyan-300">
