@@ -1,5 +1,4 @@
 import React from 'react';
-import Plotly from 'plotly.js-dist-min';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Download, Share2, Settings2 } from 'lucide-react';
