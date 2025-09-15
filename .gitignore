@@ -68,3 +68,6 @@ dist
 
 # Local Netlify folder
 .netlify
+
+# backend
+__pycache__/
