@@ -35,12 +35,10 @@ const queryClient = new QueryClient();
 
 function App() {
   const { initializeTheme } = useThemeStore();
-  const { initializeAuth } = useAuthStore();
 
   useEffect(() => {
     initializeTheme();
-    initializeAuth();
-  }, [initializeTheme, initializeAuth]);
+  }, [initializeTheme]);
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

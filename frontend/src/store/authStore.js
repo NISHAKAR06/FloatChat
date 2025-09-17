@@ -6,18 +6,20 @@ const useAuthStore = create(
     (set, get) => ({
       isAuthenticated: false,
       user: null,
-      login: (userData) => {
+      token: null,
+      login: (userData, token) => {
         set({
           isAuthenticated: true,
-          user: userData
+          user: userData,
+          token: token,
         });
       },
       logout: () => {
         set({
           isAuthenticated: false,
-          user: null
+          user: null,
+          token: null,
         });
-        localStorage.removeItem('auth');
       },
       updateUser: (userData) => {
         set(state => ({
@@ -25,22 +27,11 @@ const useAuthStore = create(
         }));
       },
       initializeAuth: () => {
-        const authData = localStorage.getItem('auth');
-        if (authData) {
-          try {
-            const { isAuthenticated, user } = JSON.parse(authData);
-            if (isAuthenticated && user) {
-              set({ isAuthenticated, user });
-            }
-          } catch (error) {
-            console.error('Error parsing auth data:', error);
-            localStorage.removeItem('auth');
-          }
-        }
+        // This will be handled by the persist middleware
       }
     }),
     {
-      name: 'auth-storage',
+      name: 'auth',
     }
   )
 );

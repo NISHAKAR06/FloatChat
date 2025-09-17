@@ -71,3 +71,13 @@ dist
 
 # backend
 __pycache__/
+
+# Django / Python
+*.pyc
+*.sqlite3
+db.sqlite3
+
+# Virtualenv
+.venv
+venv
+env

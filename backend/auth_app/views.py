@@ -1,8 +1,16 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from .models import CustomUser, Profile
-from .serializers import CustomUserSerializer, ProfileSerializer
+from .serializers import CustomUserSerializer, ProfileSerializer, UserRegistrationSerializer, MyTokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-class CustomUserViewSet(viewsets.ModelViewSet):
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
+class UserRegistrationView(generics.CreateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserRegistrationSerializer
+
+class CustomUserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
 
