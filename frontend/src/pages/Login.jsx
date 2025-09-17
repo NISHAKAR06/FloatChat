@@ -42,6 +42,8 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    console.log('Login attempt:', formData);
+
     // Mock authentication
     setTimeout(() => {
       const userData = {
@@ -49,27 +51,38 @@ const Login = () => {
         role: formData.role,
         name: formData.email.split('@')[0]
       };
+      
+      console.log('User data:', userData);
 
-      // Store auth data using Zustand store
-      login(userData);
-
-      // Also store in localStorage for compatibility
-      localStorage.setItem('auth', JSON.stringify({
+      // First, set up both storage mechanisms
+      const authData = {
         isAuthenticated: true,
         user: userData
-      }));
-
+      };
+      
+      // Update localStorage first
+      localStorage.setItem('auth', JSON.stringify(authData));
+      
+      // Then update Zustand store
+      login(userData);
+      
+      // Verify the data is stored properly
+      const storedAuth = localStorage.getItem('auth');
+      console.log('Stored auth data:', storedAuth);
+      
       toast({
         title: "Login successful!",
-        description: `Welcome back, ${formData.role}!`,
+        description: `Welcome back, ${userData.name}!`,
       });
 
-      // Redirect based on role
-      if (formData.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
+      // Short delay to ensure state is updated before navigation
+      setTimeout(() => {
+        if (formData.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
+      }, 100);
       
       setIsLoading(false);
     }, 1000);

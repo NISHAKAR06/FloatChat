@@ -16,15 +16,20 @@ import Visualizations from './pages/Visualizations';
 import ChatAssistant from './pages/ChatAssistant';
 import ProfileViewer from './pages/ProfileViewer';
 import CompareParameters from './pages/CompareParameters';
+// Pages
 import AdminDashboard from './pages/AdminDashboard';
-import AdminMetrics from './pages/AdminMetrics';
-import AdminUsers from './pages/AdminUsers';
-import AdminLogs from './pages/AdminLogs';
 import AdminSettings from './pages/AdminSettings';
-import AdminDatasetMonitor from './pages/AdminDatasetMonitor';
+// Pages
+import AdminUserManagement from './pages/AdminUserManagement';
+// Pages
+import AdminUsageAnalytics from './pages/AdminUsageAnalytics';
+// Pages
+import AdminDatasetManagement from './pages/AdminDatasetManagement';
+import SystemMetrics from './pages/SystemMetrics';
 
 // Utils
 import ProtectedRoute from './utils/ProtectedRoute';
+import AdminLayout from './components/AdminLayout';
 
 const queryClient = new QueryClient();
 
@@ -81,32 +86,65 @@ function App() {
             {/* Admin Protected Routes */}
             <Route path="/admin" element={
               <ProtectedRoute role="admin">
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/metrics" element={
-              <ProtectedRoute role="admin">
-                <AdminMetrics />
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/users" element={
               <ProtectedRoute role="admin">
-                <AdminUsers />
+                <AdminLayout>
+                  <AdminUserManagement />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/usage-analytics" element={
+              <ProtectedRoute role="admin">
+                <AdminLayout>
+                  <AdminUsageAnalytics />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/datasets" element={
+              <ProtectedRoute role="admin">
+                <AdminLayout>
+                  <AdminDatasetManagement />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/system-metrics" element={
+              <ProtectedRoute role="admin">
+                <AdminLayout>
+                  <SystemMetrics />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/metrics" element={
+              <ProtectedRoute role="admin">
+                <AdminLayout>
+                  <div>Metrics</div>
+                </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/logs" element={
               <ProtectedRoute role="admin">
-                <AdminLogs />
+                <AdminLayout>
+                  <div>Logs</div>
+                </AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/admin/settings" element={
               <ProtectedRoute role="admin">
-                <AdminSettings />
+                <AdminLayout>
+                  <AdminSettings />
+                </AdminLayout>
               </ProtectedRoute>
             } />
-            <Route path="/admin/dataset" element={
+            <Route path="/admin/settings" element={
               <ProtectedRoute role="admin">
-                <AdminDatasetMonitor />
+                <AdminLayout>
+                  <AdminSettings />
+                </AdminLayout>
               </ProtectedRoute>
             } />
             

@@ -1,3 +1,7 @@
-from django.shortcuts import render
+from rest_framework import viewsets
+from .models import SystemMetric
+from .serializers import SystemMetricSerializer
 
-# Create your views here.
+class SystemMetricViewSet(viewsets.ModelViewSet):
+    queryset = SystemMetric.objects.all()
+    serializer_class = SystemMetricSerializer

@@ -37,9 +37,9 @@ export default {
   				foreground: 'hsl(var(--muted-foreground))'
   			},
   			accent: {
-  				DEFAULT: '#0a9396',
-  				foreground: '#ffffff',
-  				hover: '#087f82'
+  				DEFAULT: '#e0f7fa',
+  				foreground: '#007788',
+  				hover: '#ccecf2'
   			},
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',

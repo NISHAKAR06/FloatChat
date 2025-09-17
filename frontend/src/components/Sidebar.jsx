@@ -38,11 +38,11 @@ const Sidebar = () => {
 
   const adminMenuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/admin', badge: null },
-    { icon: BarChart3, label: 'Metrics', path: '/admin/metrics', badge: null },
-    { icon: Users, label: 'Users', path: '/admin/users', badge: '12' },
-    { icon: FileText, label: 'Logs', path: '/admin/logs', badge: null },
-    { icon: Settings, label: 'Settings', path: '/admin/settings', badge: null },
-    { icon: Database, label: 'Dataset Monitor', path: '/admin/dataset', badge: 'New' },
+    { icon: Users, label: 'User Management', path: '/admin/users', badge: null },
+    { icon: BarChart3, label: 'Usage Analytics', path: '/admin/usage-analytics', badge: null },
+    { icon: Database, label: 'Dataset Management', path: '/admin/datasets', badge: null },
+    { icon: Activity, label: 'System Metrics', path: '/admin/system-metrics', badge: null },
+    { icon: Settings, label: 'Settings', path: '/admin/settings', badge: null }
   ];
 
   const menuItems = isAdmin ? adminMenuItems : userMenuItems;
@@ -175,29 +175,6 @@ const Sidebar = () => {
           ))}
         </nav>
 
-        {/* Status Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className={`${collapsed ? 'p-3' : 'p-4'} border-t border-slate-200/60 dark:border-slate-700/60`}
-        >
-          {!collapsed ? (
-            <div className="bg-gradient-to-r from-green-100/90 to-emerald-100/90 dark:from-green-900/30 dark:to-emerald-900/30 rounded-lg p-3 border border-green-200/50 dark:border-green-700/30 backdrop-blur-sm">
-              <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 bg-green-500 dark:bg-green-400 rounded-full animate-pulse flex-shrink-0"></div>
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">System Online</span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                All services operational
-              </p>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-            </div>
-          )}
-        </motion.div>
       </div>
     </motion.div>
   );

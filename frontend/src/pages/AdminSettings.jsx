@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -50,11 +48,8 @@ const AdminSettings = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-      <Navbar />
       <div className="flex">
-        <Sidebar collapsed={sidebarCollapsed} onCollapse={setSidebarCollapsed} />
-        
-        <main className={`flex-1 transition-all duration-300 ${sidebarCollapsed ? 'ml-16' : 'ml-64'} p-6`}>
+        <main className="flex-1 p-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -77,53 +72,6 @@ const AdminSettings = () => {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* API Configuration */}
-              <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-slate-800 dark:text-slate-100">
-                    <Key className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
-                    API Configuration
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label className="text-slate-800 dark:text-slate-200" htmlFor="apiKey">API Key</Label>
-                    <div className="flex space-x-2">
-                      <Input
-                        id="apiKey"
-                        value={settings.apiKey}
-                        onChange={(e) => handleSettingChange('apiKey', e.target.value)}
-                        type="password"
-                        className="bg-white/50 dark:bg-slate-900/50"
-                      />
-                      <Button variant="outline" size="sm" className="hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors duration-300">
-                        <RefreshCw className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-slate-800 dark:text-slate-200" htmlFor="refreshInterval">Refresh Interval (seconds)</Label>
-                    <Input
-                      id="refreshInterval"
-                      type="number"
-                      value={settings.apiRefreshInterval}
-                      onChange={(e) => handleSettingChange('apiRefreshInterval', parseInt(e.target.value))}
-                      className="bg-white/50 dark:bg-slate-900/50"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="rateLimiting">Enable Rate Limiting</Label>
-                    <Switch
-                      id="rateLimiting"
-                      checked={settings.enableRateLimiting}
-                      onCheckedChange={(checked) => handleSettingChange('enableRateLimiting', checked)}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* System Limits */}
               <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-white/20 dark:border-slate-700/20 hover:shadow-lg transition-all duration-300">
                 <CardHeader>

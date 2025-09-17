@@ -103,24 +103,8 @@ const Landing = () => {
                 <Waves className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link to="/login">
-              <Button size="lg" variant="outline" className="border-cyan-200 text-cyan-700 hover:bg-cyan-50 dark:border-cyan-700 dark:text-cyan-400 dark:hover:bg-cyan-900/20 px-8 py-4 text-lg">
-                View Demo
-                <BarChart3 className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
           </div>
 
-          {/* Demo visualization placeholder */}
-          <div className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/20 dark:border-slate-700/20 max-w-5xl mx-auto">
-            <div className="bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/50 dark:to-cyan-900/50 rounded-2xl h-80 flex items-center justify-center">
-              <div className="text-center">
-                <Globe className="h-16 w-16 text-cyan-600 dark:text-cyan-400 mx-auto mb-4" />
-                <p className="text-slate-600 dark:text-slate-300 text-lg font-medium">Interactive Ocean Data Visualization</p>
-                <p className="text-slate-500 dark:text-slate-400">Experience the full platform after signing up</p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -168,7 +152,7 @@ const Landing = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/signup">
               <Button size="lg" className="bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 text-white px-8 py-4 text-lg">
-                Start Free Trial
+                Sign Up
               </Button>
             </Link>
             <Link to="/login">
