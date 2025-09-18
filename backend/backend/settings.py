@@ -25,7 +25,11 @@ SECRET_KEY = "django-insecure-wi2u^m%^5$f^h@md#jkyllzjrr-v16dt=teh9_mz+55k5v%bki
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+# Allow all hosts for Render, or set your Render domain
+import os
+ALLOWED_HOSTS = [".onrender.com", "localhost", "127.0.0.1"]
+
 
 
 # Application definition
@@ -47,8 +51,10 @@ INSTALLED_APPS = [
     "chat_app",
 ]
 
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -77,14 +83,14 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Database
+# Use DATABASE_URL from environment if present (Render uses PostgreSQL)
+import dj_database_url
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR}/db.sqlite3"
+    )
 }
 
 
@@ -119,15 +125,23 @@ USE_I18N = True
 USE_TZ = True
 
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Use environment variable for secret key in production
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", SECRET_KEY)
+
+# Set debug from environment
+DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
 AUTH_USER_MODEL = "auth_app.CustomUser"
 

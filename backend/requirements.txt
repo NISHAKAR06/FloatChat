@@ -1,0 +1,4 @@
+gunicorn
+django
+whitenoise
+psycopg2-binary

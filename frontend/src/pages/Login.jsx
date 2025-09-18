@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -34,7 +35,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login/', {
+  const response = await fetch(`${API_BASE}/api/auth/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
