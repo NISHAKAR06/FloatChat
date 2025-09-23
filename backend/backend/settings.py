@@ -89,10 +89,12 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # Use DATABASE_URL from environment if present (Render uses PostgreSQL)
 import dj_database_url
+
+# Set default DATABASE_URL for development if not set
+os.environ.setdefault('DATABASE_URL', f"sqlite:///{BASE_DIR}/db.sqlite3")
+
 DATABASES = {
-    "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR}/db.sqlite3"
-    )
+    'default': dj_database_url.config()
 }
 
 
