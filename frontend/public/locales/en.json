@@ -1,0 +1,104 @@
+{
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard", 
+    "settings": "Settings",
+    "help": "Help",
+    "login": "Login",
+    "logout": "Logout"
+  },
+  "landing": {
+    "hero": {
+      "title": "AI-Powered Conversational System for ARGO Float Data",
+      "subtitle": "Explore, query, and visualize oceanographic information with ease.",
+      "getStarted": "Get Started",
+      "learnMore": "Learn More"
+    },
+    "background": {
+      "title": "Background",
+      "description": "ARGO floats are autonomous oceanographic instruments that collect vital data about ocean temperature, salinity, and biogeochemical properties. Our AI system makes this data accessible through natural language queries."
+    },
+    "features": {
+      "title": "Features",
+      "realTime": {
+        "title": "Real-time Tracking",
+        "description": "Monitor live ARGO float positions and data collection"
+      },
+      "aiQuery": {
+        "title": "AI-Powered Queries",
+        "description": "Ask questions in natural language and get instant insights"
+      },
+      "visualization": {
+        "title": "Advanced Visualization",
+        "description": "Interactive charts, maps, and 3D oceanographic profiles"
+      },
+      "export": {
+        "title": "Data Export",
+        "description": "Export data in multiple formats for further analysis"
+      }
+    },
+    "solution": {
+      "title": "Expected Solution",
+      "description": "A comprehensive platform that bridges the gap between complex oceanographic data and researchers, providing intuitive access to ARGO float information through conversational AI and advanced visualizations."
+    }
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "dashboard": {
+    "user": {
+      "title": "User Dashboard",
+      "liveTracking": "Live Float Tracking",
+      "visualizations": "Data Visualizations",
+      "filters": "Filters & Search",
+      "exports": "Export Options",
+      "favorites": "Saved Favorites"
+    },
+    "admin": {
+      "title": "Admin Dashboard", 
+      "dataManagement": "Data Management",
+      "userManagement": "User Management",
+      "queryMonitoring": "Query Monitoring",
+      "modelManagement": "Model Management",
+      "systemMonitoring": "System Monitoring"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "theme": "Theme",
+    "language": "Language", 
+    "voice": "Voice Input",
+    "exports": "Export Preferences",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "chatbot": {
+    "placeholder": "Ask about ARGO float data...",
+    "newChat": "New Chat",
+    "deleteChat": "Delete Chat",
+    "renameChat": "Rename Chat",
+    "history": "Chat History",
+    "voiceInput": "Voice Input",
+    "textToSpeech": "Text to Speech"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next"
+  }
+}
