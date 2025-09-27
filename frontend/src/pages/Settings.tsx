@@ -57,7 +57,7 @@ const Settings = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-surface">
+    <div className="h-full bg-gradient-surface">
       <div className="max-w-4xl mx-auto p-6">
         {/* Header */}
         <div className="mb-8">
@@ -68,7 +68,7 @@ const Settings = () => {
             </h1>
           </div>
           <p className="text-muted-foreground">
-            Customize your OceanAI experience
+            Customize your FloatChat experience
           </p>
         </div>
 

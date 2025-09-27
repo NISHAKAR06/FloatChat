@@ -12,14 +12,15 @@ import {
   SidebarHeader,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { 
-  LayoutDashboard, 
-  MessageCircle, 
-  BarChart3, 
-  Search, 
-  Download, 
+import {
+  LayoutDashboard,
+  MessageCircle,
+  BarChart3,
+  Search,
+  Download,
   Star,
-  Waves
+  Waves,
+  Settings
 } from 'lucide-react';
 
 const UserSidebar = () => {
@@ -38,11 +39,12 @@ const UserSidebar = () => {
     { title: 'Search & Filters', url: '/filters-search', icon: Search },
     { title: 'Export Data', url: '/export-options', icon: Download },
     { title: 'Saved Favorites', url: '/saved-favorites', icon: Star },
+    { title: 'Settings', url: '/settings', icon: Settings },
   ];
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50';
+    isActive ? 'bg-primary/20 text-primary font-semibold' : 'font-semibold hover:bg-primary/10';
 
   return (
     <Sidebar className={`border-r ${collapsed ? 'w-14' : 'w-64'}`} collapsible="icon">
@@ -103,6 +105,8 @@ const UserSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+
       </SidebarContent>
     </Sidebar>
   );

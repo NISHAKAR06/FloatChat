@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Globe,
   Moon,
@@ -17,7 +20,10 @@ import {
   Settings,
   LogOut,
   User,
-  Waves
+  Waves,
+  MessageCircle,
+  Send,
+  Bot
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -31,6 +37,28 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   const { t, language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
+
+  // Chatbot state
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatHistory, setChatHistory] = useState<Array<{type: 'user' | 'bot', message: string}>>([
+    { type: 'bot', message: 'Hello! I can help you analyze ARGO float data. Ask questions about temperature, salinity, or ocean regions!' }
+  ]);
+
+  const handleChatSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatMessage.trim()) return;
+
+    setChatHistory(prev => [...prev, { type: 'user', message: chatMessage }]);
+
+    // Mock AI response
+    setTimeout(() => {
+      const response = 'I found relevant ARGO float data for your query. Here\'s what I discovered about oceanographic patterns.';
+      setChatHistory(prev => [...prev, { type: 'bot', message: response }]);
+    }, 1000);
+
+    setChatMessage('');
+  };
 
   const languages = [
     { code: 'en', name: 'English' },
@@ -50,10 +78,10 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   };
 
   return (
-    <div className="min-h-screen bg-gradient-surface flex">
+    <div className="h-screen bg-gradient-surface flex overflow-hidden">
       <SidebarProvider>
         <UserSidebar />
-        <SidebarInset>
+        <SidebarInset className="flex flex-col h-full">
           <header className="flex h-16 shrink-0 items-center justify-between gap-4 px-4 border-b bg-glass backdrop-blur-md">
             {/* Left section: Sidebar trigger and logo */}
             <div className="flex items-center gap-4">
@@ -71,8 +99,8 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
             <div className="flex items-center gap-2">
               {/* Language Selector */}
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
                     <Globe className="h-4 w-4" />
                     <span className="ml-2 hidden md:inline">{language.toUpperCase()}</span>
                   </Button>
@@ -82,7 +110,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
                     <DropdownMenuItem
                       key={lang.code}
                       onClick={() => setLanguage(lang.code as any)}
-                      className={`${language === lang.code ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted'}`}
+                      className={`${language === lang.code ? 'bg-primary/20 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-primary/10'}`}
                     >
                       {lang.name}
                     </DropdownMenuItem>
@@ -93,20 +121,20 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
               {/* Theme Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
                     {getThemeIcon()}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setTheme('light')} className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  <DropdownMenuItem onClick={() => setTheme('light')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
                     <Sun className="h-4 w-4 mr-2" />
                     {t('settings.light')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('dark')} className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  <DropdownMenuItem onClick={() => setTheme('dark')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
                     <Moon className="h-4 w-4 mr-2" />
                     {t('settings.dark')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('system')} className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  <DropdownMenuItem onClick={() => setTheme('system')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
                     <Monitor className="h-4 w-4 mr-2" />
                     {t('settings.system')}
                   </DropdownMenuItem>
@@ -116,17 +144,25 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
               {/* User Actions */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => navigate('/settings')} className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  <DropdownMenuItem onClick={() => navigate('/settings')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
                     <Settings className="h-4 w-4 mr-2" />
                     {t('navigation.settings')}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => {}} className="text-muted-foreground hover:text-foreground hover:bg-muted">
+                  <DropdownMenuItem onClick={() => {
+                    // Clear any stored authentication data
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    sessionStorage.clear();
+
+                    // Redirect to login page
+                    navigate('/login');
+                  }} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
                     <LogOut className="h-4 w-4 mr-2" />
                     {t('navigation.logout')}
                   </DropdownMenuItem>
@@ -134,10 +170,61 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
               </DropdownMenu>
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4">
-            {children}
+          <div className="flex-1 overflow-auto">
+            <div className="h-full p-4">
+              {children}
+            </div>
           </div>
         </SidebarInset>
+
+        {/* Floating Chatbot Button */}
+        <Button
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90"
+          size="sm"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </Button>
+
+        {/* Chatbot Popup Modal */}
+        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+          <DialogContent className="sm:max-w-[500px] max-h-[600px] flex flex-col">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" />
+                AI Ocean Analyst
+              </DialogTitle>
+            </DialogHeader>
+
+            <ScrollArea className="flex-1 pr-4">
+              <div className="space-y-4 pb-4">
+                {chatHistory.map((msg, index) => (
+                  <div key={index} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] p-3 rounded-lg ${
+                      msg.type === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    }`}>
+                      <p className="text-sm">{msg.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+
+            <form onSubmit={handleChatSubmit} className="flex gap-2 pt-4">
+              <Input
+                placeholder="Ask about ocean data..."
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit" disabled={!chatMessage.trim()}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </SidebarProvider>
     </div>
   );

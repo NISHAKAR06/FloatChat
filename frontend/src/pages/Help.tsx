@@ -66,7 +66,7 @@ const Help = () => {
             {t('navigation.help')} & Support
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Find answers to common questions and learn how to make the most of OceanAI
+            Find answers to common questions and learn how to make the most of FloatChat
           </p>
         </div>
 
@@ -79,7 +79,7 @@ const Help = () => {
                 Getting Started
               </h3>
               <p className="text-muted-foreground mb-4">
-                Learn the basics of using OceanAI
+                Learn the basics of using FloatChat
               </p>
               <Button variant="outline" className="w-full">
                 Watch Tutorial
@@ -129,7 +129,7 @@ const Help = () => {
               Frequently Asked Questions
             </CardTitle>
             <CardDescription>
-              Find quick answers to common questions about OceanAI
+              Find quick answers to common questions about FloatChat
             </CardDescription>
           </CardHeader>
           <CardContent>

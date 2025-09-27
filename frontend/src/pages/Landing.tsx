@@ -261,10 +261,10 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Waves className="h-6 w-6 text-primary" />
-            <span className="font-bold text-lg">OceanAI</span>
+            <span className="font-bold text-lg">FloatChat</span>
           </div>
           <p className="text-muted-foreground text-sm">
-            © 2024 OceanAI. Advancing oceanographic research through AI.
+            © 2024 FloatChat. Advancing oceanographic research through AI.
           </p>
         </div>
       </footer>

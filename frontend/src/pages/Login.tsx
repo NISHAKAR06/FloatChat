@@ -79,8 +79,8 @@ const Login = () => {
             </CardTitle>
             <CardDescription>
               {isLogin 
-                ? 'Welcome back to OceanAI' 
-                : 'Create your OceanAI account'
+                ? 'Welcome back to FloatChat' 
+                : 'Create your FloatChat account'
               }
             </CardDescription>
           </CardHeader>

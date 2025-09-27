@@ -51,7 +51,7 @@ const App = () => (
               <Route path="/user-management" element={<Layout><UserManagement /></Layout>} />
               <Route path="/data-management" element={<Layout><DataManagement /></Layout>} />
               <Route path="/query-monitoring" element={<Layout><QueryMonitoring /></Layout>} />
-              <Route path="/settings" element={<Layout><Settings /></Layout>} />
+              <Route path="/settings" element={<UserDashboardLayout><Settings /></UserDashboardLayout>} />
               <Route path="/help" element={<Layout><Help /></Layout>} />
               
               {/* Catch-all route */}
