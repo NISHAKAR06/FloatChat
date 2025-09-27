@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,7 +27,12 @@ import {
   Bell,
   Target,
   Heart,
-  AlertCircle
+  AlertCircle,
+  Shield,
+  Database,
+  Users,
+  Eye,
+  Settings
 } from 'lucide-react';
 
 const UserDashboard = () => {
@@ -38,6 +44,8 @@ const UserDashboard = () => {
   ]);
 
   // Mock data
+  const navigate = useNavigate();
+
   const quickStats = [
     { label: 'Active Floats', value: '1,247', icon: Activity, color: 'text-green-500' },
     { label: 'Data Points Today', value: '23.4K', icon: TrendingUp, color: 'text-blue-500' },
@@ -48,6 +56,34 @@ const UserDashboard = () => {
   const regions = [
     'Arabian Sea', 'Bay of Bengal', 'Equator', 'North Pacific', 'South Pacific',
     'North Atlantic', 'South Atlantic', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'
+  ];
+
+  // Admin panel navigation items
+  const adminNavItems = [
+    {
+      title: 'Query Monitoring',
+      description: 'Monitor and analyze user queries and system performance',
+      icon: Activity,
+      url: '/query-monitoring',
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-50 border-blue-200'
+    },
+    {
+      title: 'Analytics Dashboard',
+      description: 'View usage patterns and system insights',
+      icon: BarChart3,
+      url: '/analytics',
+      color: 'text-green-500',
+      bgColor: 'bg-green-50 border-green-200'
+    },
+    {
+      title: 'System Config',
+      description: 'Configure system settings and security',
+      icon: Settings,
+      url: '/system-config',
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-50 border-purple-200'
+    }
   ];
 
   const handleChatSubmit = (e: React.FormEvent) => {
@@ -445,6 +481,54 @@ const UserDashboard = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* Admin Panel Navigation */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                System Administration
+              </CardTitle>
+              <CardDescription>
+                Access administrative tools and system monitoring
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {adminNavItems.map((item, index) => {
+                  const Icon = item.icon;
+                  return (
+                    <div
+                      key={index}
+                      className={`${item.bgColor} border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all hover:scale-[1.02]`}
+                      onClick={() => navigate(item.url)}
+                    >
+                      <div className="flex flex-col items-center text-center space-y-3">
+                        <Icon className={`h-8 w-8 ${item.color}`} />
+                        <div>
+                          <h3 className="font-semibold text-sm">{item.title}</h3>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {item.description}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(item.url);
+                          }}
+                        >
+                          Access
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         {/* Personalization Tab */}

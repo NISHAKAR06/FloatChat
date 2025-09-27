@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Download, FileText, Database, Archive, Calendar, MapPin, Thermometer } from 'lucide-react';
+import { Download, FileText, Database, Archive, Calendar, MapPin, Thermometer, Search, Filter, Globe, Waves, Target, CheckCircle, AlertTriangle } from 'lucide-react';
 
 const ExportOptions = () => {
   const { t } = useLanguage();
@@ -15,6 +16,39 @@ const ExportOptions = () => {
   const [selectedData, setSelectedData] = useState<string[]>(['temperature', 'salinity']);
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
+
+  // Date filtering states
+  const [dateRange, setDateRange] = useState({
+    startDate: '',
+    endDate: '',
+    quickSelect: 'all'
+  });
+
+  // Advanced filtering states
+  const [filters, setFilters] = useState({
+    // Location filters
+    oceans: [] as string[],
+    regions: [] as string[],
+    latitudeRange: { min: '', max: '' },
+    longitudeRange: { min: '', max: '' },
+
+    // Depth/pressure filters
+    depthRange: { min: '', max: '' },
+    pressureRange: { min: '', max: '' },
+
+    // Float filters
+    floatIds: '',
+    wmoIds: '',
+
+    // Quality filters
+    qualityFlags: [] as string[],
+    includeQC: true,
+    qcThreshold: 'good',
+
+    // Data filters
+    parameters: [] as string[],
+    includeMetadata: true
+  });
 
   const exportFormats = [
     {
@@ -142,6 +176,412 @@ const ExportOptions = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Date Range Selection */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Filter by Date Range
+              </Label>
+              <div className="space-y-3">
+                {/* Quick Select Options */}
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: 'all', label: 'All Time', icon: Calendar },
+                    { value: '7d', label: 'Last 7 Days', icon: Calendar },
+                    { value: '30d', label: 'Last 30 Days', icon: Calendar },
+                    { value: '90d', label: 'Last 90 Days', icon: Calendar },
+                    { value: '1y', label: 'Last Year', icon: Calendar },
+                  ].map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <Button
+                        key={option.value}
+                        variant={dateRange.quickSelect === option.value ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setDateRange({
+                          ...dateRange,
+                          quickSelect: option.value,
+                          startDate: '',
+                          endDate: ''
+                        })}
+                        className="flex items-center gap-1"
+                      >
+                        <Icon className="h-3 w-3" />
+                        {option.label}
+                      </Button>
+                    );
+                  })}
+                </div>
+
+                {/* Custom Date Range */}
+                <div className="border rounded-lg p-3 bg-muted/30">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Filter className="h-4 w-4 text-primary" />
+                    <span className="font-medium text-sm">Custom Date Range</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="start-date" className="text-xs text-muted-foreground">Start Date</Label>
+                      <Input
+                        id="start-date"
+                        type="date"
+                        value={dateRange.startDate}
+                        onChange={(e) => setDateRange({
+                          ...dateRange,
+                          startDate: e.target.value,
+                          quickSelect: dateRange.startDate || e.target.value ? 'custom' : 'all'
+                        })}
+                        placeholder="YYYY-MM-DD"
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="end-date" className="text-xs text-muted-foreground">End Date</Label>
+                      <Input
+                        id="end-date"
+                        type="date"
+                        value={dateRange.endDate}
+                        onChange={(e) => setDateRange({
+                          ...dateRange,
+                          endDate: e.target.value,
+                          quickSelect: dateRange.endDate || e.target.value ? 'custom' : 'all'
+                        })}
+                        placeholder="YYYY-MM-DD"
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                  {(dateRange.startDate || dateRange.endDate) && (
+                    <div className="mt-3 p-2 bg-primary/5 border border-primary/20 rounded text-sm">
+                      <div className="flex items-center gap-2 font-medium text-primary">
+                        <Search className="h-3 w-3" />
+                        Date Filter Active
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Filtering data from {dateRange.startDate || 'beginning'} to {dateRange.endDate || 'present'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Data Availability Info */}
+                <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <div className="text-sm">
+                    <span className="font-medium text-blue-800">Data Available:</span>
+                    <span className="text-blue-700 ml-1">1990-01-01 to 2024-12-31</span>
+                    <span className="text-blue-600 text-xs ml-2">(34+ years of ARGO data)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Advanced Filters */}
+            <div className="space-y-3">
+              <Label className="text-base font-semibold flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Advanced Filters
+              </Label>
+
+              {/* Filter Pills/Status */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  Date: {dateRange.quickSelect !== 'all' ? dateRange.quickSelect.toUpperCase() : 'All'}
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Globe className="h-3 w-3" />
+                  Location: {filters.regions.length > 0 ? `${filters.regions.length} regions` : 'All'}
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <Waves className="h-3 w-3" />
+                  Depth: {filters.depthRange.min || filters.depthRange.max ? 'Custom' : 'All'}
+                </Badge>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3" />
+                  Quality: {filters.qcThreshold}
+                </Badge>
+              </div>
+
+              {/* Filter Cards */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Location Filters */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      Location Filters
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Oceans */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Oceans</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {['Atlantic', 'Pacific', 'Indian', 'Southern', 'Arctic'].map((ocean) => (
+                          <Button
+                            key={ocean}
+                            variant={filters.oceans.includes(ocean) ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setFilters({
+                              ...filters,
+                              oceans: filters.oceans.includes(ocean)
+                                ? filters.oceans.filter(o => o !== ocean)
+                                : [...filters.oceans, ocean]
+                            })}
+                            className="h-7 text-xs"
+                          >
+                            {ocean}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Lat/Lng Range */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Min Latitude</Label>
+                        <Input
+                          type="number"
+                          placeholder="-90"
+                          min="-90"
+                          max="90"
+                          value={filters.latitudeRange.min}
+                          onChange={(e) => setFilters({
+                            ...filters,
+                            latitudeRange: { ...filters.latitudeRange, min: e.target.value }
+                          })}
+                          className="h-8"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Max Latitude</Label>
+                        <Input
+                          type="number"
+                          placeholder="90"
+                          min="-90"
+                          max="90"
+                          value={filters.latitudeRange.max}
+                          onChange={(e) => setFilters({
+                            ...filters,
+                            latitudeRange: { ...filters.latitudeRange, max: e.target.value }
+                          })}
+                          className="h-8"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Min Longitude</Label>
+                        <Input
+                          type="number"
+                          placeholder="-180"
+                          min="-180"
+                          max="180"
+                          value={filters.longitudeRange.min}
+                          onChange={(e) => setFilters({
+                            ...filters,
+                            longitudeRange: { ...filters.longitudeRange, min: e.target.value }
+                          })}
+                          className="h-8"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Max Longitude</Label>
+                        <Input
+                          type="number"
+                          placeholder="180"
+                          min="-180"
+                          max="180"
+                          value={filters.longitudeRange.max}
+                          onChange={(e) => setFilters({
+                            ...filters,
+                            longitudeRange: { ...filters.longitudeRange, max: e.target.value }
+                          })}
+                          className="h-8"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Depth & Pressure Filters */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Waves className="h-4 w-4" />
+                      Depth & Pressure Filters
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Depth Range */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Min Depth (m)</Label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          min="0"
+                          max="6000"
+                          value={filters.depthRange.min}
+                          onChange={(e) => setFilters({
+                            ...filters,
+                            depthRange: { ...filters.depthRange, min: e.target.value }
+                          })}
+                          className="h-8"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Max Depth (m)</Label>
+                        <Input
+                          type="number"
+                          placeholder="6000"
+                          min="0"
+                          max="6000"
+                          value={filters.depthRange.max}
+                          onChange={(e) => setFilters({
+                            ...filters,
+                            depthRange: { ...filters.depthRange, max: e.target.value }
+                          })}
+                          className="h-8"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Pressure Range */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs">Min Pressure (dbar)</Label>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          min="0"
+                          max="6000"
+                          value={filters.pressureRange.min}
+                          onChange={(e) => setFilters({
+                            ...filters,
+                            pressureRange: { ...filters.pressureRange, min: e.target.value }
+                          })}
+                          className="h-8"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs">Max Pressure (dbar)</Label>
+                        <Input
+                          type="number"
+                          placeholder="6000"
+                          min="0"
+                          max="6000"
+                          value={filters.pressureRange.max}
+                          onChange={(e) => setFilters({
+                            ...filters,
+                            pressureRange: { ...filters.pressureRange, max: e.target.value }
+                          })}
+                          className="h-8"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-xs text-muted-foreground">
+                      Leave empty for no depth/pressure filtering
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Float Filters */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      Float Selection
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs">Float IDs (comma-separated)</Label>
+                      <Input
+                        placeholder="e.g., 6901234,6901235,6901236"
+                        value={filters.floatIds}
+                        onChange={(e) => setFilters({...filters, floatIds: e.target.value})}
+                        className="h-8"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs">WMO Numbers (comma-separated)</Label>
+                      <Input
+                        placeholder="e.g., 4901234,4901235"
+                        value={filters.wmoIds}
+                        onChange={(e) => setFilters({...filters, wmoIds: e.target.value})}
+                        className="h-8"
+                      />
+                    </div>
+
+                    <div className="text-xs text-muted-foreground">
+                      Select specific floats or leave empty for all
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Quality & Data Filters */}
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      Quality & Data Filters
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Quality Threshold */}
+                    <div className="space-y-2">
+                      <Label className="text-xs">Quality Threshold</Label>
+                      <Select value={filters.qcThreshold} onValueChange={(value) => setFilters({...filters, qcThreshold: value})}>
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Data (no filtering)</SelectItem>
+                          <SelectItem value="good">Good Quality Only</SelectItem>
+                          <SelectItem value="fair">Good & Fair Quality</SelectItem>
+                          <SelectItem value="excellent">Excellent Quality Only</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Include QC */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-xs">Include Quality Flags</Label>
+                        <p className="text-xs text-muted-foreground">Add QC columns to export</p>
+                      </div>
+                      <Checkbox
+                        checked={filters.includeQC}
+                        onCheckedChange={(checked: boolean) => setFilters({...filters, includeQC: checked})}
+                      />
+                    </div>
+
+                    {/* Include Metadata */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-xs">Include Metadata</Label>
+                        <p className="text-xs text-muted-foreground">Add float metadata columns</p>
+                      </div>
+                      <Checkbox
+                        checked={filters.includeMetadata}
+                        onCheckedChange={(checked: boolean) => setFilters({...filters, includeMetadata: checked})}
+                      />
+                    </div>
+
+                    {/* Quality Index */}
+                    <div className="p-2 bg-green-50 border border-green-200 rounded text-xs">
+                      <div className="flex items-center gap-1 text-green-700 font-medium">
+                        <CheckCircle className="h-3 w-3" />
+                        Current QC: 94.2% Good Quality
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
             {/* Format Selection */}
             <div className="space-y-3">
               <Label className="text-base font-semibold">Export Format</Label>

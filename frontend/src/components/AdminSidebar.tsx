@@ -12,13 +12,14 @@ import {
   SidebarHeader,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Database, 
-  Activity, 
+import {
+  LayoutDashboard,
+  Users,
+  Database,
+  Activity,
   Shield,
-  Waves
+  BarChart3,
+  Settings
 } from 'lucide-react';
 
 const AdminSidebar = () => {
@@ -35,11 +36,13 @@ const AdminSidebar = () => {
     { title: 'User Management', url: '/user-management', icon: Users },
     { title: 'Data Management', url: '/data-management', icon: Database },
     { title: 'Query Monitoring', url: '/query-monitoring', icon: Activity },
+    { title: 'Analytics', url: '/analytics', icon: BarChart3 },
+    { title: 'System Config', url: '/system-config', icon: Settings },
   ];
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50';
+    isActive ? 'bg-primary/20 text-primary font-semibold' : 'font-semibold hover:bg-primary/10';
 
   return (
     <Sidebar className={`border-r ${collapsed ? 'w-14' : 'w-64'}`} collapsible="icon">
