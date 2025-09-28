@@ -33,7 +33,7 @@ const Settings = () => {
   const handleSaveSettings = () => {
     toast({
       title: t('common.success'),
-      description: "Settings saved successfully",
+      description: "सेटिंग्स सफलतापूर्वक सहेजी गईं",
     });
   };
 
@@ -68,7 +68,7 @@ const Settings = () => {
             </h1>
           </div>
           <p className="text-muted-foreground">
-            Customize your FloatChat experience
+            अपने FloatChat अनुभव को अनुकूलित करें
           </p>
         </div>
 
@@ -78,10 +78,10 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-primary" />
-                Appearance
+                दिखावट
               </CardTitle>
               <CardDescription>
-                Customize the look and feel of the application
+                एप्लिकेशन की लुक और फील को अनुकूलित करें
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -108,10 +108,10 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-primary" />
-                Language & Region
+                भाषा और क्षेत्र
               </CardTitle>
               <CardDescription>
-                Set your preferred language for the interface
+                इंटरफेस के लिए अपनी पसंदीदा भाषा सेट करें
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -138,10 +138,10 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mic className="h-5 w-5 text-primary" />
-                Voice & Audio
+                आवाज और ऑडियो
               </CardTitle>
               <CardDescription>
-                Configure voice input and text-to-speech settings
+                वॉइस इनपुट और टेक्स्ट-टू-स्पीच सेटिंग्स को कॉन्फ़िगर करें
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -149,7 +149,7 @@ const Settings = () => {
                 <div className="space-y-0.5">
                   <Label htmlFor="voice-input">{t('settings.voice')}</Label>
                   <p className="text-sm text-muted-foreground">
-                    Enable voice input for chatbot queries
+                    चैटबॉट क्वेरी के लिए वॉइस इनपुट सक्षम करें
                   </p>
                 </div>
                 <Switch
@@ -165,9 +165,9 @@ const Settings = () => {
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="text-to-speech">Text-to-Speech</Label>
+                  <Label htmlFor="text-to-speech">टेक्स्ट-टू-स्पीच</Label>
                   <p className="text-sm text-muted-foreground">
-                    Enable audio responses from the chatbot
+                    चैटबॉट से ऑडियो प्रतिक्रियाएं सक्षम करें
                   </p>
                 </div>
                 <Switch
@@ -186,15 +186,15 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Download className="h-5 w-5 text-primary" />
-                Data & Export
+                डेटा और निर्यात
               </CardTitle>
               <CardDescription>
-                Configure data export preferences and formats
+                डेटा निर्यात प्राथमिकताएं और प्रारूप कॉन्फ़िगर करें
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="export-format">Default Export Format</Label>
+                <Label htmlFor="export-format">डिफ़ॉल्ट निर्यात प्रारूप</Label>
                 <Select 
                   value={localSettings.exportFormat} 
                   onValueChange={(value) =>
@@ -218,9 +218,9 @@ const Settings = () => {
               
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="auto-save">Auto-save Queries</Label>
+                  <Label htmlFor="auto-save">क्वेरी स्वतः सहेजें</Label>
                   <p className="text-sm text-muted-foreground">
-                    Automatically save favorite queries and visualizations
+                    पसंदीदा क्वेरी और विज़ुअलाइज़ेशन को स्वचालित रूप से सहेजें
                   </p>
                 </div>
                 <Switch
@@ -239,18 +239,18 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <SettingsIcon className="h-5 w-5 text-primary" />
-                Notifications
+                सूचनाएं
               </CardTitle>
               <CardDescription>
-                Manage notification preferences
+                सूचना प्राथमिकताओं को प्रबंधित करें
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="notifications">Enable Notifications</Label>
+                  <Label htmlFor="notifications">सूचनाएं सक्षम करें</Label>
                   <p className="text-sm text-muted-foreground">
-                    Receive notifications about data updates and system status
+                    डेटा अपडेट और सिस्टम स्थिति के बारे में सूचनाएं प्राप्त करें
                   </p>
                 </div>
                 <Switch

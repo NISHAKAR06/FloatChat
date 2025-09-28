@@ -39,7 +39,31 @@
     },
     "solution": {
       "title": "अपेक्षित समाधान",
-      "description": "एक व्यापक मंच जो जटिल समुद्री डेटा और शोधकर्ताओं के बीच की खाई को पाटता है।"
+      "description": "एक व्यापक मंच जो जटिल समुद्री डेटा और शोधकर्ताओं के बीच की खाई को पाटता है।",
+      "cards": {
+        "globalCoverage": {
+          "title": "वैश्विक कवरेज",
+          "description": "विश्वव्यापी आर्गो फ्लोट नेटवर्क डेटा"
+        },
+        "aiIntegration": {
+          "title": "AI एकीकरण",
+          "description": "प्राकृतिक भाषा प्रसंस्करण"
+        },
+        "realTimeInsights": {
+          "title": "रीयल-टाइम अंतर्दृष्टि",
+          "description": "लाइव समुद्री विश्लेषण"
+        }
+      }
+    },
+    "footer": {
+      "copyright": "© 2025 FloatChat. AI के माध्यम से समुद्री अनुसंधान को आगे बढ़ाना।"
+    },
+    "common": {
+      "login": "लॉगिन",
+      "signUp": "साइन अप",
+      "light": "लाइट",
+      "dark": "डार्क",
+      "system": "सिस्टम"
     }
   },
   "auth": {
@@ -50,7 +74,13 @@
     "confirmPassword": "पासवर्ड पुष्टि करें",
     "forgotPassword": "पासवर्ड भूल गए?",
     "noAccount": "कोई खाता नहीं है?",
-    "hasAccount": "पहले से खाता है?"
+    "hasAccount": "पहले से खाता है?",
+    "welcomeBack": "FloatChat में वापस स्वागत है",
+    "createAccount": "अपना FloatChat खाता बनाएं",
+    "emailPlaceholder": "your@email.com",
+    "demoHint": "डेमो: एडमिन एक्सेस के लिए admin@oceanic.ai / admin123 का इस्तेमाल करें",
+    "passwordMismatch": "पासवर्ड मेल नहीं खाते",
+    "accountCreated": "खाता सफलतापूर्वक बनाया गया"
   },
   "dashboard": {
     "user": {
@@ -59,15 +89,104 @@
       "visualizations": "डेटा दृश्यीकरण",
       "filters": "फ़िल्टर और खोज",
       "exports": "निर्यात विकल्प",
-      "favorites": "सहेजे गए पसंदीदा"
+      "favorites": "सहेजे गए पसंदीदा",
+      "quickStats": {
+        "activeFloats": "सक्रिय फ्लोट्स",
+        "dataPointsToday": "आज के डेटा पॉइंट्स",
+        "temperatureAvg": "तापमान औसत",
+        "salinityAvg": "लवणता औसत"
+      },
+      "tabs": {
+        "chatbot": "AI चैट",
+        "visualizations": "मानचित्र और चार्ट",
+        "analysis": "विश्लेषण उपकरण",
+        "personalization": "मेरा डैशबोर्ड"
+      },
+      "aiOceanAnalyst": "AI समुद्री विश्लेषक",
+      "regionFocus": "क्षेत्र फोकस",
+      "chooseRegion": "विश्लेषण पर ध्यान केंद्रित करने के लिए क्षेत्र चुनें",
+      "askAbout": "तापमान प्रोफाइल, लवणता पैटर्न, समुद्री क्षेत्रों के बारे में पूछें...",
+      "quickActions": "त्वरित कार्य",
+      "exportData": "डेटा निर्यात करें",
+      "csv": "CSV",
+      "netCDF": "NetCDF",
+      "exporting": "निर्यात हो रहा है",
+      "recentFloatActivity": "हालिया फ्लोट गतिविधि",
+      "activeAgo": "सक्रिय - 2 घंटे पहले",
+      "liveOceanMap": "लाइव समुद्र मानचित्र",
+      "realTimeTracking": "रीयल-टाइम ARGO फ्लोट ट्रैकिंग एकीकरण",
+      "interactiveOceanMap": "इंटरैक्टिव समुद्र मानचित्र",
+      "temperatureLayer": "तापमान परत",
+      "salinityContours": "लवणता आउटलाइन",
+      "floatTrajectories": "फ्लोट ट्रेजेक्टरी",
+      "temperatureProfile": "तापमान प्रोफाइल",
+      "depthTime": "फ्लोट डेटा के लिए गहराई बनाम समय विश्लेषण",
+      "temperatureProfileChart": "तापमान प्रोफाइल चार्ट",
+      "dataFrom": "2023-2024 से डेटा",
+      "regionalComparison": "क्षेत्रीय तुलना",
+      "arabianvsBay": "अरेबियन सी बनाम बंगाल की खाड़ी लवणता प्रवृत्तियां",
+      "comparativeAnalysis": "तुलनात्मक विश्लेषण",
+      "arabianSeaRange": "अरेबियन सी: 35.2-36.5 PSU",
+      "bayOfBengalRange": "बंगाल की खाड़ी: 32.5-34.8 PSU",
+      "advancedFilters": "उन्नत फ़िल्टर",
+      "oceanRegions": "समुद्री क्षेत्र",
+      "selectRegion": "क्षेत्र चुनें",
+      "timePeriod": "समय अवधि",
+      "chooseTimeRange": "समय सीमा चुनें",
+      "lastMonth": "पिछला महीना",
+      "last6Months": "पिछले 6 महीने",
+      "lastYear": "पिछला वर्ष",
+      "customRange": "कस्टम रेंज",
+      "parameters": "पैरामीटर",
+      "temperature": "तापमान",
+      "salinity": "लवणता",
+      "bgcOxygen": "BGC ऑक्सीजन",
+      "nearestFloatLocator": "निकटतम फ्लोट लोकेटर",
+      "latitude": "अक्षांश",
+      "longitude": "देशांतर",
+      "searching": "निकटतम फ्लोट खोज रहे हैं...",
+      "findNearestFloat": "निकटतम फ्लोट खोजें",
+      "systemAdministration": "सिस्टम प्रशासन",
+      "access": "एक्सेस",
+      "savedFavorites": "सहेजे गए पसंदीदा",
+      "aiGeneratedReports": "AI जनित रिपोर्ट",
+      "salinityTrends": "लवणता प्रवृत्तियाँ",
+      "downloadPDF": "PDF डाउनलोड करें",
+      "temperatureAnomalies": "तापमान विसंगतियाँ",
+      "downloadReport": "रिपोर्ट डाउनलोड करें",
+      "chennaiTemperatureAnalysis": "चेन्नई तापमान विश्लेषण",
+      "temperatureProfilesNear": "चेन्नई के पास तापमान प्रोफाइल",
+      "savedYesterday": "कल सहेजा गया",
+      "arabianSeaComparison": "अरेबियन सी तुलना",
+      "compareSalinity": "क्षेत्रों के बीच लवणता की तुलना करें",
+      "saved2DaysAgo": "2 दिन पहले सहेजा गया",
+      "aiPoweredPlatform": "AI-संचालित समुद्री विज्ञान डेटा विश्लेषण प्लेटफॉर्म",
+      "notifyOnUpdates": "अपडेट पर अधिसूचना दें",
+      "helloCanHelp": "नमस्ते! मैं ARGO फ्लोट डेटा का विश्लेषण करने में मदद कर सकता हूं। तापमान, लवणता या समुद्री क्षेत्रों के बारे में सवाल पूछें!",
+      "foundRelevant": "मैंने आपकी क्वेरी के लिए प्रासंगिक ARGO फ्लोट डेटा पाया। से डेटा का विश्लेषण कर रहा हूं",
+      "discovered": "मैंने समुद्री पैटर्न के बारे में क्या खोजा, यहाँ है।"
     },
     "admin": {
-      "title": "व्यवस्थापक डैशबोर्ड", 
+      "title": "व्यवस्थापक डैशबोर्ड",
       "dataManagement": "डेटा प्रबंधन",
       "userManagement": "उपयोगकर्ता प्रबंधन",
       "queryMonitoring": "क्वेरी निगरानी",
       "modelManagement": "मॉडल प्रबंधन",
-      "systemMonitoring": "सिस्टम निगरानी"
+      "systemMonitoring": "सिस्टम निगरानी",
+      "nav": {
+        "queryMonitoring": {
+          "title": "क्वेरी निगरानी",
+          "description": "उपयोगकर्ता क्वेरी और सिस्टम प्रदर्शन की निगरानी और विश्लेषण करें"
+        },
+        "analyticsDashboard": {
+          "title": "विश्लेषण डैशबोर्ड",
+          "description": "उपयोग पैटर्न और सिस्टम अंतर्दृष्टि देखें"
+        },
+        "systemConfig": {
+          "title": "सिस्टम कॉन्फिगरेशन",
+          "description": "सिस्टम सेटिंग और सुरक्षा कॉन्फ़िगर करें"
+        }
+      }
     }
   },
   "settings": {
@@ -87,7 +206,41 @@
     "renameChat": "चैट का नाम बदलें",
     "history": "चैट इतिहास",
     "voiceInput": "आवाज इनपुट",
-    "textToSpeech": "टेक्स्ट से स्पीच"
+    "textToSpeech": "टेक्स्ट से स्पीच",
+    "aiResponse": "मैं आपकी क्वेरी के लिए ARGO फ्लोट डेटा का विश्लेषण कर रहा हूं। यहाँ मुख्य अंतर्दृष्टि हैं...",
+    "newChatPrefix": "चैट",
+    "selectChat": "एक चैट चुनें",
+    "messages": "संदेश",
+    "sendMessage": "संदेश भेजें"
+  },
+  "dataVisualization": {
+    "title": "डेटा विज़ुअलाइज़ेशन",
+    "subtitle": "ARGO फ्लोट डेटा विश्लेषण के लिए इंटरैक्टिव चार्ट और ग्राफ",
+    "exportChart": "चार्ट निर्यात करें",
+    "chartTypes": "चार्ट प्रकार",
+    "interactiveChart": "इंटरैक्टिव चार्ट यहां प्रदर्शित किया जाएगा",
+    "sampleData": "नमूना डेटा: तापमान सीमा 8.1°C - 22.5°C",
+    "depthRange": "गहराई सीमा: 0m - 2000m",
+    "last7Days": "पिछले 7 दिन",
+    "last30Days": "पिछले 30 दिन",
+    "last90Days": "पिछले 90 दिन",
+    "lastYear": "पिछला वर्ष",
+    "activeFloats": "सक्रिय फ्लोट्स",
+    "dataPoints": "डेटा पॉइंट्स",
+    "avgTemperature": "औसत तापमान",
+    "regions": "क्षेत्र",
+    "temperatureDepthProfile": "तापमान बनाम गहराई प्रोफाइल",
+    "lineChart": "लाइन चार्ट",
+    "verticalTempDistribution": "ऊर्ध्वाधर तापमान वितरण",
+    "salinityTimeSeries": "लवणता समय श्रृंखला",
+    "timeSeries": "समय श्रृंखला",
+    "salinityChanges": "समय के साथ लवणता में परिवर्तन",
+    "floatTrajectories": "फ्लोट ट्रेजेक्टरी",
+    "map": "मानचित्र",
+    "geographicMovement": "भौगोलिक गति पैटर्न",
+    "dissolvedOxygen": "घुलित ऑक्सीजन वितरण",
+    "barChart": "बार चार्ट",
+    "oxygenLevels": "क्षेत्रों में ऑक्सीजन स्तर"
   },
   "common": {
     "loading": "लोड हो रहा है...",

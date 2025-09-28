@@ -10,6 +10,7 @@ import UserDashboardLayout from "@/components/UserDashboardLayout";
 import AdminLayout from "@/components/AdminLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import Chatbot from "./pages/Chatbot";
@@ -40,7 +41,8 @@ const App = () => (
               {/* Landing page without layout */}
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<Login />} />
-              
+              <Route path="/signup" element={<Signup />} />
+
               {/* User Dashboard Pages with sidebar */}
               <Route path="/dashboard" element={<UserDashboardLayout><UserDashboard /></UserDashboardLayout>} />
               <Route path="/chatbot" element={<UserDashboardLayout><Chatbot /></UserDashboardLayout>} />

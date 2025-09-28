@@ -79,15 +79,15 @@ const Landing = () => {
           onClick={() => navigate('/login')}
           className="text-white hover:bg-white/10 backdrop-blur-sm font-semibold"
         >
-          Login
+          {t('landing.common.login')}
         </Button>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/login')} // Assuming sign up not separate, or TODO
+          onClick={() => navigate('/signup')}
           className="text-white hover:bg-white/10 backdrop-blur-sm font-semibold"
         >
-          Sign Up
+          {t('landing.common.signUp')}
         </Button>
 
         {/* Language Selector */}
@@ -121,15 +121,15 @@ const Landing = () => {
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => setTheme('light')}>
               <Sun className="h-4 w-4 mr-2" />
-              Light
+              {t('landing.common.light')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setTheme('dark')}>
               <Moon className="h-4 w-4 mr-2" />
-              Dark
+              {t('landing.common.dark')}
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setTheme('system')}>
               <Monitor className="h-4 w-4 mr-2" />
-              System
+              {t('landing.common.system')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -231,18 +231,18 @@ const Landing = () => {
               <div className="grid md:grid-cols-3 gap-8 items-center">
                 <div className="text-center">
                   <Globe className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="font-semibold text-foreground mb-2">Global Coverage</h3>
-                  <p className="text-sm text-muted-foreground">Worldwide ARGO float network data</p>
+                  <h3 className="font-semibold text-foreground mb-2">{t('landing.solution.cards.globalCoverage.title')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('landing.solution.cards.globalCoverage.description')}</p>
                 </div>
                 <div className="text-center">
                   <Bot className="h-12 w-12 text-accent mx-auto mb-4" />
-                  <h3 className="font-semibold text-foreground mb-2">AI Integration</h3>
-                  <p className="text-sm text-muted-foreground">Natural language processing</p>
+                  <h3 className="font-semibold text-foreground mb-2">{t('landing.solution.cards.aiIntegration.title')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('landing.solution.cards.aiIntegration.description')}</p>
                 </div>
                 <div className="text-center">
                   <TrendingUp className="h-12 w-12 text-primary-glow mx-auto mb-4" />
-                  <h3 className="font-semibold text-foreground mb-2">Real-time Insights</h3>
-                  <p className="text-sm text-muted-foreground">Live oceanographic analysis</p>
+                  <h3 className="font-semibold text-foreground mb-2">{t('landing.solution.cards.realTimeInsights.title')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('landing.solution.cards.realTimeInsights.description')}</p>
                 </div>
               </div>
               
@@ -264,7 +264,7 @@ const Landing = () => {
             <span className="font-bold text-lg">FloatChat</span>
           </div>
           <p className="text-muted-foreground text-sm">
-            © 2024 FloatChat. Advancing oceanographic research through AI.
+            {t('landing.footer.copyright')}
           </p>
         </div>
       </footer>

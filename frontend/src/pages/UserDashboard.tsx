@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,21 +37,24 @@ import {
 } from 'lucide-react';
 
 const UserDashboard = () => {
+  // Use language
+  const { t } = useLanguage();
+
   // State management
   const [chatMessage, setChatMessage] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
   const [chatHistory, setChatHistory] = useState<Array<{type: 'user' | 'bot', message: string}>>([
-    { type: 'bot', message: 'Hello! I can help you analyze ARGO float data. Ask questions about temperature, salinity, or ocean regions!' }
+    { type: 'bot', message: t('dashboard.user.helloCanHelp') }
   ]);
 
   // Mock data
   const navigate = useNavigate();
 
   const quickStats = [
-    { label: 'Active Floats', value: '1,247', icon: Activity, color: 'text-green-500' },
-    { label: 'Data Points Today', value: '23.4K', icon: TrendingUp, color: 'text-blue-500' },
-    { label: 'Temperature Avg', value: '15.7°C', icon: Thermometer, color: 'text-orange-500' },
-    { label: 'Salinity Avg', value: '34.8 PSU', icon: Droplets, color: 'text-cyan-500' },
+    { label: t('dashboard.user.quickStats.activeFloats'), value: '1,247', icon: Activity, color: 'text-green-500' },
+    { label: t('dashboard.user.quickStats.dataPointsToday'), value: '23.4K', icon: TrendingUp, color: 'text-blue-500' },
+    { label: t('dashboard.user.quickStats.temperatureAvg'), value: '15.7°C', icon: Thermometer, color: 'text-orange-500' },
+    { label: t('dashboard.user.quickStats.salinityAvg'), value: '34.8 PSU', icon: Droplets, color: 'text-cyan-500' },
   ];
 
   const regions = [
@@ -61,24 +65,24 @@ const UserDashboard = () => {
   // Admin panel navigation items
   const adminNavItems = [
     {
-      title: 'Query Monitoring',
-      description: 'Monitor and analyze user queries and system performance',
+      title: t('dashboard.admin.nav.queryMonitoring.title'),
+      description: t('dashboard.admin.nav.queryMonitoring.description'),
       icon: Activity,
       url: '/query-monitoring',
       color: 'text-blue-500',
       bgColor: 'bg-blue-50 border-blue-200'
     },
     {
-      title: 'Analytics Dashboard',
-      description: 'View usage patterns and system insights',
+      title: t('dashboard.admin.nav.analyticsDashboard.title'),
+      description: t('dashboard.admin.nav.analyticsDashboard.description'),
       icon: BarChart3,
       url: '/analytics',
       color: 'text-green-500',
       bgColor: 'bg-green-50 border-green-200'
     },
     {
-      title: 'System Config',
-      description: 'Configure system settings and security',
+      title: t('dashboard.admin.nav.systemConfig.title'),
+      description: t('dashboard.admin.nav.systemConfig.description'),
       icon: Settings,
       url: '/system-config',
       color: 'text-purple-500',
@@ -112,10 +116,10 @@ const UserDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-primary">
-            🌊 FloatChat Dashboard
+            🌊 FloatChat {t('dashboard.user.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            AI-Powered Oceanographic Data Analysis Platform
+            {t('dashboard.user.aiPoweredPlatform')}
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -125,7 +129,7 @@ const UserDashboard = () => {
           </Badge>
           <Button variant="outline" size="sm">
             <Bell className="h-4 w-4 mr-2" />
-            Notify on Updates
+            {t('dashboard.user.notifyOnUpdates')}
           </Button>
         </div>
       </div>
@@ -152,19 +156,19 @@ const UserDashboard = () => {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="chatbot" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />
-            AI Chat
+            {t('dashboard.user.tabs.chatbot')}
           </TabsTrigger>
           <TabsTrigger value="visualizations" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
-            Maps & Charts
+            {t('dashboard.user.tabs.visualizations')}
           </TabsTrigger>
           <TabsTrigger value="analysis" className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
-            Analysis Tools
+            {t('dashboard.user.tabs.analysis')}
           </TabsTrigger>
           <TabsTrigger value="personalization" className="flex items-center gap-2">
             <Star className="h-4 w-4" />
-            My Dashboard
+            {t('dashboard.user.tabs.personalization')}
           </TabsTrigger>
         </TabsList>
 
@@ -176,20 +180,20 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bot className="h-5 w-5 text-primary" />
-                  AI Ocean Analyst
+                  {t('dashboard.user.aiOceanAnalyst')}
                 </CardTitle>
                 <CardDescription>
-                  Ask natural language questions about ARGO float data
+                  {t('dashboard.user.askAbout')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {/* Region Selector */}
                   <div>
-                    <Label className="text-sm font-medium">Region Focus</Label>
+                    <Label className="text-sm font-medium">{t('dashboard.user.regionFocus')}</Label>
                     <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                       <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Choose region to focus analysis" />
+                        <SelectValue placeholder={t('dashboard.user.chooseRegion')} />
                       </SelectTrigger>
                       <SelectContent>
                         {regions.map((region) => (
@@ -221,7 +225,7 @@ const UserDashboard = () => {
                   {/* Chat Input */}
                   <form onSubmit={handleChatSubmit} className="flex gap-2">
                     <Input
-                      placeholder="Ask about temperature profiles, salinity patterns, ocean regions..."
+                      placeholder={t('dashboard.user.askAbout')}
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}
                       className="flex-1"
@@ -239,34 +243,34 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Download className="h-5 w-5" />
-                  Quick Actions
+                  {t('dashboard.user.quickActions')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Export Options */}
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Export Data</Label>
+                  <Label className="text-sm font-medium mb-2 block">{t('dashboard.user.exportData')}</Label>
                   <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" size="sm" onClick={() => alert('Exporting CSV...')}>
+                    <Button variant="outline" size="sm" onClick={() => alert(t('dashboard.user.csv'))}>
                       <FileText className="h-3 w-3 mr-2" />
-                      CSV
+                      {t('dashboard.user.csv')}
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => alert('Exporting NetCDF...')}>
+                    <Button variant="outline" size="sm" onClick={() => alert(t('dashboard.user.netCDF'))}>
                       <FileText className="h-3 w-3 mr-2" />
-                      NetCDF
+                      {t('dashboard.user.netCDF')}
                     </Button>
                   </div>
                 </div>
 
                 {/* Recent Floats */}
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Recent Float Activity</Label>
+                  <Label className="text-sm font-medium mb-2 block">{t('dashboard.user.recentFloatActivity')}</Label>
                   <div className="space-y-2">
                     <div className="text-center p-4 border rounded">
                       <Activity className="h-8 w-8 mx-auto mb-2 text-green-500" />
                       <p className="text-sm font-medium">ARGO_001</p>
                       <p className="text-xs text-muted-foreground">Bay of Bengal</p>
-                      <p className="text-xs">Active - 2h ago</p>
+                      <p className="text-xs">{t('dashboard.user.activeAgo')}</p>
                     </div>
                   </div>
                 </div>
@@ -283,10 +287,10 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Globe className="h-5 w-5" />
-                  Live Ocean Map
+                  {t('dashboard.user.liveOceanMap')}
                 </CardTitle>
                 <CardDescription>
-                  ARGO float positions and regional data visualization
+                  {t('dashboard.user.realTimeTracking')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -294,22 +298,22 @@ const UserDashboard = () => {
                   <div className="absolute inset-0 bg-black/10"></div>
                   <div className="relative text-center text-black">
                     <Waves className="h-16 w-16 mx-auto mb-4" />
-                    <p className="text-lg font-semibold">Interactive Ocean Map</p>
+                    <p className="text-lg font-semibold">{t('dashboard.user.interactiveOceanMap')}</p>
                     <p className="text-sm opacity-80 mb-4">
-                      Real-time ARGO float tracking integration
+                      {t('dashboard.user.realTimeTracking')}
                     </p>
                     <div className="flex flex-wrap gap-2 justify-center">
                       <Button variant="outline" className="border-black text-black hover:bg-black/10">
                         <Thermometer className="h-4 w-4 mr-2" />
-                        Temperature Layer
+                        {t('dashboard.user.temperatureLayer')}
                       </Button>
                       <Button variant="outline" className="border-black text-black hover:bg-black/10">
                         <Droplets className="h-4 w-4 mr-2" />
-                        Salinity Contours
+                        {t('dashboard.user.salinityContours')}
                       </Button>
                       <Button variant="outline" className="border-black text-black hover:bg-black/10">
                         <Target className="h-4 w-4 mr-2" />
-                        Float Trajectories
+                        {t('dashboard.user.floatTrajectories')}
                       </Button>
                     </div>
                   </div>
@@ -322,18 +326,18 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BarChart3 className="h-5 w-5" />
-                  Temperature Profile
+                  {t('dashboard.user.temperatureProfile')}
                 </CardTitle>
                 <CardDescription>
-                  Depth vs Time analysis for float data
+                  {t('dashboard.user.depthTime')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64 bg-muted rounded flex items-center justify-center">
                   <div className="text-center">
                     <TrendingUp className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Temperature Profile Chart</p>
-                    <p className="text-xs text-muted-foreground">Data from 2023-2024</p>
+                    <p className="text-sm text-muted-foreground">{t('dashboard.user.temperatureProfileChart')}</p>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.user.dataFrom')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -343,19 +347,19 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  Regional Comparison
+                  {t('dashboard.user.regionalComparison')}
                 </CardTitle>
                 <CardDescription>
-                  Arabian Sea vs Bay of Bengal salinity trends
+                  {t('dashboard.user.arabianvsBay')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-64 bg-muted rounded flex items-center justify-center">
                   <div className="text-center">
                     <BarChart3 className="h-12 w-12 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Comparative Analysis</p>
-                    <p className="text-xs text-muted-foreground">Arabian Sea: 35.2-36.5 PSU</p>
-                    <p className="text-xs text-muted-foreground">Bay of Bengal: 32.5-34.8 PSU</p>
+                    <p className="text-sm text-muted-foreground">{t('dashboard.user.comparativeAnalysis')}</p>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.user.arabianSeaRange')}</p>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.user.bayOfBengalRange')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -371,18 +375,18 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Filter className="h-5 w-5" />
-                  Advanced Filters
+                  {t('dashboard.user.advancedFilters')}
                 </CardTitle>
                 <CardDescription>
-                  Fine-tune your data analysis parameters
+                  {t('dashboard.user.oceanRegions')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium">Ocean Regions</Label>
+                  <Label className="text-sm font-medium">{t('dashboard.user.selectRegion')}</Label>
                   <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Select region" />
+                      <SelectValue placeholder={t('dashboard.user.selectRegion')} />
                     </SelectTrigger>
                     <SelectContent>
                       {regions.map((region) => (
@@ -395,42 +399,42 @@ const UserDashboard = () => {
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium">Time Period</Label>
+                  <Label className="text-sm font-medium">{t('dashboard.user.timePeriod')}</Label>
                   <Select defaultValue="last-month">
                     <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="Choose time range" />
+                      <SelectValue placeholder={t('dashboard.user.chooseTimeRange')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="last-month">Last Month</SelectItem>
-                      <SelectItem value="last-6-months">Last 6 Months</SelectItem>
-                      <SelectItem value="last-year">Last Year</SelectItem>
-                      <SelectItem value="custom">Custom Range</SelectItem>
+                      <SelectItem value="last-month">{t('dashboard.user.lastMonth')}</SelectItem>
+                      <SelectItem value="last-6-months">{t('dashboard.user.last6Months')}</SelectItem>
+                      <SelectItem value="last-year">{t('dashboard.user.lastYear')}</SelectItem>
+                      <SelectItem value="custom">{t('dashboard.user.customRange')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Parameters</Label>
+                  <Label className="text-sm font-medium mb-2 block">{t('dashboard.user.parameters')}</Label>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <Checkbox id="temp" defaultChecked />
                       <Label htmlFor="temp" className="flex items-center gap-2 text-sm cursor-pointer">
                         <Thermometer className="h-3 w-3" />
-                        Temperature
+                        {t('dashboard.user.temperature')}
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="salinity" defaultChecked />
                       <Label htmlFor="salinity" className="flex items-center gap-2 text-sm cursor-pointer">
                         <Droplets className="h-3 w-3" />
-                        Salinity
+                        {t('dashboard.user.salinity')}
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Checkbox id="oxygen" />
                       <Label htmlFor="oxygen" className="flex items-center gap-2 text-sm cursor-pointer">
                         <Droplets className="h-3 w-3" />
-                        BGC Oxygen
+                        {t('dashboard.user.bgcOxygen')}
                       </Label>
                     </div>
                   </div>
@@ -443,16 +447,16 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
-                  Nearest Float Locator
+                  {t('dashboard.user.nearestFloatLocator')}
                 </CardTitle>
                 <CardDescription>
-                  Find ARGO floats near specific coordinates
+                  {t('dashboard.user.latitude')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="latitude">Latitude</Label>
+                    <Label htmlFor="latitude">{t('dashboard.user.latitude')}</Label>
                     <Input
                       id="latitude"
                       type="number"
@@ -463,7 +467,7 @@ const UserDashboard = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="longitude">Longitude</Label>
+                    <Label htmlFor="longitude">{t('dashboard.user.longitude')}</Label>
                     <Input
                       id="longitude"
                       type="number"
@@ -474,9 +478,9 @@ const UserDashboard = () => {
                     />
                   </div>
                 </div>
-                <Button className="w-full" onClick={() => alert('Searching for nearest floats...')}>
+                <Button className="w-full" onClick={() => alert(t('dashboard.user.searching'))}>
                   <Search className="h-4 w-4 mr-2" />
-                  Find Nearest Float
+                  {t('dashboard.user.findNearestFloat')}
                 </Button>
               </CardContent>
             </Card>
@@ -487,10 +491,10 @@ const UserDashboard = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                System Administration
+                {t('dashboard.user.systemAdministration')}
               </CardTitle>
               <CardDescription>
-                Access administrative tools and system monitoring
+                {t('dashboard.user.access')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -520,7 +524,7 @@ const UserDashboard = () => {
                             navigate(item.url);
                           }}
                         >
-                          Access
+                          {t('dashboard.user.access')}
                         </Button>
                       </div>
                     </div>
@@ -539,23 +543,22 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Heart className="h-5 w-5" />
-                  Saved Favorites
+                  {t('dashboard.user.savedFavorites')}
                 </CardTitle>
                 <CardDescription>
-                  Your customized queries and analyses
+                  {t('dashboard.user.chennaiTemperatureAnalysis')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="p-3 border rounded">
-                    <p className="font-medium">Chennai Temperature Analysis</p>
-                    <p className="text-sm text-muted-foreground">Temperature profiles near Chennai</p>
-                    <p className="text-xs text-muted-foreground">Saved yesterday</p>
+                    <p className="font-medium">{t('dashboard.user.temperatureProfilesNear')}</p>
+                    <p className="text-sm text-muted-foreground">{t('dashboard.user.savedYesterday')}</p>
                   </div>
                   <div className="p-3 border rounded">
-                    <p className="font-medium">Arabian Sea Comparison</p>
-                    <p className="text-sm text-muted-foreground">Compare salinity between regions</p>
-                    <p className="text-xs text-muted-foreground">Saved 2 days ago</p>
+                    <p className="font-medium">{t('dashboard.user.arabianSeaComparison')}</p>
+                    <p className="text-sm text-muted-foreground">{t('dashboard.user.compareSalinity')}</p>
+                    <p className="text-xs text-muted-foreground">{t('dashboard.user.saved2DaysAgo')}</p>
                   </div>
                 </div>
               </CardContent>
@@ -566,10 +569,10 @@ const UserDashboard = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <AlertCircle className="h-5 w-5" />
-                  AI-Generated Reports
+                  {t('dashboard.user.aiGeneratedReports')}
                 </CardTitle>
                 <CardDescription>
-                  Automated insights and summaries
+                  {t('dashboard.user.salinityTrends')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -577,28 +580,28 @@ const UserDashboard = () => {
                   <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg">
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <AlertCircle className="h-4 w-4 text-blue-500" />
-                      Salinity Trends (June 2024)
+                      {t('dashboard.user.salinityTrends')}
                     </h4>
                     <p className="text-sm text-muted-foreground">
                       Salinity in the Arabian Sea increased by 2.3% compared to last month due to reduced river discharge.
                     </p>
                     <Button variant="outline" size="sm" className="mt-2">
                       <Download className="h-3 w-3 mr-2" />
-                      Download PDF
+                      {t('dashboard.user.downloadPDF')}
                     </Button>
                   </div>
 
                   <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg">
                     <h4 className="font-medium mb-2 flex items-center gap-2">
                       <TrendingUp className="h-4 w-4 text-green-500" />
-                      Temperature Anomalies
+                      {t('dashboard.user.temperatureAnomalies')}
                     </h4>
                     <p className="text-sm text-muted-foreground">
                       Surface temperatures in the Indian Ocean are 1.2°C above seasonal average.
                     </p>
                     <Button variant="outline" size="sm" className="mt-2">
                       <Download className="h-3 w-3 mr-2" />
-                      Download Report
+                      {t('dashboard.user.downloadReport')}
                     </Button>
                   </div>
                 </div>

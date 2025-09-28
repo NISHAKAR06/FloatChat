@@ -60,13 +60,13 @@ const Chatbot = () => {
     setTimeout(() => {
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'I\'m analyzing the ARGO float data for your query. Here are the key insights...',
+        content: t('chatbot.aiResponse'),
         type: 'assistant',
         timestamp: new Date()
       };
-      
-      setChats(prev => prev.map(chat => 
-        chat.id === activeChat 
+
+      setChats(prev => prev.map(chat =>
+        chat.id === activeChat
           ? { ...chat, messages: [...chat.messages, aiResponse] }
           : chat
       ));
@@ -76,7 +76,7 @@ const Chatbot = () => {
   const createNewChat = () => {
     const newChat: Chat = {
       id: Date.now().toString(),
-      name: `Chat ${chats.length + 1}`,
+      name: `${t('chatbot.newChatPrefix')} ${chats.length + 1}`,
       messages: [],
       isFavorite: false
     };
@@ -110,10 +110,10 @@ const Chatbot = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
-                Chat History
+                {t('chatbot.history')}
               </CardTitle>
               <Button size="sm" onClick={createNewChat}>
-                New Chat
+                {t('chatbot.newChat')}
               </Button>
             </div>
           </CardHeader>
@@ -156,7 +156,7 @@ const Chatbot = () => {
                       </div>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {chat.messages.length} messages
+                      {chat.messages.length} {t('chatbot.messages')}
                     </p>
                   </div>
                 ))}
@@ -169,7 +169,7 @@ const Chatbot = () => {
         <Card className="flex-1 flex flex-col">
           <CardHeader className="pb-3">
             <CardTitle className="text-xl">
-              {chats.find(chat => chat.id === activeChat)?.name || 'Select a chat'}
+              {chats.find(chat => chat.id === activeChat)?.name || t('chatbot.selectChat')}
             </CardTitle>
           </CardHeader>
           <Separator />
@@ -207,7 +207,7 @@ const Chatbot = () => {
           <div className="p-4">
             <div className="flex gap-2">
               <Input
-                placeholder="Ask about ARGO float data..."
+                placeholder={t('chatbot.placeholder')}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
@@ -217,10 +217,11 @@ const Chatbot = () => {
                 size="icon"
                 variant={isListening ? "destructive" : "outline"}
                 onClick={() => setIsListening(!isListening)}
+                title={t('chatbot.voiceInput')}
               >
                 <Mic className="h-4 w-4" />
               </Button>
-              <Button onClick={handleSendMessage}>
+              <Button onClick={handleSendMessage} title={t('chatbot.sendMessage')}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>

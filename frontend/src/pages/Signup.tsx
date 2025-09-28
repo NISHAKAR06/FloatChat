@@ -9,12 +9,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Waves, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const Login = () => {
+const Signup = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  const [isLogin, setIsLogin] = useState(true);
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -24,39 +23,22 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock authentication logic
-    // In real implementation, this would connect to Supabase
-    if (isLogin) {
-      // Check for admin credentials (demo purposes)
-      if (formData.email === 'admin@oceanic.ai' && formData.password === 'admin123') {
-        toast({
-          title: "Success",
-          description: "Logged in as Admin",
-        });
-        navigate('/admin');
-      } else {
-        toast({
-          title: "Success", 
-          description: "Logged in successfully",
-        });
-        navigate('/dashboard');
-      }
-    } else {
-      if (formData.password !== formData.confirmPassword) {
-        toast({
-          title: "Error",
-          description: "Passwords do not match",
-          variant: "destructive",
-        });
-        return;
-      }
+
+    if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Success",
-        description: "Account created successfully",
+        title: t('common.error'),
+        description: t('auth.passwordMismatch'),
+        variant: 'destructive',
       });
-      navigate('/dashboard');
+      return;
     }
+
+    // Mock signup logic - in a real app, this would create the account
+    toast({
+      title: t('common.success'),
+      description: t('auth.accountCreated'),
+    });
+    navigate('/dashboard');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,16 +57,13 @@ const Login = () => {
               <Waves className="h-10 w-10 text-primary" />
             </div>
             <CardTitle className="text-2xl font-bold">
-              {isLogin ? t('auth.login') : t('auth.signup')}
+              {t('auth.signup')}
             </CardTitle>
             <CardDescription>
-              {isLogin
-                ? t('auth.welcomeBack')
-                : t('auth.createAccount')
-              }
+              {t('auth.createAccount')}
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -100,7 +79,7 @@ const Login = () => {
                   className="bg-background/50 backdrop-blur-sm"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">{t('auth.password')}</Label>
                 <div className="relative">
@@ -128,65 +107,43 @@ const Login = () => {
                   </Button>
                 </div>
               </div>
-              
-              {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type={showPassword ? 'text' : 'password'}
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    required
-                    className="bg-background/50 backdrop-blur-sm"
-                  />
-                </div>
-              )}
-              
-              <Button 
-                type="submit" 
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  required
+                  className="bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+
+              <Button
+                type="submit"
                 className="w-full bg-gradient-ocean hover:opacity-90 transition-opacity"
                 size="lg"
               >
-                {isLogin ? t('auth.login') : t('auth.signup')}
+                {t('auth.signup')}
               </Button>
             </form>
-            
-            {isLogin && (
-              <div className="mt-4 text-center">
-                <Link 
-                  to="/forgot-password" 
-                  className="text-sm text-primary hover:underline"
-                >
-                  {t('auth.forgotPassword')}
-                </Link>
-              </div>
-            )}
-            
+
             <Separator className="my-6" />
-            
+
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}
+                {t('auth.hasAccount')}
               </p>
               <Button
                 variant="link"
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => navigate('/login')}
                 className="mt-1"
               >
-                {isLogin ? t('auth.signup') : t('auth.login')}
+                {t('auth.login')}
               </Button>
             </div>
-            
-            {/* Demo credentials hint */}
-            {isLogin && (
-              <div className="mt-6 p-3 bg-muted/50 rounded-lg border">
-                <p className="text-xs text-muted-foreground text-center">
-                  {t('auth.demoHint')}
-                </p>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
@@ -194,4 +151,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Signup;

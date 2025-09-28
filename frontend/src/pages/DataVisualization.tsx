@@ -13,31 +13,31 @@ const DataVisualization = () => {
   const visualizations = [
     {
       id: 'temperature-depth',
-      title: 'Temperature vs Depth Profile',
-      type: 'Line Chart',
+      title: t('dataVisualization.temperatureDepthProfile'),
+      type: t('dataVisualization.lineChart'),
       icon: LineChart,
-      description: 'Vertical temperature distribution'
+      description: t('dataVisualization.verticalTempDistribution')
     },
     {
       id: 'salinity-time',
-      title: 'Salinity Time Series',
-      type: 'Time Series',
+      title: t('dataVisualization.salinityTimeSeries'),
+      type: t('dataVisualization.timeSeries'),
       icon: TrendingUp,
-      description: 'Salinity changes over time'
+      description: t('dataVisualization.salinityChanges')
     },
     {
       id: 'float-trajectories',
-      title: 'Float Trajectories',
-      type: 'Map',
+      title: t('dataVisualization.floatTrajectories'),
+      type: t('dataVisualization.map'),
       icon: Map,
-      description: 'Geographic movement patterns'
+      description: t('dataVisualization.geographicMovement')
     },
     {
       id: 'oxygen-distribution',
-      title: 'Dissolved Oxygen Distribution',
-      type: 'Bar Chart',
+      title: t('dataVisualization.dissolvedOxygen'),
+      type: t('dataVisualization.barChart'),
       icon: BarChart3,
-      description: 'Oxygen levels across regions'
+      description: t('dataVisualization.oxygenLevels')
     }
   ];
 
@@ -53,15 +53,15 @@ const DataVisualization = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-primary">
-            Data Visualization
+            {t('dataVisualization.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Interactive charts and graphs for ARGO float data analysis
+            {t('dataVisualization.subtitle')}
           </p>
         </div>
         <Button className="flex items-center gap-2">
           <Download className="h-4 w-4" />
-          Export Chart
+          {t('dataVisualization.exportChart')}
         </Button>
       </div>
 
@@ -69,7 +69,7 @@ const DataVisualization = () => {
         {/* Visualization Types */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <CardTitle className="text-lg">Chart Types</CardTitle>
+            <CardTitle className="text-lg">{t('dataVisualization.chartTypes')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {visualizations.map((viz) => {
@@ -113,10 +113,10 @@ const DataVisualization = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="last-7-days">Last 7 days</SelectItem>
-                    <SelectItem value="last-30-days">Last 30 days</SelectItem>
-                    <SelectItem value="last-90-days">Last 90 days</SelectItem>
-                    <SelectItem value="last-year">Last year</SelectItem>
+                    <SelectItem value="last-7-days">{t('dataVisualization.last7Days')}</SelectItem>
+                    <SelectItem value="last-30-days">{t('dataVisualization.last30Days')}</SelectItem>
+                    <SelectItem value="last-90-days">{t('dataVisualization.last90Days')}</SelectItem>
+                    <SelectItem value="last-year">{t('dataVisualization.lastYear')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -131,12 +131,12 @@ const DataVisualization = () => {
                   {visualizations.find(v => v.id === selectedVisualization)?.title}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Interactive chart will be displayed here
+                  {t('dataVisualization.interactiveChart')}
                 </p>
                 {selectedVisualization === 'temperature-depth' && (
                   <div className="mt-4 text-xs text-muted-foreground">
-                    <p>Sample Data: Temperature range 8.1°C - 22.5°C</p>
-                    <p>Depth range: 0m - 2000m</p>
+                    <p>{t('dataVisualization.sampleData')}</p>
+                    <p>{t('dataVisualization.depthRange')}</p>
                   </div>
                 )}
               </div>
@@ -154,7 +154,7 @@ const DataVisualization = () => {
                 <BarChart3 className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Active Floats</p>
+                <p className="text-sm text-muted-foreground">{t('dataVisualization.activeFloats')}</p>
                 <p className="text-2xl font-bold">3,847</p>
               </div>
             </div>
@@ -168,7 +168,7 @@ const DataVisualization = () => {
                 <Activity className="h-5 w-5 text-blue-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Data Points</p>
+                <p className="text-sm text-muted-foreground">{t('dataVisualization.dataPoints')}</p>
                 <p className="text-2xl font-bold">1.2M</p>
               </div>
             </div>
@@ -182,7 +182,7 @@ const DataVisualization = () => {
                 <TrendingUp className="h-5 w-5 text-green-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Avg Temperature</p>
+                <p className="text-sm text-muted-foreground">{t('dataVisualization.avgTemperature')}</p>
                 <p className="text-2xl font-bold">15.2°C</p>
               </div>
             </div>
@@ -196,7 +196,7 @@ const DataVisualization = () => {
                 <Map className="h-5 w-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Regions</p>
+                <p className="text-sm text-muted-foreground">{t('dataVisualization.regions')}</p>
                 <p className="text-2xl font-bold">12</p>
               </div>
             </div>

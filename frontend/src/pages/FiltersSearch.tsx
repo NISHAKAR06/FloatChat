@@ -191,14 +191,14 @@ const FiltersSearch = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-primary">
-            Search & Filters
+            {t('filtersSearch.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Find and filter ARGO float data with advanced search capabilities
+            {t('filtersSearch.subtitle')}
           </p>
         </div>
         <Button variant="outline" onClick={clearAllFilters}>
-          Clear All Filters
+          {t('filtersSearch.clearAllFilters')}
         </Button>
       </div>
 
@@ -206,15 +206,15 @@ const FiltersSearch = () => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="filters" className="flex items-center gap-2">
             <Filter className="h-4 w-4" />
-            Regional Filters
+            {t('filtersSearch.regionalFilters')}
           </TabsTrigger>
           <TabsTrigger value="timeline" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            Time Period
+            {t('filtersSearch.timePeriod')}
           </TabsTrigger>
           <TabsTrigger value="nearest" className="flex items-center gap-2">
             <Target className="h-4 w-4" />
-            Nearest Float
+            {t('filtersSearch.nearestFloat')}
           </TabsTrigger>
         </TabsList>
 
@@ -224,19 +224,19 @@ const FiltersSearch = () => {
             {/* Filters Panel */}
             <Card className="lg:col-span-1">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Filter className="h-5 w-5" />
-                  Regional Filters
-                </CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                {t('filtersSearch.regionalFilters')}
+              </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Search */}
                 <div className="space-y-2">
-                  <Label>Search Query</Label>
+                  <Label>{t('filtersSearch.searchQuery')}</Label>
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Search floats, regions..."
+                      placeholder={t('filtersSearch.searchPlaceholder')}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="pl-10"
@@ -246,10 +246,10 @@ const FiltersSearch = () => {
 
                 {/* Region Filter */}
                 <div className="space-y-2">
-                  <Label>Ocean Regions</Label>
+                  <Label>{t('filtersSearch.oceanRegions')}</Label>
                   <Select value={selectedRegion} onValueChange={setSelectedRegion}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select region" />
+                      <SelectValue placeholder={t('filtersSearch.selectRegion')} />
                     </SelectTrigger>
                     <SelectContent>
                       {regions.map((region) => (
@@ -263,7 +263,7 @@ const FiltersSearch = () => {
 
                 {/* Parameters */}
                 <div className="space-y-3">
-                  <Label className="text-base font-medium">Available Parameters</Label>
+                  <Label className="text-base font-medium">{t('filtersSearch.availableParameters')}</Label>
                   <div className="space-y-3 max-h-64 overflow-y-auto">
                     {parameters.map((param) => {
                       const Icon = param.icon;
@@ -290,7 +290,7 @@ const FiltersSearch = () => {
             <Card className="lg:col-span-3">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xl">Search Results</CardTitle>
+                  <CardTitle className="text-xl">{t('filtersSearch.searchResults')}</CardTitle>
                   <Badge variant="secondary">{filteredResults.length} results found</Badge>
                 </div>
                 {activeParameters.length > 0 && (
@@ -333,7 +333,7 @@ const FiltersSearch = () => {
                             </Badge>
                           </div>
                         </div>
-                        <Button size="sm">View Details</Button>
+                        <Button size="sm">{t('filtersSearch.viewDetails')}</Button>
                       </div>
                     </div>
                   ))}
@@ -347,19 +347,19 @@ const FiltersSearch = () => {
         <TabsContent value="timeline" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2">
                 <Clock className="h-5 w-5" />
-                Time Period Selection
+                {t('filtersSearch.timePeriodSelection')}
               </CardTitle>
               <CardDescription>
-                Choose a predefined time range or select a custom date range
+                {t('filtersSearch.chooseTimeRange')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Quick Time Periods */}
                 <div className="space-y-4">
-                  <Label className="text-base font-medium">Quick Select</Label>
+                  <Label className="text-base font-medium">{t('filtersSearch.quickSelect')}</Label>
                   <Select value={selectedTimePeriod} onValueChange={setSelectedTimePeriod}>
                     <SelectTrigger>
                       <SelectValue placeholder="Choose time period" />
@@ -390,9 +390,9 @@ const FiltersSearch = () => {
 
                 {/* Custom Date Range */}
                 <div className="space-y-4">
-                  <Label className="text-base font-medium">Custom Range</Label>
+                  <Label className="text-base font-medium">{t('filtersSearch.customRange')}</Label>
                   <div className="space-y-2">
-                    <Label>Start Date</Label>
+                    <Label>{t('filtersSearch.startDate')}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -418,7 +418,7 @@ const FiltersSearch = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>End Date</Label>
+                    <Label>{t('filtersSearch.endDate')}</Label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -447,7 +447,7 @@ const FiltersSearch = () => {
 
               {(currentDateRange?.from || selectedTimePeriod) && (
                 <div className="mt-6 p-4 bg-primary/10 rounded-lg">
-                  <h3 className="font-medium text-primary mb-2">Current Selection</h3>
+                  <h3 className="font-medium text-primary mb-2">{t('filtersSearch.currentSelection')}</h3>
                   <p className="text-sm">
                     Date Range: {
                       selectedTimePeriod && selectedTimePeriod !== 'custom' ?
@@ -467,18 +467,18 @@ const FiltersSearch = () => {
         <TabsContent value="nearest" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2">
                 <Target className="h-5 w-5" />
-                Nearest Float Locator
+                {t('filtersSearch.nearestFloatLocator')}
               </CardTitle>
               <CardDescription>
-                Enter coordinates to find the closest ARGO float to your location
+                {t('filtersSearch.enterCoordinates')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="latitude">Latitude</Label>
+                  <Label htmlFor="latitude">{t('filtersSearch.latitude')}</Label>
                   <Input
                     id="latitude"
                     type="number"
@@ -491,7 +491,7 @@ const FiltersSearch = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="longitude">Longitude</Label>
+                  <Label htmlFor="longitude">{t('filtersSearch.longitude')}</Label>
                   <Input
                     id="longitude"
                     type="number"
@@ -504,9 +504,9 @@ const FiltersSearch = () => {
                   />
                 </div>
                 <div className="flex items-end">
-                  <Button onClick={findNearestFloat} className="w-full" disabled={!latitude || !longitude}>
+                    <Button onClick={findNearestFloat} className="w-full" disabled={!latitude || !longitude}>
                     <Search className="h-4 w-4 mr-2" />
-                    Find Nearest
+                    {t('filtersSearch.findNearest')}
                   </Button>
                 </div>
               </div>
@@ -514,7 +514,7 @@ const FiltersSearch = () => {
               {nearestFloat && (
                 <Card className="mt-6">
                   <CardHeader>
-                    <CardTitle className="text-lg">Nearest Float</CardTitle>
+                    <CardTitle className="text-lg">{t('filtersSearch.nearestFloatResult')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
@@ -540,11 +540,11 @@ const FiltersSearch = () => {
                             </span>
                           </div>
                         </div>
-                        <Button>View on Map</Button>
+                        <Button>{t('filtersSearch.viewOnMap')}</Button>
                       </div>
                       <div className="text-sm text-muted-foreground">
                         <p>Last update: {nearestFloat.lastUpdate}</p>
-                        <p>This is a mock result. In the actual system, this would query real ARGO float positions.</p>
+                        <p>{t('filtersSearch.mockResult')}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -552,12 +552,12 @@ const FiltersSearch = () => {
               )}
 
               <div className="text-sm text-muted-foreground space-y-2">
-                <h4 className="font-medium">How it works:</h4>
+                  <h4 className="font-medium">{t('filtersSearch.howItWorks')}</h4>
                 <ul className="list-disc list-inside space-y-1">
-                  <li>Enter your current latitude and longitude coordinates</li>
-                  <li>The system searches through the ARGO float database to find the closest active float</li>
-                  <li>Distance is calculated using geodesic distance formulas</li>
-                  <li>Results include the float's position, distance, and recent data availability</li>
+                  <li>{t('filtersSearch.enterCoordinates')}</li>
+                  <li>{t('filtersSearch.searchDatabase')}</li>
+                  <li>{t('filtersSearch.calculateDistance')}</li>
+                  <li>{t('filtersSearch.includeResults')}</li>
                 </ul>
               </div>
             </CardContent>
