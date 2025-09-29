@@ -11,16 +11,22 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file in project root
+PROJECT_ROOT = BASE_DIR.parent
+load_dotenv(PROJECT_ROOT / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-wi2u^m%^5$f^h@md#jkyllzjrr-v16dt=teh9_mz+55k5v%bki"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-wi2u^m%^5$f^h@md#jkyllzjrr-v16dt=teh9_mz+55k5v%bki")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -97,24 +103,18 @@ DATABASES = {
     'default': dj_database_url.config()
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+# Add vector database configuration for ARGO data
+DATABASES['vector'] = {
+    'ENGINE': 'django.db.backends.postgresql',
+    'NAME': os.getenv('VECTOR_DB_NAME', 'vectordb'),
+    'USER': os.getenv('VECTOR_DB_USER', 'postgres'),
+    'PASSWORD': os.getenv('VECTOR_DB_PASSWORD', 'postgres'),
+    'HOST': os.getenv('VECTOR_DB_HOST', 'localhost'),
+    'PORT': os.getenv('VECTOR_DB_PORT', '5432'),
+    'OPTIONS': {
+        'sslmode': 'require',
     },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
-]
+}
 
 
 # Internationalization
@@ -133,6 +133,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 STATIC_URL = "/static/"
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
@@ -159,7 +162,8 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://float-chat-vyuga.vercel.app/",  # Allow all Vercel apps, or be more specific
+    "http://localhost:8080",
+    #"https://float-chat-vyuga.vercel.app/",  # Allow all Vercel apps, or be more specific
 ]
 
 # For development, you can use

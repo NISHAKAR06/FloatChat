@@ -1,0 +1,18 @@
+# MCP Requirements
+mcp>=1.0.0
+pydantic>=2.0.0
+
+# Database
+psycopg2-binary>=2.9.0
+
+# Vector Operations  
+numpy>=1.24.0
+
+# JSON Processing
+orjson>=3.8.0
+
+# Async Support
+asyncio-mqtt>=0.11.0
+
+# Logging
+structlog>=23.0.0

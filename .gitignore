@@ -81,3 +81,16 @@ db.sqlite3
 .venv
 venv
 env
+
+# testing files
+setup_database.py/
+simple_test.py/
+test_system.py/
+check_db_data.py
+create_embeddings.py
+fix_neon_connection.py
+inspect_user_db.py
+manual_data_insert.py
+test_basic_query.py
+test_cloud_db.py
+test_system.py

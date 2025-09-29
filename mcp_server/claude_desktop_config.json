@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "argo-float-data": {
+      "command": "python",
+      "args": [
+        "-m",
+        "mcp_server.argo_server"
+      ],
+      "cwd": "c:\\Users\\NISHAKART\\Documents\\GitHub\\FloatChat",
+      "env": {
+        "PYTHONPATH": "c:\\Users\\NISHAKART\\Documents\\GitHub\\FloatChat"
+      }
+    }
+  },
+  "globalShortcut": "Ctrl+Shift+Space"
+}

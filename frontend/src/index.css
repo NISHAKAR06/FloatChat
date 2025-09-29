@@ -150,4 +150,132 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Prevent page scrolling for chatbot interface only */
+  .chatbot-page body {
+    overflow: hidden;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  .chatbot-page html {
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .chatbot-page #root {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Floating Chatbot Button Styling */
+  .floating-chatbot-button {
+    position: fixed !important;
+    bottom: 1.5rem !important;
+    right: 1.5rem !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    border-radius: 9999px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+      0 20px 40px -12px rgba(0, 0, 0, 0.25),
+      0 8px 16px -4px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .floating-chatbot-button:hover {
+    transform: scale(1.05) !important;
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.35),
+      0 12px 24px -6px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .floating-chatbot-button:active {
+    transform: scale(0.95) !important;
+  }
+
+  /* Dark mode enhancements */
+  .dark .floating-chatbot-button {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow:
+      0 20px 40px -12px rgba(0, 0, 0, 0.5),
+      0 8px 16px -4px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .dark .floating-chatbot-button:hover {
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.7),
+      0 12px 24px -6px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .floating-chatbot-button {
+      bottom: 1rem !important;
+      right: 1rem !important;
+      width: 3rem !important;
+      height: 3rem !important;
+    }
+  }
+
+  /* Force positioning on all layouts - override any page conflicts */
+  .floating-chatbot-button {
+    transform: none !important;
+    margin: 0 !important;
+    float: none !important;
+    clear: none !important;
+    flex: none !important;
+    grid-area: none !important;
+    order: unset !important;
+  }
+
+  /* Specific overrides for different page layouts */
+  body.floating-chatbot-active .floating-chatbot-button,
+  html.floating-chatbot-active .floating-chatbot-button,
+  #root .floating-chatbot-button {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 10000 !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+  }
+
+  /* Pulse animation for attention */
+  .floating-chatbot-button.pulse {
+    animation: floatPulse 2s ease-in-out infinite alternate !important;
+  }
+
+  @keyframes floatPulse {
+    from {
+      box-shadow:
+        0 20px 40px -12px rgba(210, 85, 40, 0.4),
+        0 8px 16px -4px rgba(210, 85, 40, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    to {
+      box-shadow:
+        0 30px 60px -12px rgba(210, 85, 40, 0.6),
+        0 12px 24px -4px rgba(210, 85, 40, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+  }
 }
