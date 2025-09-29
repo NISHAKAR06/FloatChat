@@ -8,10 +8,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { 
-  Home, 
-  LayoutDashboard, 
-  Settings, 
+import {
+  Home,
+  LayoutDashboard,
+  Settings,
   HelpCircle,
   Waves,
   Globe,
@@ -19,7 +19,8 @@ import {
   Sun,
   Monitor,
   LogOut,
-  User
+  User,
+  Ship
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -62,7 +63,29 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-2 flex-shrink-0">
-            <Waves className="h-8 w-8 text-primary" />
+            <div className="h-8 w-8 flex items-center justify-center">
+              <svg width="32" height="32" viewBox="0 0 32 32" className="text-primary">
+                {/* Float/Buoy */}
+                <circle cx="16" cy="8" r="4" fill="currentColor" />
+                <rect x="15" y="4" width="2" height="8" fill="currentColor" />
+
+                {/* Ocean waves */}
+                <path d="M4 20 Q8 16 12 20 T20 20 Q24 16 28 20" stroke="currentColor" strokeWidth="2" fill="none" />
+                <path d="M2 24 Q6 20 10 24 T18 24 Q22 20 26 24 T30 24" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.7" />
+
+                {/* Argo Ship - combining ocean and argo elements */}
+                {/* Ship hull */}
+                <ellipse cx="16" cy="26" rx="10" ry="3" fill="currentColor" opacity="0.7" />
+                {/* Ship mast */}
+                <rect x="15.5" y="18" width="1" height="8" fill="currentColor" opacity="0.8" />
+                {/* Ship sail */}
+                <path d="M16.5 18 L20 18 L18 22 L16.5 26 Z" fill="currentColor" opacity="0.6" />
+                {/* Ship bow */}
+                <path d="M6 26 L12 22 L12 26 Z" fill="currentColor" opacity="0.5" />
+                {/* Ship stern */}
+                <path d="M26 26 L20 22 L20 26 Z" fill="currentColor" opacity="0.5" />
+              </svg>
+            </div>
             <span className="font-bold text-xl bg-gradient-ocean bg-clip-text text-transparent">
               FloatChat
             </span>

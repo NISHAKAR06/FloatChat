@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,33 +58,47 @@ const UserDashboard = () => {
     'North Atlantic', 'South Atlantic', 'Indian Ocean', 'Arctic Ocean', 'Southern Ocean'
   ];
 
-  // Admin panel navigation items
-  const adminNavItems = [
-    {
-      title: t('dashboard.admin.nav.queryMonitoring.title'),
-      description: t('dashboard.admin.nav.queryMonitoring.description'),
-      icon: Activity,
-      url: '/query-monitoring',
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-50 border-blue-200'
-    },
-    {
-      title: t('dashboard.admin.nav.analyticsDashboard.title'),
-      description: t('dashboard.admin.nav.analyticsDashboard.description'),
-      icon: BarChart3,
-      url: '/analytics',
-      color: 'text-green-500',
-      bgColor: 'bg-green-50 border-green-200'
-    },
-    {
-      title: t('dashboard.admin.nav.systemConfig.title'),
-      description: t('dashboard.admin.nav.systemConfig.description'),
-      icon: Settings,
-      url: '/system-config',
-      color: 'text-purple-500',
-      bgColor: 'bg-purple-50 border-purple-200'
-    }
-  ];
+  // Add useEffect for Tableau script loading
+  useEffect(() => {
+    // Load Tableau script dynamically
+    const script = document.createElement('script');
+    script.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+    script.async = true;
+
+    // Add callback to resize after script loads
+    script.onload = () => {
+      setTimeout(() => {
+        const divElement = document.getElementById('viz-dashboard');
+        if (divElement) {
+          const vizElement = divElement.getElementsByTagName('object')[0];
+          if (vizElement && vizElement.style.display !== 'none') {
+            if (divElement.offsetWidth > 800) {
+              vizElement.style.width = '100%';
+              vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+            } else if (divElement.offsetWidth > 500) {
+              vizElement.style.width = '100%';
+              vizElement.style.height = (divElement.offsetWidth * 0.75) + 'px';
+            } else {
+              vizElement.style.width = '100%';
+              vizElement.style.height = '1827px';
+            }
+          }
+        }
+      }, 2000); // Increased delay to ensure Tableau loads
+    };
+
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup script on component unmount
+      const existingScript = document.querySelector('script[src="https://public.tableau.com/javascripts/api/viz_v1.js"]');
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, []);
+
+
 
 
 
@@ -161,28 +175,24 @@ const UserDashboard = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-96 bg-gradient-to-b from-blue-50 to-cyan-100 rounded-lg flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 bg-black/10"></div>
-                  <div className="relative text-center text-black">
-                    <Waves className="h-16 w-16 mx-auto mb-4" />
-                    <p className="text-lg font-semibold">{t('dashboard.user.interactiveOceanMap')}</p>
-                    <p className="text-sm opacity-80 mb-4">
-                      {t('dashboard.user.realTimeTracking')}
-                    </p>
-                    <div className="flex flex-wrap gap-2 justify-center">
-                      <Button variant="outline" className="border-black text-black hover:bg-black/10">
-                        <Thermometer className="h-4 w-4 mr-2" />
-                        {t('dashboard.user.temperatureLayer')}
-                      </Button>
-                      <Button variant="outline" className="border-black text-black hover:bg-black/10">
-                        <Droplets className="h-4 w-4 mr-2" />
-                        {t('dashboard.user.salinityContours')}
-                      </Button>
-                      <Button variant="outline" className="border-black text-black hover:bg-black/10">
-                        <Target className="h-4 w-4 mr-2" />
-                        {t('dashboard.user.floatTrajectories')}
-                      </Button>
-                    </div>
+                <div className="w-full h-96 overflow-hidden">
+                  <div className="tableauPlaceholder" id="viz-dashboard" style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <noscript>
+                      <a href="#"><img alt="Indian ARGO Viz" src="https://public.tableau.com/static/images/XH/XH7JBZCM9/1_rss.png" style={{ border: 'none' }} /></a>
+                    </noscript>
+                    <object className="tableauViz" style={{ display: 'none', width: '100%', height: '100%' }}>
+                      <param name="host_url" value="https%3A%2F%2Fpublic.tableau.com%2F" />
+                      <param name="embed_code_version" value="3" />
+                      <param name="path" value="shared/XH7JBZCM9" />
+                      <param name="toolbar" value="yes" />
+                      <param name="static_image" value="https://public.tableau.com/static/images/XH/XH7JBZCM9/1.png" />
+                      <param name="animate_transition" value="yes" />
+                      <param name="display_static_image" value="yes" />
+                      <param name="display_spinner" value="yes" />
+                      <param name="display_overlay" value="yes" />
+                      <param name="display_count" value="yes" />
+                      <param name="language" value="en-US" />
+                    </object>
                   </div>
                 </div>
               </CardContent>
@@ -353,53 +363,7 @@ const UserDashboard = () => {
             </Card>
           </div>
 
-          {/* Admin Panel Navigation */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Shield className="h-5 w-5" />
-                {t('dashboard.user.systemAdministration')}
-              </CardTitle>
-              <CardDescription>
-                {t('dashboard.user.access')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {adminNavItems.map((item, index) => {
-                  const Icon = item.icon;
-                  return (
-                    <div
-                      key={index}
-                      className={`${item.bgColor} border rounded-lg p-4 cursor-pointer hover:shadow-md transition-all hover:scale-[1.02]`}
-                      onClick={() => navigate(item.url)}
-                    >
-                      <div className="flex flex-col items-center text-center space-y-3">
-                        <Icon className={`h-8 w-8 ${item.color}`} />
-                        <div>
-                          <h3 className="font-semibold text-sm">{item.title}</h3>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {item.description}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="w-full text-xs"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(item.url);
-                          }}
-                        >
-                          {t('dashboard.user.access')}
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+
         </TabsContent>
 
         {/* Personalization Tab */}
