@@ -9,9 +9,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useRef, useEffect } from 'react';
 import {
   Globe,
   Moon,
@@ -44,6 +44,27 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   const [chatHistory, setChatHistory] = useState<Array<{type: 'user' | 'bot', message: string}>>([
     { type: 'bot', message: 'Hello! I can help you analyze ARGO float data. Ask questions about temperature, salinity, or ocean regions!' }
   ]);
+
+  // Refs for auto-scrolling
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll function
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Auto-scroll when chat history changes
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
+
+  // Auto-scroll when chat opens
+  useEffect(() => {
+    if (isChatOpen) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [isChatOpen]);
 
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,21 +207,41 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
           <MessageCircle className="h-6 w-6" />
         </Button>
 
-        {/* Chatbot Popup Modal */}
-        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
-          <DialogContent className="sm:max-w-[500px] max-h-[600px] flex flex-col">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" />
-                AI Ocean Analyst
-              </DialogTitle>
-            </DialogHeader>
+        {/* Background Overlay */}
+        {isChatOpen && (
+          <div
+            className="fixed inset-0 bg-white/60 dark:bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+            onClick={() => setIsChatOpen(false)}
+          />
+        )}
 
-            <ScrollArea className="flex-1 pr-4">
-              <div className="space-y-4 pb-4">
+        {/* Chatbot Side Panel */}
+        <div className={`fixed right-0 top-1/2 h-[calc(100vh-8rem)] w-80 sm:w-96 lg:w-[28rem] xl:w-[32rem] max-w-[90vw] bg-blue-500/20 dark:bg-blue-400/30 backdrop-blur-xl border border-blue-300/40 dark:border-blue-200/50 shadow-2xl z-50 transform transition-all duration-300 ease-in-out rounded-l-lg sm:rounded-l-xl -translate-y-1/2 overflow-hidden flex flex-col ${
+          isChatOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}>
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">AI Ocean Analyst</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsChatOpen(false)}
+                className="h-8 w-8 p-0"
+              >
+                ×
+              </Button>
+            </div>
+
+            {/* Messages */}
+            <ScrollArea className="flex-1 px-4 py-4">
+              <div className="space-y-4 w-full pr-2">
                 {chatHistory.map((msg, index) => (
                   <div key={index} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[80%] p-3 rounded-lg ${
+                    <div className={`max-w-[85%] p-3 rounded-lg break-words ${
                       msg.type === 'user'
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted'
@@ -209,22 +250,26 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
                     </div>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
 
-            <form onSubmit={handleChatSubmit} className="flex gap-2 pt-4">
-              <Input
-                placeholder="Ask about ocean data..."
-                value={chatMessage}
-                onChange={(e) => setChatMessage(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit" disabled={!chatMessage.trim()}>
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            {/* Input */}
+            <div className="p-4 border-t border-blue-300/40 dark:border-blue-200/50">
+              <form onSubmit={handleChatSubmit} className="flex gap-2">
+                <Input
+                  placeholder="Ask about ocean data..."
+                  value={chatMessage}
+                  onChange={(e) => setChatMessage(e.target.value)}
+                  className="flex-1"
+                />
+                <Button type="submit" disabled={!chatMessage.trim()}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            </div>
+          </div>
+        </div>
       </SidebarProvider>
     </div>
   );

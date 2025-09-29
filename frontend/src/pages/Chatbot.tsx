@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -101,11 +101,20 @@ const Chatbot = () => {
 
   const activeMessages = chats.find(chat => chat.id === activeChat)?.messages || [];
 
+  // Auto-scroll to the latest message within the chat area only
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [activeMessages.length, activeChat]);
+
   return (
-    <div className="h-full flex">
-      <div className="flex h-full w-full">
+    <div className="h-full flex min-h-0">
+      <div className="flex h-full w-full min-h-0">
         {/* Chat History Sidebar */}
-        <Card className="w-80 flex flex-col">
+        <Card className="w-80 flex flex-col min-h-0 overflow-hidden">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -117,7 +126,7 @@ const Chatbot = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 p-0">
+          <CardContent className="flex-1 p-0 min-h-0">
             <ScrollArea className="h-full px-4">
               <div className="space-y-2">
                 {chats.map((chat) => (
@@ -166,7 +175,7 @@ const Chatbot = () => {
         </Card>
 
         {/* Chat Interface */}
-        <Card className="flex-1 flex flex-col">
+        <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
           <CardHeader className="pb-3">
             <CardTitle className="text-xl">
               {chats.find(chat => chat.id === activeChat)?.name || t('chatbot.selectChat')}
@@ -175,16 +184,16 @@ const Chatbot = () => {
           <Separator />
           
           {/* Messages */}
-          <CardContent className="flex-1 p-0">
+          <CardContent className="flex-1 p-0 min-h-0 overflow-hidden">
             <ScrollArea className="h-full p-4">
-              <div className="space-y-4">
+              <div className="space-y-4 pr-2">
                 {activeMessages.map((msg) => (
                   <div
                     key={msg.id}
                     className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
-                      className={`max-w-[70%] p-3 rounded-lg ${
+                      className={`max-w-[70%] p-3 rounded-lg break-words ${
                         msg.type === 'user'
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted'
@@ -197,6 +206,7 @@ const Chatbot = () => {
                     </div>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
           </CardContent>

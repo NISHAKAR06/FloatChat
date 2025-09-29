@@ -42,9 +42,13 @@ const UserSidebar = () => {
     { title: 'Settings', url: '/settings', icon: Settings },
   ];
 
-  const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? 'bg-primary/20 text-primary font-semibold' : 'font-semibold hover:bg-primary/10';
+  const getNavLinkClass = (isActive: boolean) => {
+    const baseClasses = 'flex items-center gap-3 px-3 py-2 rounded-md text-sm w-full';
+    if (isActive) {
+      return `${baseClasses} !bg-black !text-white !border-black font-bold border-l-4 shadow-md`;
+    }
+    return `${baseClasses} !text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-all duration-200`;
+  };
 
   return (
     <Sidebar className={`border-r ${collapsed ? 'w-14' : 'w-64'}`} collapsible="icon">
@@ -77,7 +81,10 @@ const UserSidebar = () => {
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) => getNavLinkClass(isActive)}
+                    >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -95,7 +102,10 @@ const UserSidebar = () => {
               {analysisItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) => getNavLinkClass(isActive)}
+                    >
                       <item.icon className="h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}
                     </NavLink>
@@ -105,8 +115,6 @@ const UserSidebar = () => {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-
       </SidebarContent>
     </Sidebar>
   );
