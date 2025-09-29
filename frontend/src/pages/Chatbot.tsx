@@ -23,17 +23,24 @@ interface Chat {
 
 const Chatbot = () => {
   const { t } = useLanguage();
-  const [chats, setChats] = useState<Chat[]>([
-    {
-      id: '1',
-      name: 'ARGO Float Analysis',
-      messages: [
-        { id: '1-1', content: 'Show me temperature data for floats in the Pacific Ocean', type: 'user', timestamp: new Date() },
-        { id: '1-2', content: 'I found 15 active ARGO floats in the Pacific Ocean. Here\'s the temperature analysis...', type: 'assistant', timestamp: new Date() }
-      ],
-      isFavorite: true
+  const [chats, setChats] = useState<Chat[]>([]);
+
+  useEffect(() => {
+    if (chats.length === 0) {
+      setChats([
+        {
+          id: '1',
+          name: t('chatbot.argoFloatAnalysis'),
+          messages: [
+            { id: '1-1', content: t('chatbot.showMeTempData'), type: 'user', timestamp: new Date() },
+            { id: '1-2', content: t('chatbot.found15Floats'), type: 'assistant', timestamp: new Date() }
+          ],
+          isFavorite: true
+        }
+      ]);
+      setActiveChat('1');
     }
-  ]);
+  }, [t]);
   const [activeChat, setActiveChat] = useState<string>('1');
   const [message, setMessage] = useState('');
   const [isListening, setIsListening] = useState(false);

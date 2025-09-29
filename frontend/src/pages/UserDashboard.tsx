@@ -41,20 +41,16 @@ const UserDashboard = () => {
   const { t } = useLanguage();
 
   // State management
-  const [chatMessage, setChatMessage] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('');
-  const [chatHistory, setChatHistory] = useState<Array<{type: 'user' | 'bot', message: string}>>([
-    { type: 'bot', message: t('dashboard.user.helloCanHelp') }
-  ]);
 
   // Mock data
   const navigate = useNavigate();
 
   const quickStats = [
-    { label: t('dashboard.user.quickStats.activeFloats'), value: '1,247', icon: Activity, color: 'text-green-500' },
-    { label: t('dashboard.user.quickStats.dataPointsToday'), value: '23.4K', icon: TrendingUp, color: 'text-blue-500' },
-    { label: t('dashboard.user.quickStats.temperatureAvg'), value: '15.7°C', icon: Thermometer, color: 'text-orange-500' },
-    { label: t('dashboard.user.quickStats.salinityAvg'), value: '34.8 PSU', icon: Droplets, color: 'text-cyan-500' },
+    { label: t('dashboard.user.quickStats.activeFloats'), value: t('dashboard.user.oneTwoFourSeven'), icon: Activity, color: 'text-green-500' },
+    { label: t('dashboard.user.quickStats.dataPointsToday'), value: t('dashboard.user.twentyThreeFourK'), icon: TrendingUp, color: 'text-blue-500' },
+    { label: t('dashboard.user.quickStats.temperatureAvg'), value: t('dashboard.user.fifteenSevenCelsius'), icon: Thermometer, color: 'text-orange-500' },
+    { label: t('dashboard.user.quickStats.salinityAvg'), value: t('dashboard.user.thirtyFourEightPSU'), icon: Droplets, color: 'text-cyan-500' },
   ];
 
   const regions = [
@@ -90,25 +86,7 @@ const UserDashboard = () => {
     }
   ];
 
-  const handleChatSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatMessage.trim()) return;
 
-    setChatHistory(prev => [...prev, { type: 'user', message: chatMessage }]);
-
-    // Mock AI response based on selected region
-    setTimeout(() => {
-      let response = 'I found relevant ARGO float data for your query. ';
-      if (selectedRegion) {
-        response += `Analyzing data from ${selectedRegion} region. `;
-      }
-      response += 'Here\'s what I discovered about oceanographic patterns.';
-
-      setChatHistory(prev => [...prev, { type: 'bot', message: response }]);
-    }, 1000);
-
-    setChatMessage('');
-  };
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
@@ -125,7 +103,7 @@ const UserDashboard = () => {
         <div className="flex items-center gap-4">
           <Badge variant="secondary" className="flex items-center gap-2">
             <Activity className="h-3 w-3" />
-            3 Active Floats
+            {t('dashboard.user.threeActiveFloats')}
           </Badge>
           <Button variant="outline" size="sm">
             <Bell className="h-4 w-4 mr-2" />
@@ -152,12 +130,8 @@ const UserDashboard = () => {
       </div>
 
       {/* Main Dashboard Tabs */}
-      <Tabs defaultValue="chatbot" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="chatbot" className="flex items-center gap-2">
-            <MessageCircle className="h-4 w-4" />
-            {t('dashboard.user.tabs.chatbot')}
-          </TabsTrigger>
+      <Tabs defaultValue="visualizations" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="visualizations" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             {t('dashboard.user.tabs.visualizations')}
@@ -171,113 +145,6 @@ const UserDashboard = () => {
             {t('dashboard.user.tabs.personalization')}
           </TabsTrigger>
         </TabsList>
-
-        {/* AI Chatbot Tab */}
-        <TabsContent value="chatbot" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Chat Interface */}
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5 text-primary" />
-                  {t('dashboard.user.aiOceanAnalyst')}
-                </CardTitle>
-                <CardDescription>
-                  {t('dashboard.user.askAbout')}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Region Selector */}
-                  <div>
-                    <Label className="text-sm font-medium">{t('dashboard.user.regionFocus')}</Label>
-                    <Select value={selectedRegion} onValueChange={setSelectedRegion}>
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder={t('dashboard.user.chooseRegion')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {regions.map((region) => (
-                          <SelectItem key={region} value={region}>
-                            {region}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Chat Messages */}
-                  <div className="h-96 w-full rounded border p-4 overflow-y-auto">
-                    <div className="space-y-4">
-                      {chatHistory.map((msg, index) => (
-                        <div key={index} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[80%] p-3 rounded-lg ${
-                            msg.type === 'user'
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted'
-                          }`}>
-                            <p className="text-sm">{msg.message}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Chat Input */}
-                  <form onSubmit={handleChatSubmit} className="flex gap-2">
-                    <Input
-                      placeholder={t('dashboard.user.askAbout')}
-                      value={chatMessage}
-                      onChange={(e) => setChatMessage(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button type="submit" disabled={!chatMessage.trim()} className="flex items-center gap-2">
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </form>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions & Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Download className="h-5 w-5" />
-                  {t('dashboard.user.quickActions')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Export Options */}
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">{t('dashboard.user.exportData')}</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" size="sm" onClick={() => alert(t('dashboard.user.csv'))}>
-                      <FileText className="h-3 w-3 mr-2" />
-                      {t('dashboard.user.csv')}
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => alert(t('dashboard.user.netCDF'))}>
-                      <FileText className="h-3 w-3 mr-2" />
-                      {t('dashboard.user.netCDF')}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Recent Floats */}
-                <div>
-                  <Label className="text-sm font-medium mb-2 block">{t('dashboard.user.recentFloatActivity')}</Label>
-                  <div className="space-y-2">
-                    <div className="text-center p-4 border rounded">
-                      <Activity className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                      <p className="text-sm font-medium">ARGO_001</p>
-                      <p className="text-xs text-muted-foreground">Bay of Bengal</p>
-                      <p className="text-xs">{t('dashboard.user.activeAgo')}</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
 
         {/* Visualization Tab */}
         <TabsContent value="visualizations" className="space-y-6">
@@ -583,7 +450,7 @@ const UserDashboard = () => {
                       {t('dashboard.user.salinityTrends')}
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      Salinity in the Arabian Sea increased by 2.3% compared to last month due to reduced river discharge.
+                      {t('dashboard.user.salinityReportDesc')}
                     </p>
                     <Button variant="outline" size="sm" className="mt-2">
                       <Download className="h-3 w-3 mr-2" />
@@ -597,7 +464,7 @@ const UserDashboard = () => {
                       {t('dashboard.user.temperatureAnomalies')}
                     </h4>
                     <p className="text-sm text-muted-foreground">
-                      Surface temperatures in the Indian Ocean are 1.2°C above seasonal average.
+                      {t('dashboard.user.temperatureReportDesc')}
                     </p>
                     <Button variant="outline" size="sm" className="mt-2">
                       <Download className="h-3 w-3 mr-2" />

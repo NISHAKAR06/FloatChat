@@ -33,7 +33,7 @@ const Settings = () => {
   const handleSaveSettings = () => {
     toast({
       title: t('common.success'),
-      description: "सेटिंग्स सफलतापूर्वक सहेजी गईं",
+      description: t('settings.subtitle'),
     });
   };
 
@@ -68,7 +68,7 @@ const Settings = () => {
             </h1>
           </div>
           <p className="text-muted-foreground">
-            अपने FloatChat अनुभव को अनुकूलित करें
+            {t('settings.subtitle')}
           </p>
         </div>
 
@@ -78,10 +78,10 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-primary" />
-                दिखावट
+                {t('settings.appearance.title')}
               </CardTitle>
               <CardDescription>
-                एप्लिकेशन की लुक और फील को अनुकूलित करें
+                {t('settings.appearance.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -108,10 +108,10 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-primary" />
-                भाषा और क्षेत्र
+                {t('settings.languageRegion.title')}
               </CardTitle>
               <CardDescription>
-                इंटरफेस के लिए अपनी पसंदीदा भाषा सेट करें
+                {t('settings.languageRegion.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -138,10 +138,10 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mic className="h-5 w-5 text-primary" />
-                आवाज और ऑडियो
+                {t('settings.voiceAudio.title')}
               </CardTitle>
               <CardDescription>
-                वॉइस इनपुट और टेक्स्ट-टू-स्पीच सेटिंग्स को कॉन्फ़िगर करें
+                {t('settings.voiceAudio.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -149,7 +149,7 @@ const Settings = () => {
                 <div className="space-y-0.5">
                   <Label htmlFor="voice-input">{t('settings.voice')}</Label>
                   <p className="text-sm text-muted-foreground">
-                    चैटबॉट क्वेरी के लिए वॉइस इनपुट सक्षम करें
+                    {t('settings.enableVoiceInput')}
                   </p>
                 </div>
                 <Switch
@@ -160,14 +160,14 @@ const Settings = () => {
                   }
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="text-to-speech">टेक्स्ट-टू-स्पीच</Label>
+                  <Label htmlFor="text-to-speech">Text-to-Speech</Label>
                   <p className="text-sm text-muted-foreground">
-                    चैटबॉट से ऑडियो प्रतिक्रियाएं सक्षम करें
+                    {t('settings.enableTextToSpeech')}
                   </p>
                 </div>
                 <Switch
@@ -186,17 +186,17 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Download className="h-5 w-5 text-primary" />
-                डेटा और निर्यात
+                {t('settings.dataExport.title')}
               </CardTitle>
               <CardDescription>
-                डेटा निर्यात प्राथमिकताएं और प्रारूप कॉन्फ़िगर करें
+                {t('settings.dataExport.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="export-format">डिफ़ॉल्ट निर्यात प्रारूप</Label>
-                <Select 
-                  value={localSettings.exportFormat} 
+                <Label htmlFor="export-format">{t('settings.defaultExportFormat')}</Label>
+                <Select
+                  value={localSettings.exportFormat}
                   onValueChange={(value) =>
                     setLocalSettings(prev => ({ ...prev, exportFormat: value }))
                   }
@@ -213,14 +213,14 @@ const Settings = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="auto-save">क्वेरी स्वतः सहेजें</Label>
+                  <Label htmlFor="auto-save">{t('settings.autoSaveQueries')}</Label>
                   <p className="text-sm text-muted-foreground">
-                    पसंदीदा क्वेरी और विज़ुअलाइज़ेशन को स्वचालित रूप से सहेजें
+                    {t('settings.autoSaveDescription')}
                   </p>
                 </div>
                 <Switch
@@ -239,18 +239,18 @@ const Settings = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <SettingsIcon className="h-5 w-5 text-primary" />
-                सूचनाएं
+                {t('settings.notifications.title')}
               </CardTitle>
               <CardDescription>
-                सूचना प्राथमिकताओं को प्रबंधित करें
+                {t('settings.notifications.description')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="notifications">सूचनाएं सक्षम करें</Label>
+                  <Label htmlFor="notifications">{t('settings.enableNotifications')}</Label>
                   <p className="text-sm text-muted-foreground">
-                    डेटा अपडेट और सिस्टम स्थिति के बारे में सूचनाएं प्राप्त करें
+                    {t('settings.notificationsDescription')}
                   </p>
                 </div>
                 <Switch

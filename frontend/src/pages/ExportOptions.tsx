@@ -158,10 +158,10 @@ const ExportOptions = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black text-primary">
-            Export Data
+            {t('filtersSearch.export.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Download ARGO float data in various formats for analysis
+            {t('filtersSearch.export.subtitle')}
           </p>
         </div>
       </div>
@@ -172,7 +172,7 @@ const ExportOptions = () => {
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
               <Download className="h-5 w-5" />
-              Configure Export
+              {t('filtersSearch.export.configureExport')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -180,7 +180,7 @@ const ExportOptions = () => {
             <div className="space-y-3">
               <Label className="text-base font-semibold flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Filter by Date Range
+                {t('filtersSearch.export.filterByDateRange')}
               </Label>
               <div className="space-y-3">
                 {/* Quick Select Options */}
@@ -217,11 +217,11 @@ const ExportOptions = () => {
                 <div className="border rounded-lg p-3 bg-muted/30">
                   <div className="flex items-center gap-3 mb-3">
                     <Filter className="h-4 w-4 text-primary" />
-                    <span className="font-medium text-sm">Custom Date Range</span>
+                    <span className="font-medium text-sm">{t('filtersSearch.export.customDateRange')}</span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label htmlFor="start-date" className="text-xs text-muted-foreground">Start Date</Label>
+                      <Label htmlFor="start-date" className="text-xs text-muted-foreground">{t('filtersSearch.export.startDate')}</Label>
                       <Input
                         id="start-date"
                         type="date"
@@ -236,7 +236,7 @@ const ExportOptions = () => {
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="end-date" className="text-xs text-muted-foreground">End Date</Label>
+                      <Label htmlFor="end-date" className="text-xs text-muted-foreground">{t('filtersSearch.export.endDate')}</Label>
                       <Input
                         id="end-date"
                         type="date"
@@ -255,10 +255,10 @@ const ExportOptions = () => {
                     <div className="mt-3 p-2 bg-primary/5 border border-primary/20 rounded text-sm">
                       <div className="flex items-center gap-2 font-medium text-primary">
                         <Search className="h-3 w-3" />
-                        Date Filter Active
+                        {t('filtersSearch.export.dateFilterActive')}
                       </div>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Filtering data from {dateRange.startDate || 'beginning'} to {dateRange.endDate || 'present'}
+                        {t('filtersSearch.export.filteringDataFrom')} {dateRange.startDate || 'beginning'} {t('filtersSearch.export.to')} {dateRange.endDate || 'present'}
                       </p>
                     </div>
                   )}
@@ -268,9 +268,9 @@ const ExportOptions = () => {
                 <div className="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <Calendar className="h-4 w-4 text-blue-600" />
                   <div className="text-sm">
-                    <span className="font-medium text-blue-800">Data Available:</span>
+                    <span className="font-medium text-blue-800">{t('filtersSearch.export.dataAvailable')}:</span>
                     <span className="text-blue-700 ml-1">1990-01-01 to 2024-12-31</span>
-                    <span className="text-blue-600 text-xs ml-2">(34+ years of ARGO data)</span>
+                    <span className="text-blue-600 text-xs ml-2">{t('filtersSearch.export.argoDataYears')}</span>
                   </div>
                 </div>
               </div>
@@ -280,7 +280,7 @@ const ExportOptions = () => {
             <div className="space-y-3">
               <Label className="text-base font-semibold flex items-center gap-2">
                 <Filter className="h-4 w-4" />
-                Advanced Filters
+                {t('filtersSearch.export.advancedFilters')}
               </Label>
 
               {/* Filter Pills/Status */}
@@ -310,13 +310,13 @@ const ExportOptions = () => {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Globe className="h-4 w-4" />
-                      Location Filters
+                      {t('filtersSearch.export.locationFilters')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Oceans */}
-                    <div className="space-y-2">
-                      <Label className="text-sm font-medium">Oceans</Label>
+                      <div className="space-y-2">
+                      <Label className="text-sm font-medium">{t('filtersSearch.export.oceans')}</Label>
                       <div className="flex flex-wrap gap-2">
                         {['Atlantic', 'Pacific', 'Indian', 'Southern', 'Arctic'].map((ocean) => (
                           <Button
@@ -335,69 +335,69 @@ const ExportOptions = () => {
                           </Button>
                         ))}
                       </div>
-                    </div>
 
-                    {/* Lat/Lng Range */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Min Latitude</Label>
-                        <Input
-                          type="number"
-                          placeholder="-90"
-                          min="-90"
-                          max="90"
-                          value={filters.latitudeRange.min}
-                          onChange={(e) => setFilters({
-                            ...filters,
-                            latitudeRange: { ...filters.latitudeRange, min: e.target.value }
-                          })}
-                          className="h-8"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Max Latitude</Label>
-                        <Input
-                          type="number"
-                          placeholder="90"
-                          min="-90"
-                          max="90"
-                          value={filters.latitudeRange.max}
-                          onChange={(e) => setFilters({
-                            ...filters,
-                            latitudeRange: { ...filters.latitudeRange, max: e.target.value }
-                          })}
-                          className="h-8"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Min Longitude</Label>
-                        <Input
-                          type="number"
-                          placeholder="-180"
-                          min="-180"
-                          max="180"
-                          value={filters.longitudeRange.min}
-                          onChange={(e) => setFilters({
-                            ...filters,
-                            longitudeRange: { ...filters.longitudeRange, min: e.target.value }
-                          })}
-                          className="h-8"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Max Longitude</Label>
-                        <Input
-                          type="number"
-                          placeholder="180"
-                          min="-180"
-                          max="180"
-                          value={filters.longitudeRange.max}
-                          onChange={(e) => setFilters({
-                            ...filters,
-                            longitudeRange: { ...filters.longitudeRange, max: e.target.value }
-                          })}
-                          className="h-8"
-                        />
+                      {/* Min/Max Latitude */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t('filtersSearch.export.minLatitude')}</Label>
+                          <Input
+                            type="number"
+                            placeholder="-90"
+                            min="-90"
+                            max="90"
+                            value={filters.latitudeRange.min}
+                            onChange={(e) => setFilters({
+                              ...filters,
+                              latitudeRange: { ...filters.latitudeRange, min: e.target.value }
+                            })}
+                            className="h-8"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t('filtersSearch.export.maxLatitude')}</Label>
+                          <Input
+                            type="number"
+                            placeholder="90"
+                            min="-90"
+                            max="90"
+                            value={filters.latitudeRange.max}
+                            onChange={(e) => setFilters({
+                              ...filters,
+                              latitudeRange: { ...filters.latitudeRange, max: e.target.value }
+                            })}
+                            className="h-8"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t('filtersSearch.export.minLongitude')}</Label>
+                          <Input
+                            type="number"
+                            placeholder="-180"
+                            min="-180"
+                            max="180"
+                            value={filters.longitudeRange.min}
+                            onChange={(e) => setFilters({
+                              ...filters,
+                              longitudeRange: { ...filters.longitudeRange, min: e.target.value }
+                            })}
+                            className="h-8"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">{t('filtersSearch.export.maxLongitude')}</Label>
+                          <Input
+                            type="number"
+                            placeholder="180"
+                            min="-180"
+                            max="180"
+                            value={filters.longitudeRange.max}
+                            onChange={(e) => setFilters({
+                              ...filters,
+                              longitudeRange: { ...filters.longitudeRange, max: e.target.value }
+                            })}
+                            className="h-8"
+                          />
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -408,14 +408,14 @@ const ExportOptions = () => {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <Waves className="h-4 w-4" />
-                      Depth & Pressure Filters
+                      {t('filtersSearch.export.depthPressureFilters')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Depth Range */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label className="text-xs">Min Depth (m)</Label>
+                        <Label className="text-xs">{t('filtersSearch.export.minDepth')}</Label>
                         <Input
                           type="number"
                           placeholder="0"
@@ -430,7 +430,7 @@ const ExportOptions = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Max Depth (m)</Label>
+                        <Label className="text-xs">{t('filtersSearch.export.maxDepth')}</Label>
                         <Input
                           type="number"
                           placeholder="6000"
@@ -449,7 +449,7 @@ const ExportOptions = () => {
                     {/* Pressure Range */}
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label className="text-xs">Min Pressure (dbar)</Label>
+                        <Label className="text-xs">{t('filtersSearch.export.minPressure')}</Label>
                         <Input
                           type="number"
                           placeholder="0"
@@ -464,7 +464,7 @@ const ExportOptions = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-xs">Max Pressure (dbar)</Label>
+                        <Label className="text-xs">{t('filtersSearch.export.maxPressure')}</Label>
                         <Input
                           type="number"
                           placeholder="6000"
@@ -481,7 +481,7 @@ const ExportOptions = () => {
                     </div>
 
                     <div className="text-xs text-muted-foreground">
-                      Leave empty for no depth/pressure filtering
+                      {t('filtersSearch.export.leaveEmptyForNoFilter')}
                     </div>
                   </CardContent>
                 </Card>
@@ -489,9 +489,9 @@ const ExportOptions = () => {
                 {/* Float Filters */}
                 <Card>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center gap-2">
+                  <CardTitle className="text-lg flex items-center gap-2">
                       <Target className="h-4 w-4" />
-                      Float Selection
+                      {t('exportOptions.floatSelection')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -516,7 +516,7 @@ const ExportOptions = () => {
                     </div>
 
                     <div className="text-xs text-muted-foreground">
-                      Select specific floats or leave empty for all
+                      {t('exportOptions.selectSpecificFloats')}
                     </div>
                   </CardContent>
                 </Card>
@@ -532,7 +532,7 @@ const ExportOptions = () => {
                   <CardContent className="space-y-4">
                     {/* Quality Threshold */}
                     <div className="space-y-2">
-                      <Label className="text-xs">Quality Threshold</Label>
+                      <Label className="text-xs">{t('exportOptions.qualityThreshold')}</Label>
                       <Select value={filters.qcThreshold} onValueChange={(value) => setFilters({...filters, qcThreshold: value})}>
                         <SelectTrigger className="h-8">
                           <SelectValue />
@@ -549,8 +549,8 @@ const ExportOptions = () => {
                     {/* Include QC */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label className="text-xs">Include Quality Flags</Label>
-                        <p className="text-xs text-muted-foreground">Add QC columns to export</p>
+                        <Label className="text-xs">{t('exportOptions.includeQualityFlags')}</Label>
+                        <p className="text-xs text-muted-foreground">{t('exportOptions.addQcColumns')}</p>
                       </div>
                       <Checkbox
                         checked={filters.includeQC}
@@ -561,8 +561,8 @@ const ExportOptions = () => {
                     {/* Include Metadata */}
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label className="text-xs">Include Metadata</Label>
-                        <p className="text-xs text-muted-foreground">Add float metadata columns</p>
+                        <Label className="text-xs">{t('exportOptions.includeMetadata')}</Label>
+                        <p className="text-xs text-muted-foreground">{t('exportOptions.addMetadataColumns')}</p>
                       </div>
                       <Checkbox
                         checked={filters.includeMetadata}
@@ -584,7 +584,7 @@ const ExportOptions = () => {
 
             {/* Format Selection */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Export Format</Label>
+              <Label className="text-base font-semibold">{t('exportOptions.exportFormat')}</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {exportFormats.map((format) => {
                   const Icon = format.icon;
@@ -616,7 +616,7 @@ const ExportOptions = () => {
 
             {/* Data Selection */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Select Data Types</Label>
+              <Label className="text-base font-semibold">{t('exportOptions.selectDataTypes')}</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {dataTypes.map((dataType) => {
                   const Icon = dataType.icon;
@@ -648,20 +648,23 @@ const ExportOptions = () => {
               {isExporting ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Preparing export...</span>
+                    <span className="text-sm font-medium">{t('exportOptions.preparingExport')}</span>
                     <span className="text-sm text-muted-foreground">{exportProgress}%</span>
                   </div>
                   <Progress value={exportProgress} className="w-full" />
                 </div>
               ) : (
-                <Button 
-                  onClick={handleExport} 
-                  className="w-full" 
+                <Button
+                  onClick={handleExport}
+                  className="w-full"
                   size="lg"
                   disabled={selectedData.length === 0}
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Export {selectedData.length} Data Type{selectedData.length !== 1 ? 's' : ''} as {selectedFormat.toUpperCase()}
+                  {t('exportOptions.exportButton')
+                    .replace('{count}', selectedData.length.toString())
+                    .replace('{plural}', selectedData.length !== 1 ? 'கள்' : '')
+                    .replace('{format}', selectedFormat.toUpperCase())}
                 </Button>
               )}
             </div>
@@ -671,7 +674,7 @@ const ExportOptions = () => {
         {/* Recent Exports */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-lg">Recent Exports</CardTitle>
+            <CardTitle className="text-lg">{t('exportOptions.recentExports')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -705,7 +708,7 @@ const ExportOptions = () => {
       {/* Export Guidelines */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Export Guidelines</CardTitle>
+          <CardTitle className="text-lg">{t('exportOptions.exportGuidelines')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">

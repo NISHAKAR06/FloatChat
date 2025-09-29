@@ -36,22 +36,22 @@ const FiltersSearch = () => {
   ];
 
   const timePeriods = [
-    { label: 'Last Month', value: 'last-month' },
-    { label: 'Last 6 Months', value: 'last-6-months' },
-    { label: 'Last Year', value: 'last-year' },
-    { label: 'Custom Range', value: 'custom' }
+    { label: t('filtersSearch.lastMonth'), value: 'last-month' },
+    { label: t('filtersSearch.last6Months'), value: 'last-6-months' },
+    { label: t('filtersSearch.lastYear'), value: 'last-year' },
+    { label: t('filtersSearch.customRange'), value: 'custom' }
   ];
 
   const parameters = [
-    { id: 'temperature', label: 'Temperature', icon: Thermometer },
-    { id: 'salinity', label: 'Salinity', icon: Droplets },
-    { id: 'oxygen', label: 'BGC Oxygen', icon: Droplets },
-    { id: 'nitrate', label: 'Nitrate', icon: Wind },
-    { id: 'phosphate', label: 'Phosphate', icon: Wind },
-    { id: 'ph', label: 'pH Level', icon: Droplets },
-    { id: 'chlorophyll', label: 'Chlorophyll', icon: Droplets },
-    { id: 'cdom', label: 'CDOM', icon: Wind },
-    { id: 'backscatter', label: 'Backscatter', icon: Wind }
+    { id: 'temperature', label: t('filtersSearch.temperature'), icon: Thermometer },
+    { id: 'salinity', label: t('filtersSearch.salinity'), icon: Droplets },
+    { id: 'oxygen', label: t('filtersSearch.oxygen'), icon: Droplets },
+    { id: 'nitrate', label: t('filtersSearch.nitrate'), icon: Wind },
+    { id: 'phosphate', label: t('filtersSearch.phosphate'), icon: Wind },
+    { id: 'ph', label: t('filtersSearch.ph'), icon: Droplets },
+    { id: 'chlorophyll', label: t('filtersSearch.chlorophyll'), icon: Droplets },
+    { id: 'cdom', label: t('filtersSearch.cdom'), icon: Wind },
+    { id: 'backscatter', label: t('filtersSearch.backscatter'), icon: Wind }
   ];
 
   // Get date range based on selected time period
@@ -70,6 +70,24 @@ const FiltersSearch = () => {
   };
 
   const currentDateRange = getTimePeriodRange();
+
+  // Helper function to get translated region
+  const getTranslatedRegion = (region: string) => {
+    const regionMap: {[key: string]: string} = {
+      'North Pacific': 'northPacific',
+      'South Atlantic': 'southAtlantic',
+      'Indian Ocean': 'indianOcean',
+      'North Atlantic': 'northAtlantic',
+      'Mediterranean Sea': 'mediterraneanSea'
+    };
+    const key = regionMap[region];
+    return key ? t(`filtersSearch.regions.${key}`) : region;
+  };
+
+  // Helper function to get translated status
+  const getTranslatedStatus = (status: string) => {
+    return status === 'Active' ? t('filtersSearch.active') : t('filtersSearch.inactive');
+  };
 
   // Extended mock data for more realistic search
   const allFloats = [
@@ -291,7 +309,7 @@ const FiltersSearch = () => {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">{t('filtersSearch.searchResults')}</CardTitle>
-                  <Badge variant="secondary">{filteredResults.length} results found</Badge>
+                  <Badge variant="secondary">{filteredResults.length} {t('filtersSearch.resultsFound')}</Badge>
                 </div>
                 {activeParameters.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
@@ -322,14 +340,14 @@ const FiltersSearch = () => {
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1">
                               <MapPin className="h-3 w-3" />
-                              {result.region}
+                              {getTranslatedRegion(result.region)}
                             </div>
                             <div className="flex items-center gap-1">
                               <CalendarIcon className="h-3 w-3" />
                               {result.lastUpdate}
                             </div>
                             <Badge variant={result.status === 'Active' ? 'default' : 'secondary'}>
-                              {result.status}
+                              {getTranslatedStatus(result.status)}
                             </Badge>
                           </div>
                         </div>
@@ -399,7 +417,7 @@ const FiltersSearch = () => {
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {dateRange?.from ?
                             format(dateRange.from, "MMM dd, yyyy") :
-                            <span>Pick start date</span>
+                            <span>{t('filtersSearch.pickStartDate')}</span>
                           }
                         </Button>
                       </PopoverTrigger>
@@ -425,7 +443,7 @@ const FiltersSearch = () => {
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {dateRange?.to ?
                             format(dateRange.to, "MMM dd, yyyy") :
-                            <span>Pick end date</span>
+                            <span>{t('filtersSearch.pickEndDate')}</span>
                           }
                         </Button>
                       </PopoverTrigger>
@@ -533,10 +551,10 @@ const FiltersSearch = () => {
                           </div>
                           <div className="flex items-center gap-4">
                             <Badge variant={nearestFloat.status === 'Active' ? 'default' : 'secondary'}>
-                              {nearestFloat.status}
+                              {getTranslatedStatus(nearestFloat.status)}
                             </Badge>
                             <span className="text-sm text-muted-foreground">
-                              Region: {nearestFloat.region}
+                              Region: {getTranslatedRegion(nearestFloat.region)}
                             </span>
                           </div>
                         </div>

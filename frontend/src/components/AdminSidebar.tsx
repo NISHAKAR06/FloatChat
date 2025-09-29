@@ -42,7 +42,9 @@ const AdminSidebar = () => {
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? 'bg-primary/20 text-primary font-semibold' : 'font-semibold hover:bg-primary/10';
+    isActive ? '!text-black font-semibold' : '!text-blue-600 hover:!text-blue-800 hover:bg-blue-50 font-semibold';
+
+  const getItemColor = (active: boolean) => (active ? 'text-black' : 'text-blue-600');
 
   return (
     <Sidebar className={`border-r ${collapsed ? 'w-14' : 'w-64'}`} collapsible="icon">
@@ -76,8 +78,8 @@ const AdminSidebar = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <item.icon className={`h-4 w-4 ${getItemColor(currentPath === item.url)}`} />
+                      {!collapsed && <span className={getItemColor(currentPath === item.url)}>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -94,8 +96,8 @@ const AdminSidebar = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      <item.icon className={`h-4 w-4 ${getItemColor(currentPath === item.url)}`} />
+                      {!collapsed && <span className={getItemColor(currentPath === item.url)}>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
