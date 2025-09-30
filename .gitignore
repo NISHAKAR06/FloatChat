@@ -94,3 +94,9 @@ manual_data_insert.py
 test_basic_query.py
 test_cloud_db.py
 test_system.py
+test_rag_fixes.py
+test_db_connection.py
+test_llm_embedding.py
+test_what_is_argo.py
+test_fast_query.py
+src=rag_pipeline.py

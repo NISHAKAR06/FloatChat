@@ -415,7 +415,7 @@ const Chatbot = () => {
                       <div className="flex items-center space-x-2">
                         <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
-                          Analyzing ARGO data with Ollama LLaMA...
+                          Analyzing ARGO data ...
                         </span>
                       </div>
                     </div>

@@ -673,7 +673,7 @@ class ArgoVisualizer:
             fig.update_xaxes(title_text="Salinity (PSU)", row=2, col=1)
             fig.update_yaxes(title_text="Temperature (°C)", row=2, col=1)
 
-            fig.update_layout(geo=dict(showcoastlines=True), row=2, col=2)
+            fig.update_geos(showcoastlines=True, row=2, col=2)
 
             return fig.to_html(full_html=False, include_plotlyjs=True)
 

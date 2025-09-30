@@ -40,7 +40,7 @@ def create_fallback_config() -> Config:
                     database_uri=db_uri,
                     groq_api_key=os.getenv("GROQ_API", ""),
                     ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
-                    ollama_embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma")
+                    ollama_embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
                 )
 
         except Exception as e:
@@ -57,7 +57,7 @@ def create_fallback_config() -> Config:
         database_uri=fallback_uri,
         groq_api_key=os.getenv("GROQ_API", ""),
         ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
-        ollama_embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma")
+        ollama_embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
     )
 
 def setup_fallback_database():
