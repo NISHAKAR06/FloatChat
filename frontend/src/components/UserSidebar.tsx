@@ -43,15 +43,15 @@ const UserSidebar = () => {
   ];
 
   const getNavLinkClass = (isActive: boolean) => {
-    const baseClasses = 'flex items-center gap-3 px-3 py-2 rounded-md text-sm w-full';
+    const baseClasses = 'flex items-center gap-3 px-3 py-2 rounded-l-md text-sm w-full transition-all duration-200';
     if (isActive) {
-      return `${baseClasses} !text-black font-semibold`;
+      return `${baseClasses} bg-primary/30 border-l-4 border-primary shadow-sm`;
     }
-    return `${baseClasses} !text-blue-600 hover:!text-blue-800 hover:bg-blue-50 font-medium`;
+    return `${baseClasses} text-blue-600 hover:text-blue-800 hover:bg-blue-50 font-medium rounded-l-none`;
   };
 
-  // Explicit color helper to ensure icon and label respect the intended colors
-  const getItemColor = (isActive: boolean) => (isActive ? 'text-black' : 'text-blue-600');
+  // Explicit color helper to ensure icon and label use consistent color
+  const getItemColor = (isActive: boolean) => (isActive ? 'text-foreground' : 'text-blue-600');
 
   return (
     <Sidebar className={`border-r ${collapsed ? 'w-14' : 'w-64'}`} collapsible="icon">
