@@ -81,22 +81,23 @@ const SystemConfig = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-black text-primary">
-            System Configuration
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Configure system settings, database, and security
-          </p>
-        </div>
-        <Button onClick={() => handleSaveConfig('All')} size="lg" className="flex items-center gap-2">
-          <Save className="h-4 w-4" />
-          Save All Changes
-        </Button>
-      </div>
+      <div className="h-full bg-gradient-surface">
+        <div className="max-w-7xl mx-auto p-6 space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-black text-primary">
+                System Configuration
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Configure system settings, database, and security
+              </p>
+            </div>
+            <Button onClick={() => handleSaveConfig('All')} size="lg" className="flex items-center gap-2">
+              <Save className="h-4 w-4" />
+              Save All Changes
+            </Button>
+          </div>
 
       {/* Configuration Tabs */}
       <Tabs defaultValue="database" className="space-y-6">
@@ -117,7 +118,7 @@ const SystemConfig = () => {
 
         {/* Database Configuration */}
         <TabsContent value="database" className="space-y-6">
-          <Card>
+          <Card className="bg-glass backdrop-blur-sm border-glass">
             <CardHeader>
               <CardTitle className="text-xl flex items-center gap-2">
                 <Database className="h-5 w-5" />
@@ -221,13 +222,13 @@ const SystemConfig = () => {
                     />
                   </div>
                 </div>
-                <div className="space-y-4">
+                <div className="flex flex-col justify-start space-y-4">
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline">PostgreSQL</Badge>
                     <Badge variant="outline">Active</Badge>
                     <Badge variant="outline" className="text-green-500">Healthy</Badge>
                   </div>
-                  <Button onClick={handleTestConnection} className="flex items-center gap-2">
+                  <Button onClick={handleTestConnection} className="flex items-center gap-2 w-fit">
                     <TestTube className="h-4 w-4" />
                     Test Connection
                   </Button>
@@ -251,7 +252,7 @@ const SystemConfig = () => {
         {/* System Settings */}
         <TabsContent value="system" className="space-y-6">
           <div className="grid gap-6">
-            <Card>
+            <Card className="bg-glass backdrop-blur-sm border-glass">
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
                   <Settings className="h-5 w-5" />
@@ -351,7 +352,7 @@ const SystemConfig = () => {
             </Card>
 
             {/* Email Settings */}
-            <Card>
+            <Card className="bg-glass backdrop-blur-sm border-glass">
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
                   <Mail className="h-5 w-5" />
@@ -399,7 +400,7 @@ const SystemConfig = () => {
         {/* Security Settings */}
         <TabsContent value="security" className="space-y-6">
           <div className="grid gap-6">
-            <Card>
+            <Card className="bg-glass backdrop-blur-sm border-glass">
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
                   <Shield className="h-5 w-5" />
@@ -514,6 +515,7 @@ const SystemConfig = () => {
           </div>
         </TabsContent>
       </Tabs>
+        </div>
     </div>
   );
 };

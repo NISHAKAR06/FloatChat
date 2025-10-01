@@ -200,6 +200,7 @@
     "theme": "Theme",
     "language": "Language",
     "voice": "Voice Input",
+    "textToSpeech": "Text to Speech",
     "exports": "Export Preferences",
     "light": "Light",
     "dark": "Dark",

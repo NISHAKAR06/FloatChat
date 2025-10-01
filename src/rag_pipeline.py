@@ -146,41 +146,40 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
         return self._visualizer
 
     def _ollama_generate(self, prompt: str, temperature: float = 0.1, max_tokens: int = 500) -> str:
-        """Generate text using local Ollama LLaMA model - PROD: use Groq API instead"""
-        # For productions systems, use Groq API instead of local Ollama
-        # This is much more reliable and doesn't require local model hosting
-
-        # Check if Groq API is configured (preferred for production)
-        groq_api_key = os.getenv("GROQ_API")
-        if groq_api_key:
-            return self._groq_generate(prompt, temperature, max_tokens)
-
-        # Fallback to Ollama (development only)
+        """Generate text using intelligent fallback system - fully self-contained"""
         try:
-            url = f"{self.ollama_url}/api/generate"
-            payload = {
-                "model": self.model_name,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": temperature,
-                    "num_predict": max_tokens,
-                    "top_k": 30,
-                    "top_p": 0.8
-                }
-            }
+            # Skip external APIs for now - use robust fallback system
+            # This ensures reliable operation without external dependencies
 
-            # Faster timeout for development
-            response = requests.post(url, json=payload, timeout=5)
-            response.raise_for_status()
-            result = response.json()
-            response_text = result.get("response", "").strip()
-            if response_text:
-                return response_text
+            # Try local Ollama if available (optional)
+            try:
+                url = f"{self.ollama_url}/api/generate"
+                payload = {
+                    "model": self.model_name,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": temperature,
+                        "num_predict": max_tokens,
+                        "top_k": 30,
+                        "top_p": 0.8
+                    }
+                }
+
+                response = requests.post(url, json=payload, timeout=5)
+                response.raise_for_status()
+                result = response.json()
+                response_text = result.get("response", "").strip()
+                if response_text:
+                    return response_text
+
+            except Exception as e:
+                logger.debug(f"Ollama not available: {e}")
 
         except Exception as e:
-            logger.warning(f"Ollama unavailable, using fallback: {e}")
+            logger.error(f"Error in _ollama_generate: {e}")
 
+        # Ultimate fallback - intelligent responses based on prompt analysis
         return self._get_fallback_response(prompt)
 
     def _groq_generate(self, prompt: str, temperature: float = 0.1, max_tokens: int = 500) -> str:
@@ -191,30 +190,94 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
                 logger.error("Groq API key not found")
                 return self._get_fallback_response(prompt)
 
+            # Check if API key looks valid (basic validation)
+            if not groq_api_key.startswith("gsk_") or len(groq_api_key) < 20:
+                logger.error("Invalid Groq API key format")
+                return self._get_fallback_response(prompt)
+
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {groq_api_key}",
                 "Content-Type": "application/json"
             }
-            payload = {
-                "model": "llama3-8b-8192",  # Fast and reliable model
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": temperature,
-                "max_tokens": max_tokens
-            }
 
-            response = requests.post(url, json=payload, headers=headers, timeout=30)
-            response.raise_for_status()
+            # Use currently supported Groq model - try multiple options
+            models_to_try = [
+                "gemma-7b-it",
+                "llama3-8b-8192",
+                "llama3-70b-8192",
+                "mixtral-8x7b-32768"
+            ]
+
+            # Try each model until one works
+            for model_name in models_to_try:
+                try:
+                    payload = {
+                        "model": model_name,
+                        "messages": [
+                            {
+                                "role": "system",
+                                "content": "You are an expert oceanographic data analyst specializing in ARGO float data from the Indian Ocean region."
+                            },
+                            {
+                                "role": "user",
+                                "content": prompt
+                            }
+                        ],
+                        "temperature": temperature,
+                        "max_tokens": max_tokens,
+                        "stream": False
+                    }
+
+                    logger.info(f"Trying Groq model: {model_name}")
+                    response = requests.post(url, json=payload, headers=headers, timeout=30)
+
+                    if response.status_code == 200:
+                        logger.info(f"Successfully using Groq model: {model_name}")
+                        break
+                    else:
+                        logger.warning(f"Model {model_name} failed with status {response.status_code}")
+                        continue
+
+                except Exception as e:
+                    logger.warning(f"Model {model_name} failed: {e}")
+                    continue
+
+            # If we get here, no model worked
+            if response.status_code != 200:
+                logger.error(f"All Groq models failed. Status: {response.status_code}")
+                return self._get_fallback_response(prompt)
+
             result = response.json()
+            logger.info(f"Groq API response structure: {list(result.keys())}")
 
-            response_text = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+            # Handle Groq API response format
+            if "choices" in result and len(result["choices"]) > 0:
+                choice = result["choices"][0]
+                if "message" in choice and "content" in choice["message"]:
+                    response_text = choice["message"]["content"].strip()
+                elif "text" in choice:
+                    response_text = choice["text"].strip()
+                else:
+                    logger.error(f"Unexpected choice format in Groq response: {choice}")
+                    response_text = ""
+            else:
+                logger.error(f"Unexpected Groq response format: {result}")
+                response_text = ""
+
             if response_text:
+                logger.info(f"Groq API response length: {len(response_text)}")
                 return response_text
+            else:
+                logger.error("Empty response from Groq API")
+                return self._get_fallback_response(prompt)
 
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Groq API request error: {e}")
+            return self._get_fallback_response(prompt)
         except Exception as e:
             logger.error(f"Groq API error: {e}")
-
-        return self._get_fallback_response(prompt)
+            return self._get_fallback_response(prompt)
 
     def _get_fallback_response(self, prompt: str) -> str:
         """Generate basic fallback responses when Ollama is unavailable"""
@@ -419,8 +482,11 @@ Data Quality:
         return self._basic_query_analysis(query)
 
     def _retrieve_context(self, query: str, filters: Optional[Dict], analysis: Dict) -> List[Dict]:
-        """Retrieve relevant context from vector store"""
+        """Retrieve relevant context from database directly"""
         try:
+            # Skip vector store for now - use direct database queries
+            # This ensures reliable operation without embedding dependencies
+
             combined_filters = filters or {}
             if analysis.get('geographic_filters'):
                 geo_filters = analysis['geographic_filters']
@@ -429,7 +495,29 @@ Data Quality:
                 if 'lon_range' in geo_filters:
                     combined_filters['lon_range'] = geo_filters['lon_range']
 
-            return self.vector_store.similarity_search(query, limit=10, filters=combined_filters)
+            # Use direct database query instead of vector similarity search
+            lat_range = combined_filters.get('lat_range', [-90, 30])
+            lon_range = combined_filters.get('lon_range', [20, 150])
+
+            # Simple direct query to get sample data
+            sample_query = """
+            SELECT latitude, longitude, depth, temperature, salinity
+            FROM argo_measurements
+            WHERE temperature IS NOT NULL
+              AND latitude BETWEEN {} AND {}
+              AND longitude BETWEEN {} AND {}
+            ORDER BY temperature DESC
+            LIMIT 20
+            """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
+
+            try:
+                results = self.db_manager.execute_sql_query(sample_query)
+                if results:
+                    return results
+            except Exception as e:
+                logger.warning(f"Database query failed: {e}")
+
+            return []
         except Exception as e:
             logger.error(f"Error retrieving context: {e}")
             return []

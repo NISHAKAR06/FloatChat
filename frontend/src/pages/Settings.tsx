@@ -74,7 +74,7 @@ const Settings = () => {
 
         <div className="space-y-8">
           {/* Appearance Settings */}
-          <Card className="bg-glass backdrop-blur-sm border-glass">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/30 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-primary" />
@@ -104,7 +104,7 @@ const Settings = () => {
           </Card>
 
           {/* Language Settings */}
-          <Card className="bg-glass backdrop-blur-sm border-glass">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/30 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-primary" />
@@ -134,7 +134,7 @@ const Settings = () => {
           </Card>
 
           {/* Voice & Audio Settings */}
-          <Card className="bg-glass backdrop-blur-sm border-glass">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/30 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mic className="h-5 w-5 text-primary" />
@@ -165,7 +165,7 @@ const Settings = () => {
 
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="text-to-speech">Text-to-Speech</Label>
+                  <Label htmlFor="text-to-speech">{t('settings.textToSpeech')}</Label>
                   <p className="text-sm text-muted-foreground">
                     {t('settings.enableTextToSpeech')}
                   </p>
@@ -182,7 +182,7 @@ const Settings = () => {
           </Card>
 
           {/* Data & Export Settings */}
-          <Card className="bg-glass backdrop-blur-sm border-glass">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/30 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Download className="h-5 w-5 text-primary" />
@@ -235,7 +235,7 @@ const Settings = () => {
           </Card>
 
           {/* Notifications */}
-          <Card className="bg-glass backdrop-blur-sm border-glass">
+          <Card className="bg-white/80 backdrop-blur-sm border-white/30 shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <SettingsIcon className="h-5 w-5 text-primary" />
