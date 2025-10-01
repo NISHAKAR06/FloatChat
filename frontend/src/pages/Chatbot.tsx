@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import {
-  MessageCircle,
+  MessageSquare,
   Send,
   Trash2,
   Star,
@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Wifi,
   WifiOff,
+  Bot,
 } from "lucide-react";
 
 interface Message {
@@ -457,9 +458,9 @@ const Chatbot = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-4">
-            <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
-              <MessageCircle className="h-8 w-8 text-white" />
-            </div>
+                      <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+                          <MessageSquare className="h-8 w-8 text-white" />
+                        </div>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3">
             AI Ocean Analyst
@@ -473,7 +474,7 @@ const Chatbot = () => {
         <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 rounded-2xl p-8 mb-12 border border-blue-200/50 dark:border-blue-800/50 shadow-xl backdrop-blur-sm">
           <div className="flex items-center justify-center gap-3 mb-6">
             <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-              <MessageCircle className="h-6 w-6 text-white" />
+              <MessageSquare className="h-6 w-6 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
               Indian Ocean ARGO Data Summary
@@ -561,9 +562,9 @@ const Chatbot = () => {
                 }}
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-300">
-                    <MessageCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  </div>
+                              <div className="p-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-300">
+                                <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                              </div>
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100 leading-relaxed">
                     {prompt}
                   </span>
@@ -697,29 +698,13 @@ const Chatbot = () => {
               <ChevronRight className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                <MessageCircle className="h-5 w-5 text-white" />
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                <MessageSquare className="h-5 w-5 text-white" />
               </div>
               <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">
                 ARGO Float Data Chatbot
               </CardTitle>
-              {/* Connection Status Indicator */}
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-3 h-3 rounded-full ${
-                    isConnected ? "bg-green-500" : "bg-red-500"
-                  } ${isConnected ? "animate-pulse" : ""}`}
-                ></div>
-                <span
-                  className={`text-sm font-medium ${
-                    isConnected
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {isConnected ? "Connected" : "Disconnected"}
-                </span>
-              </div>
+
             </div>
             <div className="w-10"></div> {/* Spacer for centering */}
           </div>
@@ -729,8 +714,8 @@ const Chatbot = () => {
         {!sidebarCollapsed && (
           <div className="border-b border-slate-200/50 dark:border-slate-700/50 p-4 bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm">
             <div className="flex items-center justify-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                <MessageCircle className="h-5 w-5 text-white" />
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                <MessageSquare className="h-5 w-5 text-white" />
               </div>
               <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">
                 ARGO Float Data Chatbot
@@ -754,7 +739,7 @@ const Chatbot = () => {
                     <div className="text-center mb-12">
                       <div className="inline-flex items-center gap-3 mb-4">
                         <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
-                          <MessageCircle className="h-8 w-8 text-white" />
+                          <MessageSquare className="h-8 w-8 text-white" />
                         </div>
                       </div>
                       <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3">
@@ -769,7 +754,7 @@ const Chatbot = () => {
                     <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 rounded-2xl p-8 mb-12 border border-blue-200/50 dark:border-blue-800/50 shadow-xl backdrop-blur-sm">
                       <div className="flex items-center justify-center gap-3 mb-6">
                         <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-                          <MessageCircle className="h-6 w-6 text-white" />
+                          <MessageSquare className="h-6 w-6 text-white" />
                         </div>
                         <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
                           Indian Ocean ARGO Data Summary
@@ -858,7 +843,7 @@ const Chatbot = () => {
                           >
                             <div className="flex items-start gap-3">
                               <div className="p-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-300">
-                                <MessageCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                               </div>
                               <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100 leading-relaxed">
                                 {prompt}
@@ -898,9 +883,18 @@ const Chatbot = () => {
                       key={msg.id}
                       className={`flex ${
                         msg.type === "user" ? "justify-end" : "justify-start"
-                      } animate-in slide-in-from-bottom-4 duration-500`}
+                      } animate-in slide-in-from-bottom-4 duration-500 gap-3`}
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
+                      {/* Bot avatar for assistant messages */}
+                      {msg.type === "assistant" && (
+                        <div className="flex-shrink-0">
+                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                            <Bot className="h-4 w-4 text-white" />
+                          </div>
+                        </div>
+                      )}
+
                       <div
                         className={`max-w-[85%] group ${
                           msg.type === "user"
