@@ -295,8 +295,7 @@ def _enhance_response_accuracy(base_answer: str, user_query: str, ocean_stats: d
             coverage_info += f"• {'Indian Ocean'}: {indian_ocean_count:,} measurements\n"
             if southern_ocean_count > 0:
                 coverage_info += f"• {'Southern Ocean (adjacent to Indian Ocean)'}: {southern_ocean_count:,} measurements\n"
-            coverage_info += f"• {'Pacific Ocean'}: {pacific_ocean_count:,} measurements (as expected - no data for this Indian Ocean project)\n"
-            coverage_info += f"• {'Atlantic Ocean'}: {ocean_stats.get('Atlantic Ocean', {}).get('measurement_count', 0):,} measurements\n"
+
 
             return base_answer + coverage_info
 
