@@ -15,9 +15,9 @@ from pathlib import Path
 from dataclasses import dataclass
 import requests
 
-from src.database import DatabaseManager
-from src.vector_store import VectorStore
-from src.config import Config
+from .database import DatabaseManager
+from .vector_store import VectorStore
+from .config import Config
 
 logger = logging.getLogger(__name__)
 

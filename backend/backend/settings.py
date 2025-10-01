@@ -21,6 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = BASE_DIR.parent
 load_dotenv(PROJECT_ROOT / '.env')
 
+# Add backend directory to Python path to enable imports
+import sys
+if str(BASE_DIR) not in sys.path:  # Add backend directory directly
+    sys.path.insert(0, str(BASE_DIR))
+# Removed PROJECT_ROOT to avoid conflicts with src directory elsewhere
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -114,6 +120,21 @@ DATABASES['vector'] = {
     'OPTIONS': {
         'sslmode': 'require',
     },
+}
+
+# NetCDF processing settings
+NETCDF_SETTINGS = {
+    'MAX_FILE_SIZE': 100 * 1024 * 1024,  # 100MB
+    'ALLOWED_EXTENSIONS': ['.nc'],
+    'TEMP_DIR': os.path.join(BASE_DIR, 'media', 'temp'),
+    'CHUNK_SIZE': 1000,  # Process in chunks for large files
+}
+
+# Embedding model settings
+EMBEDDING_SETTINGS = {
+    'MODEL_NAME': 'sentence-transformers/all-MiniLM-L6-v2',
+    'VECTOR_DIMENSIONS': 768,
+    'BATCH_SIZE': 32,
 }
 
 

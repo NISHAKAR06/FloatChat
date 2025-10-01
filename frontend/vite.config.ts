@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         secure: false
       }
+      // Removed WebSocket proxy - frontend connects directly
     }
   },
   plugins: [react()],

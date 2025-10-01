@@ -29,7 +29,7 @@ from mcp.types import (
 )
 import mcp.types as types
 
-# Import ARGO data functions with robust error handling
+# Import ARGO data functions with robust error handling - handling new module structure
 def safe_import_function(module_name, function_name):
     """Safely import a function and return a fallback if it fails"""
     try:
@@ -39,31 +39,40 @@ def safe_import_function(module_name, function_name):
         logging.warning(f"Could not import {function_name} from {module_name}: {e}")
         return None
 
-# Try to import database functions
+# Try to import database functions - updated paths
 DatabaseManager = None
 get_database_stats = None
 search_similar_argo = None
 get_all_argo_profiles = None
 
 try:
-    from src.database import DatabaseManager, get_database_stats, search_similar_argo, get_all_argo_profiles
-    logging.info("✅ Successfully imported database functions")
-except ImportError as e:
-    logging.warning(f"Could not import database module: {e}")
-    # Try individual function imports as fallback
-    DatabaseManager = safe_import_function('src.database', 'DatabaseManager')
-    get_database_stats = safe_import_function('src.database', 'get_database_stats')
-    get_all_argo_profiles = safe_import_function('src.database', 'get_all_argo_profiles')
+    # Try relative imports first (when run as part of fastapi_service package)
+    from ..database import DatabaseManager, get_database_stats, get_all_argo_profiles
+    # search_similar_argo is not exported, so we won't try to import it
+    logging.info("✅ Successfully imported database functions via relative import")
+except ImportError:
+    try:
+        # Try absolute imports (when run standalone)
+        from fastapi_service.database import DatabaseManager, get_database_stats, get_all_argo_profiles
+        logging.info("✅ Successfully imported database functions via absolute import")
+    except ImportError as e:
+        logging.warning(f"Could not import database functions: {e}")
 
-# Try to import other modules
-RAGPipeline = safe_import_function('src.rag_pipeline', 'RAGPipeline')
-ArgoDataProcessor = safe_import_function('src.argo_processor', 'ArgoDataProcessor')
-EnhancedArgoDataProcessor = safe_import_function('src.enhanced_argo_processor', 'EnhancedArgoDataProcessor')
-VectorStore = safe_import_function('src.vector_store', 'VectorStore')
-load_config = safe_import_function('src.config', 'load_config')
-create_rag_pipeline = safe_import_function('src.rag_pipeline', 'create_rag_pipeline')
-create_enhanced_processor = safe_import_function('src.enhanced_argo_processor', 'create_enhanced_processor')
-create_visualizer = safe_import_function('src.visualizations', 'create_visualizer')
+# Try to import other modules - updated paths
+RAGPipeline = safe_import_function('fastapi_service.rag_pipeline', 'RAGPipeline')
+# ArgoDataProcessor doesn't seem to exist, skip it
+EnhancedArgoDataProcessor = safe_import_function('fastapi_service.enhanced_argo_processor', 'EnhancedArgoProcessor')
+VectorStore = safe_import_function('fastapi_service.vector_store', 'VectorStore')
+load_config = safe_import_function('fastapi_service.config', 'load_config')
+if not load_config:
+    # Fallback: import the load_config function directly
+    try:
+        from ..config import load_config
+    except ImportError:
+        from fastapi_service.config import load_config
+create_rag_pipeline = safe_import_function('fastapi_service.rag_pipeline', 'create_rag_pipeline')
+create_enhanced_processor = safe_import_function('fastapi_service.enhanced_argo_processor', 'create_enhanced_processor')
+create_visualizer = safe_import_function('fastapi_service.visualizations', 'ArgoVisualizer')  # Doesn't exist, use ArgoVisualizer
 
 # NO SAMPLE DATA - ONLY USE REAL CLOUD DATABASE
 # All ARGO data is stored in PostgreSQL cloud database only
@@ -87,11 +96,56 @@ class ArgoMCPServer:
         # Force cloud database usage from environment
         self._initialize_cloud_database_connection()
 
-        # Initialize components
-        self._initialize_components()
+        # Initialize components with fallback config
+        try:
+            self._initialize_components()
+        except Exception as e:
+            logger.warning(f"Standard config initialization failed: {e}")
+            logger.info("🔄 Using fallback configuration")
+            self._initialize_components_fallback()
 
         # Register MCP handlers
         self._register_handlers()
+
+    def _initialize_components_fallback(self):
+        """Initialize components with fallback configuration"""
+        try:
+            # Use fallback config
+            from ..fallback_config import create_fallback_config
+            self.config = create_fallback_config()
+            logger.info("✅ Fallback configuration loaded")
+
+            # Database with fallback config
+            if DatabaseManager:
+                try:
+                    self.db_manager = DatabaseManager(self.config.database_uri)
+                    logger.info("✅ ARGO database connection established (fallback)")
+                except Exception as e:
+                    logger.warning(f"⚠️ Database connection failed with fallback: {e}")
+                    self.db_manager = None
+            else:
+                logger.warning("⚠️ Database manager not available")
+
+            # RAG Pipeline with fallback config
+            if RAGPipeline and self.config:
+                try:
+                    self.rag_pipeline = RAGPipeline(self.config)
+                    logger.info("✅ RAG pipeline initialized (fallback)")
+                except Exception as e:
+                    logger.warning(f"⚠️ RAG pipeline failed to initialize: {e}")
+                    self.rag_pipeline = None
+
+            # Data processors with fallback config
+            if EnhancedArgoDataProcessor and self.config:
+                try:
+                    self.enhanced_processor = EnhancedArgoDataProcessor(self.config)
+                    logger.info("✅ Enhanced ARGO processor ready (fallback)")
+                except Exception as e:
+                    logger.warning(f"⚠️ Enhanced processor failed: {e}")
+                    self.enhanced_processor = None
+
+        except Exception as e:
+            logger.error(f"❌ Fallback component initialization failed: {e}")
 
     def _initialize_components(self):
         """Initialize all ARGO processing components"""
@@ -114,9 +168,9 @@ class ArgoMCPServer:
                 logger.info("✅ RAG pipeline initialized")
 
             # Data processors
-            if ArgoDataProcessor:
-                self.data_processor = ArgoDataProcessor()
-                logger.info("✅ Basic ARGO processor ready")
+            # Note: ArgoDataProcessor doesn't exist, so skipping basic processor initialization
+            self.data_processor = None
+            logger.info("ℹ️ Basic ARGO processor not available (skipped)")
 
             if EnhancedArgoDataProcessor and self.config:
                 try:
@@ -1211,7 +1265,10 @@ The visualization has been generated and is ready for display. Use this data to 
             if name == "search_argo_profiles_rag":
                 # FULL RAG PIPELINE ACCESS - Same as Human Query Flow
                 # AI Assistant gets formatted response + visualizations
-                from src.rag_pipeline import create_rag_pipeline
+                try:
+                    from ..rag_pipeline import create_rag_pipeline
+                except ImportError:
+                    from fastapi_service.rag_pipeline import create_rag_pipeline
                 rag_pipeline = create_rag_pipeline()
 
                 if rag_pipeline:

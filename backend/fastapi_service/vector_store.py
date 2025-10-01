@@ -2,7 +2,7 @@ import numpy as np
 from typing import List, Dict, Optional, Tuple
 import requests
 import json
-from src.database import DatabaseManager
+from .database import DatabaseManager
 import logging
 
 logger = logging.getLogger(__name__)

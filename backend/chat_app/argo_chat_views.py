@@ -19,7 +19,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import MCP server for unified architecture
 try:
-    from mcp_server.argo_server import ArgoMCPServer
+    from fastapi_service.mcp_server.argo_server import ArgoMCPServer
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
@@ -34,8 +34,8 @@ if not MCP_AVAILABLE:
 def check_rag_integration():
     """Check if RAG integration is available"""
     try:
-        from src.rag_pipeline import RAGPipeline, create_rag_pipeline
-        from src.config import Config
+        from fastapi_service.rag_pipeline import RAGPipeline, create_rag_pipeline
+        from fastapi_service.config import Config
 
         # Check for required environment variables
         db_uri = os.getenv("DATABASE_URI")
@@ -120,7 +120,7 @@ def get_rag_pipeline():
     """Get or create RAG pipeline instance"""
     if get_rag_integration_status():
         try:
-            from src.rag_pipeline import create_rag_pipeline
+            from fastapi_service.rag_pipeline import create_rag_pipeline
             rag_pipeline = create_rag_pipeline()
             logger.info("✅ RAG pipeline created successfully")
             return rag_pipeline
@@ -148,8 +148,8 @@ def process_enhanced_argo_chat(request):
 
         # FORCE cloud database usage - no fallback to fake data
         try:
-            from src.rag_pipeline import create_rag_pipeline
-            from src.database import get_ocean_region_stats
+            from fastapi_service.rag_pipeline import create_rag_pipeline
+            from fastapi_service.database import get_ocean_region_stats
 
             rag_pipeline = create_rag_pipeline()
 

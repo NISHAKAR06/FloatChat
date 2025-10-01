@@ -4,11 +4,11 @@ import re
 import requests
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from src.vector_store import VectorStore
-from src.database import DatabaseManager
-from src.enhanced_argo_processor import EnhancedArgoProcessor
-from src.visualizations import ArgoVisualizer
-from src.config import Config
+from .vector_store import VectorStore
+from .database import DatabaseManager
+from .enhanced_argo_processor import EnhancedArgoProcessor
+from .visualizations import ArgoVisualizer
+from .config import Config
 import logging
 
 logger = logging.getLogger(__name__)
@@ -33,14 +33,14 @@ class RAGPipeline:
         self._stats_cache_time = 0
         self._cache_ttl = 300  # 5 minutes cache
 
-        # Enhanced model configuration
+        # Enhanced model configuration - updated for currently available models
         self.model_name = "llama3.2:3b"  # Local Ollama LLaMA model
         self.embedding_model = config.ollama_embedding_model
 
         # FAST RESPONSE CACHE - Pre-computed frequent responses
         self._response_cache = self._build_response_cache()
 
-        logger.info("🦀 FAST RAG Pipeline initialized - optimized for speed")
+        logger.info("🦀 FAST RAG Pipeline initialized - optimized for speed with Groq models updated")
 
     def fast_query(self, user_query: str) -> Optional[str]:
         """Intelligent fast query processing using embeddings and semantic matching"""
@@ -148,10 +148,12 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
     def _ollama_generate(self, prompt: str, temperature: float = 0.1, max_tokens: int = 500) -> str:
         """Generate text using intelligent fallback system - fully self-contained"""
         try:
-            # Skip external APIs for now - use robust fallback system
-            # This ensures reliable operation without external dependencies
+            # Try Groq API first (primary method for this deployment)
+            groq_response = self._groq_generate(prompt, temperature, max_tokens)
+            if groq_response and groq_response != self._get_fallback_response(prompt):
+                return groq_response
 
-            # Try local Ollama if available (optional)
+            # If Groq fails, try local Ollama as fallback
             try:
                 url = f"{self.ollama_url}/api/generate"
                 payload = {
@@ -166,7 +168,7 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
                     }
                 }
 
-                response = requests.post(url, json=payload, timeout=5)
+                response = requests.post(url, json=payload, timeout=10)
                 response.raise_for_status()
                 result = response.json()
                 response_text = result.get("response", "").strip()
@@ -185,14 +187,19 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
     def _groq_generate(self, prompt: str, temperature: float = 0.1, max_tokens: int = 500) -> str:
         """Generate text using Groq API (recommended for production)"""
         try:
-            groq_api_key = os.getenv("GROQ_API")
+            groq_api_key = os.getenv("GROQ_API_KEY")  # Check for correct env var name
             if not groq_api_key:
-                logger.error("Groq API key not found")
-                return self._get_fallback_response(prompt)
+                groq_api_key = os.getenv("GROQ_API")  # Fallback to alternate name
+                if not groq_api_key:
+                    logger.error("❌ Groq API key not found in environment variables")
+                    logger.error("Environment variables checked: GROQ_API_KEY, GROQ_API")
+                    return self._get_fallback_response(prompt)
+
+            logger.info(f"🔑 Groq API key found, length: {len(groq_api_key)}")
 
             # Check if API key looks valid (basic validation)
             if not groq_api_key.startswith("gsk_") or len(groq_api_key) < 20:
-                logger.error("Invalid Groq API key format")
+                logger.error(f"❌ Invalid Groq API key format: starts with '{groq_api_key[:10]}...'")
                 return self._get_fallback_response(prompt)
 
             url = "https://api.groq.com/openai/v1/chat/completions"
@@ -201,55 +208,55 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
                 "Content-Type": "application/json"
             }
 
-            # Use currently supported Groq model - try multiple options
+            logger.info("🌐 Connecting to Groq API...")
+
+            # Try available models (the old llama3-8b-8192 was deprecated)
             models_to_try = [
-                "gemma-7b-it",
-                "llama3-8b-8192",
-                "llama3-70b-8192",
-                "mixtral-8x7b-32768"
+                "llama-3.1-8b-instant",  # Primary choice - most reliable and available
+                "gemma-7b-it",          # Backup option
+                "mixtral-8x7b-32768"    # Another backup option
             ]
 
-            # Try each model until one works
             for model_name in models_to_try:
-                try:
-                    payload = {
-                        "model": model_name,
-                        "messages": [
-                            {
-                                "role": "system",
-                                "content": "You are an expert oceanographic data analyst specializing in ARGO float data from the Indian Ocean region."
-                            },
-                            {
-                                "role": "user",
-                                "content": prompt
-                            }
-                        ],
-                        "temperature": temperature,
-                        "max_tokens": max_tokens,
-                        "stream": False
-                    }
+                payload = {
+                    "model": model_name,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are an expert oceanographic data analyst specializing in ARGO float data from the Indian Ocean region. Provide scientific, accurate responses based on oceanographic data."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt[:2000]  # Limit prompt length
+                        }
+                    ],
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
+                    "stream": False,
+                    "top_p": 0.9
+                }
 
-                    logger.info(f"Trying Groq model: {model_name}")
-                    response = requests.post(url, json=payload, headers=headers, timeout=30)
+                logger.info(f"🤖 Sending request to Groq with model: {model_name}")
+                logger.debug(f"Prompt length: {len(prompt)} characters")
 
-                    if response.status_code == 200:
-                        logger.info(f"Successfully using Groq model: {model_name}")
-                        break
-                    else:
-                        logger.warning(f"Model {model_name} failed with status {response.status_code}")
-                        continue
+                response = requests.post(url, json=payload, headers=headers, timeout=60)
 
-                except Exception as e:
-                    logger.warning(f"Model {model_name} failed: {e}")
-                    continue
+                logger.info(f"📡 Groq API response status: {response.status_code}")
 
-            # If we get here, no model worked
+                if response.status_code == 200:
+                    break  # Success, exit the loop
+
+                logger.error(f"❌ Model {model_name} failed with status {response.status_code}: {response.text}")
+                # Continue to next model in the loop
+
+            # If we didn't get success from any model, return fallback
             if response.status_code != 200:
-                logger.error(f"All Groq models failed. Status: {response.status_code}")
+                logger.error("❌ All Groq models failed, using fallback response")
                 return self._get_fallback_response(prompt)
 
+            # Process successful response
             result = response.json()
-            logger.info(f"Groq API response structure: {list(result.keys())}")
+            logger.debug(f"Groq response keys: {list(result.keys())}")
 
             # Handle Groq API response format
             if "choices" in result and len(result["choices"]) > 0:
@@ -259,24 +266,32 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
                 elif "text" in choice:
                     response_text = choice["text"].strip()
                 else:
-                    logger.error(f"Unexpected choice format in Groq response: {choice}")
+                    logger.error(f"❌ Unexpected choice format: {choice}")
                     response_text = ""
-            else:
-                logger.error(f"Unexpected Groq response format: {result}")
-                response_text = ""
 
-            if response_text:
-                logger.info(f"Groq API response length: {len(response_text)}")
+                logger.info(f"✅ Groq response received, length: {len(response_text)} characters")
+
+                # Additional validation
+                if not response_text or len(response_text.strip()) < 10:
+                    logger.warning("⚠️ Groq response too short or empty")
+                    return self._get_fallback_response(prompt)
+
                 return response_text
             else:
-                logger.error("Empty response from Groq API")
+                logger.error(f"❌ No choices in Groq response: {result}")
                 return self._get_fallback_response(prompt)
 
+        except requests.exceptions.Timeout:
+            logger.error("❌ Groq API request timed out")
+            return self._get_fallback_response(prompt)
+        except requests.exceptions.ConnectionError:
+            logger.error("❌ Groq API connection error")
+            return self._get_fallback_response(prompt)
         except requests.exceptions.RequestException as e:
-            logger.error(f"Groq API request error: {e}")
+            logger.error(f"❌ Groq API request error: {e}")
             return self._get_fallback_response(prompt)
         except Exception as e:
-            logger.error(f"Groq API error: {e}")
+            logger.error(f"❌ Groq API unexpected error: {e}")
             return self._get_fallback_response(prompt)
 
     def _get_fallback_response(self, prompt: str) -> str:
@@ -484,8 +499,8 @@ Data Quality:
     def _retrieve_context(self, query: str, filters: Optional[Dict], analysis: Dict) -> List[Dict]:
         """Retrieve relevant context from database directly"""
         try:
-            # Skip vector store for now - use direct database queries
-            # This ensures reliable operation without embedding dependencies
+            # Use the existing database measurements
+            # Generate embeddings for existing data if needed
 
             combined_filters = filters or {}
             if analysis.get('geographic_filters'):
@@ -495,13 +510,13 @@ Data Quality:
                 if 'lon_range' in geo_filters:
                     combined_filters['lon_range'] = geo_filters['lon_range']
 
-            # Use direct database query instead of vector similarity search
+            # Use direct database query to get existing measurements
             lat_range = combined_filters.get('lat_range', [-90, 30])
             lon_range = combined_filters.get('lon_range', [20, 150])
 
-            # Simple direct query to get sample data
+            # Query existing measurements from the database
             sample_query = """
-            SELECT latitude, longitude, depth, temperature, salinity
+            SELECT latitude, longitude, depth, temperature, salinity, filename
             FROM argo_measurements
             WHERE temperature IS NOT NULL
               AND latitude BETWEEN {} AND {}
@@ -513,9 +528,32 @@ Data Quality:
             try:
                 results = self.db_manager.execute_sql_query(sample_query)
                 if results:
-                    return results
+                    # Convert to the format expected by the system
+                    formatted_results = []
+                    for row in results:
+                        formatted_results.append({
+                            'slice_id': f"measurement_{row.get('filename', 'unknown')}",
+                            'variable': 'temperature' if row.get('temperature') else 'salinity',
+                            'region': 'Indian Ocean',  # All data in this project is Indian Ocean
+                            'summary': f"ARGO measurement: {row.get('temperature', 'N/A')}°C temp, {row.get('salinity', 'N/A')} PSU salinity at depth {row.get('depth', 'N/A')}m",
+                            'latitude': row.get('latitude'),
+                            'longitude': row.get('longitude'),
+                            'depth': row.get('depth'),
+                            'temperature': row.get('temperature'),
+                            'salinity': row.get('salinity'),
+                            'similarity': 0.85  # Mock similarity score
+                        })
+                    return formatted_results
             except Exception as e:
                 logger.warning(f"Database query failed: {e}")
+
+            # Fallback: get all measurements if filtered query fails
+            try:
+                all_measurements = self.db_manager.get_all_measurements()
+                if all_measurements:
+                    return all_measurements[:10]  # Return first 10 as context
+            except Exception as e:
+                logger.warning(f"Fallback query failed: {e}")
 
             return []
         except Exception as e:
@@ -757,15 +795,53 @@ Data Quality:
         except Exception as e:
             return {'system_status': 'error', 'error': str(e)}
 
+def test_groq_connection():
+    """Test Groq API connection and return status"""
+    try:
+        groq_api_key = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API")
+        if not groq_api_key:
+            return {"status": "error", "message": "No Groq API key found"}
+
+        # Simple test request
+        import requests
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {groq_api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": "llama-3.1-8b-instant",  # Updated to available model
+            "messages": [{"role": "user", "content": "Test"}],
+            "max_tokens": 10
+        }
+
+        logger.info("🧪 Testing Groq API connection...")
+        response = requests.post(url, json=payload, headers=headers, timeout=10)
+
+        if response.status_code == 200:
+            return {"status": "success", "message": "Groq API working"}
+        else:
+            return {"status": "error", "message": f"API returned {response.status_code}: {response.text[:100]}"}
+
+    except Exception as e:
+        return {"status": "error", "message": f"Connection failed: {str(e)}"}
+
 def create_rag_pipeline(config_path: Optional[str] = None) -> RAGPipeline:
     """Create RAG pipeline with configuration"""
-    from src.fallback_config import create_fallback_config
+    from .fallback_config import create_fallback_config
     config = create_fallback_config()
 
     if os.getenv("OLLAMA_URL"):
         config.ollama_url = os.getenv("OLLAMA_URL")
     if os.getenv("DATABASE_URI"):
         config.database_uri = os.getenv("DATABASE_URI")
+
+    # Test Groq API connection before creating pipeline
+    groq_test = test_groq_connection()
+    if groq_test["status"] == "success":
+        logger.info("✅ Groq API connection test passed")
+    else:
+        logger.warning(f"⚠️ Groq API test failed: {groq_test['message']}")
 
     try:
         return RAGPipeline(config)

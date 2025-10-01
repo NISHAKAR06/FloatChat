@@ -4,7 +4,7 @@ Fallback configuration for FloatChat when external databases are not accessible
 
 import os
 import logging
-from src.config import Config
+from .config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ def create_fallback_config() -> Config:
 def setup_fallback_database():
     """Set up fallback SQLite database with vector support"""
     try:
-        from src.database import DatabaseManager
+        from .database import DatabaseManager
 
         config = create_fallback_config()
         db_manager = DatabaseManager(config.database_uri)
@@ -83,7 +83,7 @@ def test_database_connectivity():
         config = create_fallback_config()
         print(f"📡 Database URI: {config.database_uri.split('@')[1] if '@' in config.database_uri else config.database_uri}")
 
-        from src.database import DatabaseManager
+        from .database import DatabaseManager
         db_manager = DatabaseManager(config.database_uri)
 
         stats = db_manager.get_database_stats()
@@ -101,7 +101,7 @@ def test_database_connectivity():
             print("1. Check your internet connection")
             print("2. Whitelist your IP in Neon Console (Dashboard → Settings → IP Allowlist)")
             print("3. Use local PostgreSQL database for testing")
-            print("4. Run: python -c 'from src.fallback_config import setup_fallback_database; setup_fallback_database()'")
+            print("4. Run: python -c 'from .fallback_config import setup_fallback_database; setup_fallback_database()'")
 
         return False, None
 

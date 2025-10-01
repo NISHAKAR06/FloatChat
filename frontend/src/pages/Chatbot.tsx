@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { MessageCircle, Send, Trash2, Star, Loader2, Volume2, VolumeX, Plus, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Star, Loader2, Volume2, VolumeX, Plus, X, ChevronLeft, ChevronRight, Wifi, WifiOff } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -37,6 +37,10 @@ const Chatbot = () => {
   const [speakingMessageId, setSpeakingMessageId] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [websocket, setWebsocket] = useState<WebSocket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [streamingMessage, setStreamingMessage] = useState('');
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
 
   // Function to analyze chat content and generate meaningful names
   const analyzeAndRenameChat = (messages: Message[], chatId: string) => {
@@ -115,107 +119,198 @@ const Chatbot = () => {
     }
   };
 
+  // WebSocket connection management
+  useEffect(() => {
+    connectWebSocket();
+
+    return () => {
+      if (websocket) {
+        websocket.close();
+      }
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Django RAG endpoint for ARGO chat
+  const handleHttpQuery = async (query: string, chatId?: string): Promise<void> => {
+    try {
+      console.log('🔗 Making HTTP request to Django endpoint:', '/api/chat/argo/query/');
+
+      const response = await fetch('/api/chat/argo/query/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: query
+        })
+      });
+
+      console.log('📡 HTTP Response received, status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ HTTP Error response:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}, body: ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('📦 Django Response data:', data);
+
+      // Map Django response to WebSocket response format
+      const simulatedData = {
+        type: 'response',
+        message: data.answer || data.response || 'Response not available',
+        sources: [],
+        profiles: data.data?.profiles_count > 0 ? [] : [], // Django doesn't provide individual profiles
+        statistics: data.data?.stats || {},
+        visualizations: data.visualizations || {},
+        metadata: {
+          pipeline_used: data.metadata?.pipeline || 'rag_pipeline',
+          data_source: data.metadata?.data_quality || 'indian_ocean_db'
+        }
+      };
+
+      console.log('🔄 Processed simulated data for frontend:', simulatedData);
+
+
+      // Process the response as if it came from WebSocket
+      processResponse(simulatedData, chatId);
+
+    } catch (error) {
+      console.error('❌ HTTP query error:', error);
+      processResponse({
+        type: 'error',
+        message: `HTTP request failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      });
+    }
+  };
+
+  const processResponse = (data: any, chatId?: string) => {
+    const targetChat = chatId || activeChat;
+    if (data.type === 'response') {
+      console.log('Processing HTTP response message:', data.message);
+
+      const aiResponse: Message = {
+        id: Date.now().toString(),
+        content: data.message,
+        type: 'assistant',
+        timestamp: new Date(),
+        profiles: data.profiles || [],
+        statistics: data.statistics || {},
+        visualizations: data.visualizations || {},
+        pipeline_used: data.metadata?.pipeline_used || 'http_fallback',
+        data_source: data.metadata?.data_source || 'indian_ocean_db'
+      };
+
+      setChats(prev => {
+        const updatedChats = prev.map(chat =>
+          chat.id === targetChat
+            ? { ...chat, messages: [...chat.messages, aiResponse] }
+            : chat
+        );
+        return updatedChats;
+      });
+
+      // Analyze and rename chat after AI response
+      setTimeout(() => {
+        const updatedChat = chats.find(chat => chat.id === targetChat);
+        if (updatedChat) {
+          const newMessages = [...updatedChat.messages, aiResponse];
+          analyzeAndRenameChat(newMessages, targetChat);
+        }
+      }, 100);
+
+    } else if (data.type === 'error') {
+      const errorResponse: Message = {
+        id: Date.now().toString(),
+        content: `Error: ${data.message}`,
+        type: 'assistant',
+        timestamp: new Date()
+      };
+
+      setChats(prev => prev.map(chat =>
+        chat.id === targetChat
+          ? { ...chat, messages: [...chat.messages, errorResponse] }
+          : chat
+      ));
+    }
+
+    setIsRequestLoading(false);
+    setStreamingMessage('');
+    setStreamingMessageId(null);
+  };
+
+  // Simplified connection - always simulate as connected for HTTP
+  const connectWebSocket = () => {
+    console.log('Using HTTP fallback mode');
+    setIsConnected(true); // HTTP is always "connected"
+  };
+
   const handleSendMessage = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !isConnected) {
+      console.warn('Cannot send message: HTTP fallback not available');
+      return;
+    }
 
-    let currentActiveChat = activeChat;
+    // Determine the target chat and create it if needed
+    let targetChatId = activeChat;
 
-    // If there's no active chat, create one for the first message
-    if (!currentActiveChat) {
+    if (!targetChatId) {
       const newChat: Chat = {
         id: Date.now().toString(),
         name: `Chat ${chats.length + 1}`,
         messages: [],
         isFavorite: false
       };
+
+      // Update state synchronously
       setChats(prev => [newChat, ...prev]);
       setActiveChat(newChat.id);
-      currentActiveChat = newChat.id;
+      targetChatId = newChat.id;
     }
 
-    const newMessage: Message = {
+    const userMessage: Message = {
       id: Date.now().toString(),
       content: message,
       type: 'user',
       timestamp: new Date()
     };
 
-    // Add user message to chat
+    // Add user message synchronously to the correct chat
     setChats(prev => prev.map(chat =>
-      chat.id === currentActiveChat
-        ? { ...chat, messages: [...chat.messages, newMessage] }
+      chat.id === targetChatId
+        ? { ...chat, messages: [...chat.messages, userMessage] }
         : chat
     ));
 
     const currentMessage = message;
+    const currentChatId = targetChatId; // Store the chat ID for the async operation
+
     setMessage('');
     setIsRequestLoading(true);
+    console.log('🗣️ Sending message to chat:', currentChatId);
 
     try {
-      // Call the Django backend API
-      const response = await fetch('http://localhost:8000/api/chat/argo/query/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: currentMessage
-        })
-      });
+      // Use HTTP API instead of WebSocket, pass the chat ID for response processing
+      await handleHttpQuery(currentMessage, currentChatId);
 
-      if (response.ok) {
-        const data = await response.json();
-
-        const aiResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          content: data.response || data.answer || 'I received your query about ARGO data analysis. The system is processing your request.',
-          type: 'assistant',
-          timestamp: new Date(),
-          profiles: data.profiles || [],
-          statistics: data.statistics || {},
-          visualizations: data.visualizations || {},
-          pipeline_used: data.pipeline_used,
-          data_source: data.data_source
-        };
-
-        setChats(prev => prev.map(chat =>
-          chat.id === currentActiveChat
-            ? { ...chat, messages: [...chat.messages, aiResponse] }
-            : chat
-        ));
-
-        // Analyze and rename chat after AI response
-        const updatedChat = chats.find(chat => chat.id === currentActiveChat);
-        if (updatedChat) {
-          const newMessages = [...updatedChat.messages, aiResponse];
-          analyzeAndRenameChat(newMessages, currentActiveChat);
-        }
-
-        // Stop any ongoing speech when new response arrives
-        if (speechSynthesis.speaking) {
-          speechSynthesis.cancel();
-          setSpeakingMessageId(null);
-          setIsPaused(false);
-        }
-      } else {
-        throw new Error(`API error: ${response.status} - ${response.statusText}`);
-      }
     } catch (error) {
-      console.error('Error calling API:', error);
+      console.error('❌ Error sending message via HTTP:', error);
 
-      const errorResponse: Message = {
+      const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: `I apologize, but I'm currently unable to connect to the ARGO data server. Please ensure the Django backend server is running and try again.`,
+        content: `I apologize, but I'm currently unable to connect to the chatbot service. Please ensure the Django backend is running and accessible.`,
         type: 'assistant',
         timestamp: new Date()
       };
 
+      // Add error message to the correct chat
       setChats(prev => prev.map(chat =>
-        chat.id === currentActiveChat
-          ? { ...chat, messages: [...chat.messages, errorResponse] }
+        chat.id === currentChatId
+          ? { ...chat, messages: [...chat.messages, errorMessage] }
           : chat
       ));
-    } finally {
+
       setIsRequestLoading(false);
     }
   };
@@ -536,6 +631,13 @@ const Chatbot = () => {
               <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">
                 ARGO Float Data Chatbot
               </CardTitle>
+              {/* Connection Status Indicator */}
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'} ${isConnected ? 'animate-pulse' : ''}`}></div>
+                <span className={`text-sm font-medium ${isConnected ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {isConnected ? 'Connected' : 'Disconnected'}
+                </span>
+              </div>
             </div>
             <div className="w-10"></div> {/* Spacer for centering */}
           </div>
