@@ -23,10 +23,12 @@ import {
   Waves,
   MessageCircle,
   Send,
-  Bot
+  Bot,
+  X
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import UserSidebar from './UserSidebar';
 
 interface UserDashboardLayoutProps {
@@ -38,6 +40,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   // Chatbot state
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -104,14 +107,18 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
       <SidebarProvider>
         <UserSidebar />
         <SidebarInset className="flex flex-col h-full">
-          <header className="flex h-16 shrink-0 items-center justify-between gap-4 px-4 border-b bg-glass backdrop-blur-md">
+          <header className={`flex shrink-0 items-center justify-between gap-4 border-b bg-glass backdrop-blur-md ${
+            isMobile ? 'h-14 px-3' : 'h-16 px-4'
+          }`}>
             {/* Left section: Sidebar trigger and logo */}
             <div className="flex items-center gap-4">
               <SidebarTrigger className="-ml-1" />
               {/* Logo */}
               <div className="flex items-center space-x-2">
-                <Waves className="h-6 w-6 text-primary" />
-                <span className="font-bold text-lg bg-gradient-ocean bg-clip-text text-transparent">
+                <Waves className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'} text-primary`} />
+                <span className={`font-bold bg-gradient-ocean bg-clip-text text-transparent ${
+                  isMobile ? 'text-base' : 'text-lg'
+                }`}>
                   FloatChat
                 </span>
               </div>
@@ -121,10 +128,10 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
             <div className="flex items-center gap-2">
               {/* Language Selector */}
               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
-                    <Globe className="h-4 w-4" />
-                    <span className="ml-2 hidden md:inline">{language.toUpperCase()}</span>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
+                    <Globe className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                    {!isMobile && <span className="ml-2 hidden sm:inline">{language.toUpperCase()}</span>}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -132,7 +139,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
                     <DropdownMenuItem
                       key={lang.code}
                       onClick={() => setLanguage(lang.code as any)}
-                      className={`${language === lang.code ? 'bg-primary/20 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-primary/10'}`}
+                      className={`${language === lang.code ? 'bg-primary/20 text-primary-foreground' : 'text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300'}`}
                     >
                       {lang.name}
                     </DropdownMenuItem>
@@ -143,20 +150,20 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
               {/* Theme Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
                     {getThemeIcon()}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setTheme('light')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <DropdownMenuItem onClick={() => setTheme('light')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <Sun className="h-4 w-4 mr-2" />
                     {t('settings.light')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('dark')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <DropdownMenuItem onClick={() => setTheme('dark')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <Moon className="h-4 w-4 mr-2" />
                     {t('settings.dark')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('system')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <DropdownMenuItem onClick={() => setTheme('system')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <Monitor className="h-4 w-4 mr-2" />
                     {t('settings.system')}
                   </DropdownMenuItem>
@@ -166,12 +173,12 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
               {/* User Actions */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
-                    <User className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
+                    <User className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => navigate('/settings')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <DropdownMenuItem onClick={() => navigate('/settings')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <Settings className="h-4 w-4 mr-2" />
                     {t('navigation.settings')}
                   </DropdownMenuItem>
@@ -184,7 +191,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
 
                     // Redirect to login page
                     navigate('/login');
-                  }} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  }} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <LogOut className="h-4 w-4 mr-2" />
                     {t('navigation.logout')}
                   </DropdownMenuItem>
@@ -193,7 +200,7 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
             </div>
           </header>
           <div className="flex-1 overflow-auto">
-            <div className="h-full p-4">
+            <div className={`h-full ${isMobile ? 'p-3' : 'p-4'}`}>
               {children}
             </div>
           </div>
@@ -204,10 +211,14 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
           <>
             <Button
               onClick={() => setIsChatOpen(true)}
-              className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90"
+              className={`fixed shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90 hover-ocean-glow ocean-ripple ${
+                isMobile
+                  ? 'bottom-4 right-4 h-12 w-12 rounded-full'
+                  : 'bottom-6 right-6 h-14 w-14 rounded-full'
+              }`}
               size="sm"
             >
-              <MessageCircle className="h-6 w-6" />
+              <MessageCircle className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`} />
             </Button>
 
             {/* Background Overlay */}
@@ -219,8 +230,12 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
             )}
 
             {/* Chatbot Side Panel */}
-            <div className={`fixed right-0 top-1/2 h-[calc(100vh-8rem)] w-80 sm:w-96 lg:w-[28rem] xl:w-[32rem] max-w-[90vw] bg-blue-500/20 dark:bg-blue-400/30 backdrop-blur-xl border border-blue-300/40 dark:border-blue-200/50 shadow-2xl z-50 transform transition-all duration-300 ease-in-out rounded-l-lg sm:rounded-l-xl -translate-y-1/2 overflow-hidden flex flex-col ${
+            <div className={`fixed top-1/2 bg-blue-500/20 dark:bg-blue-400/30 backdrop-blur-xl border border-blue-300/40 dark:border-blue-200/50 shadow-2xl z-50 transform transition-all duration-300 ease-in-out -translate-y-1/2 overflow-hidden flex flex-col ${
               isChatOpen ? 'translate-x-0' : 'translate-x-full'
+            } ${
+              isMobile
+                ? 'right-0 h-[calc(100vh-6rem)] w-full max-w-[95vw] rounded-l-lg'
+                : 'right-0 h-[calc(100vh-8rem)] w-80 sm:w-96 lg:w-[28rem] xl:w-[32rem] max-w-[90vw] rounded-l-lg sm:rounded-l-xl'
             }`}>
               <div className="flex flex-col h-full">
                 {/* Header */}
@@ -261,6 +276,8 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
                 <div className="p-4 border-t border-blue-300/40 dark:border-blue-200/50">
                   <form onSubmit={handleChatSubmit} className="flex gap-2">
                     <Input
+                      id="chatbot-input"
+                      name="chatbot-input"
                       placeholder="Ask about ocean data..."
                       value={chatMessage}
                       onChange={(e) => setChatMessage(e.target.value)}

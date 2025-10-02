@@ -21,8 +21,11 @@ import {
   Wifi,
   WifiOff,
   Bot,
+  Menu,
+  ArrowLeft,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Rectangle } from "recharts";
+import { useIsMobile, useIsTablet, useDeviceType } from "@/hooks/use-mobile";
 
 interface Message {
   id: string;
@@ -45,6 +48,9 @@ interface Chat {
 
 const Chatbot = () => {
   const { t, isLoading: isTranslationLoading } = useLanguage();
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  const deviceType = useDeviceType();
 
   // State declarations
   const [chats, setChats] = useState<Chat[]>([]);
@@ -62,6 +68,27 @@ const Chatbot = () => {
   const [streamingMessageId, setStreamingMessageId] = useState<string | null>(
     null
   );
+
+  // Mobile-specific state
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [showBottomNav, setShowBottomNav] = useState(true);
+
+  // Auto-collapse sidebar on mobile when chat is selected
+  useEffect(() => {
+    if (isMobile && activeChat && !sidebarCollapsed) {
+      setSidebarCollapsed(true);
+    }
+  }, [activeChat, isMobile, sidebarCollapsed]);
+
+  // Set initial sidebar state based on device type
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarCollapsed(true);
+    } else {
+      setSidebarCollapsed(false);
+    }
+  }, [isMobile]);
 
   // Function to analyze chat content and generate meaningful names
   const analyzeAndRenameChat = (messages: Message[], chatId: string) => {
@@ -601,8 +628,8 @@ const Chatbot = () => {
       {/* Sidebar */}
       <div
         className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 transition-all duration-300 shadow-xl ${
-          sidebarCollapsed ? "w-0 overflow-hidden" : "w-80"
-        }`}
+          sidebarCollapsed ? (isMobile ? "-translate-x-full" : "w-0 overflow-hidden") : "w-80"
+        } ${isMobile ? 'fixed left-0 top-0 h-full z-40' : ''}`}
       >
         <div className="h-full flex flex-col">
           {/* Sidebar Header */}
@@ -1301,27 +1328,43 @@ const Chatbot = () => {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-slate-200/50 dark:border-slate-700/50 p-6 bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex gap-4 items-end">
-              <div className="flex-1 relative">
+        <div className={`border-t border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm ${
+          isMobile ? 'p-4' : 'p-6'
+        }`}>
+          <div className={`mx-auto ${isMobile ? 'max-w-full' : 'max-w-4xl'}`}>
+            <div className={`flex gap-4 items-end ${isMobile ? 'flex-col space-y-3' : ''}`}>
+              <div className="flex-1 relative w-full">
                 <Input
-                  placeholder="Ask anything about ARGO ocean data..."
+                  id="chatbot-message-input"
+                  name="chatbot-message-input"
+                  placeholder={isMobile ? "Ask about ocean data..." : "Ask anything about ARGO ocean data..."}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={(e) =>
                     e.key === "Enter" && !e.shiftKey && handleSendMessage()
                   }
-                  className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 rounded-xl px-4 py-3 pr-12 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300"
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setIsInputFocused(false)}
+                  className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 rounded-xl px-4 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 ${
+                    isMobile
+                      ? 'py-4 pr-12 text-base min-h-[48px]' // Larger touch targets for mobile
+                      : 'py-3 pr-12'
+                  }`}
                 />
-                <div className="absolute right-3 bottom-3 text-xs text-slate-400">
-                  Press Enter to send
-                </div>
+                {!isMobile && (
+                  <div className="absolute right-3 bottom-3 text-xs text-slate-400">
+                    Press Enter to send
+                  </div>
+                )}
               </div>
               <Button
                 onClick={handleSendMessage}
                 disabled={!message.trim()}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl px-6 py-3 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className={`bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isMobile
+                    ? 'w-full py-4 text-base min-h-[48px] rounded-xl' // Full width and larger on mobile
+                    : 'px-6 py-3 rounded-xl'
+                }`}
               >
                 <Send className="h-4 w-4 mr-2" />
                 Send
@@ -1330,6 +1373,9 @@ const Chatbot = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Bottom Tab Bar - Hidden for chatbot page */}
+      {/* Bottom navigation removed for mobile chatbot interface as requested */}
     </div>
   );
 };

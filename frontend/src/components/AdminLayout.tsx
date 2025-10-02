@@ -69,7 +69,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* Language Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
                     <Globe className="h-4 w-4" />
                     <span className="ml-2 hidden md:inline">{language.toUpperCase()}</span>
                   </Button>
@@ -79,7 +79,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     <DropdownMenuItem
                       key={lang.code}
                       onClick={() => setLanguage(lang.code as any)}
-                      className={`${language === lang.code ? 'bg-primary/20 text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-primary/10'}`}
+                      className={`${language === lang.code ? 'bg-primary/20 text-primary-foreground' : 'text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300'}`}
                     >
                       {lang.name}
                     </DropdownMenuItem>
@@ -90,20 +90,20 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* Theme Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
                     {getThemeIcon()}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setTheme('light')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <DropdownMenuItem onClick={() => setTheme('light')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <Sun className="h-4 w-4 mr-2" />
                     {t('settings.light')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('dark')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <DropdownMenuItem onClick={() => setTheme('dark')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <Moon className="h-4 w-4 mr-2" />
                     {t('settings.dark')}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('system')} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <DropdownMenuItem onClick={() => setTheme('system')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <Monitor className="h-4 w-4 mr-2" />
                     {t('settings.system')}
                   </DropdownMenuItem>
@@ -113,7 +113,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* User Actions */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -127,7 +127,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
                     // Redirect to login page
                     navigate('/login');
-                  }} className="text-muted-foreground hover:text-foreground hover:bg-primary/10">
+                  }} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
                     <LogOut className="h-4 w-4 mr-2" />
                     {t('navigation.logout')}
                   </DropdownMenuItem>

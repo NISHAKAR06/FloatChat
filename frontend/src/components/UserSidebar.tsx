@@ -43,11 +43,11 @@ const UserSidebar = () => {
   ];
 
   const getNavLinkClass = (isActive: boolean) => {
-    const baseClasses = 'flex items-center gap-3 px-3 py-2 rounded-l-md text-sm w-full transition-all duration-200';
+    const baseClasses = 'flex items-center gap-3 px-3 py-2 rounded-l-md text-sm w-full transition-all duration-300 hover-ocean-wave';
     if (isActive) {
-      return `${baseClasses} bg-primary/30 border-l-4 border-primary shadow-sm`;
+      return `${baseClasses} bg-primary/30 border-l-4 border-primary shadow-lg`;
     }
-    return `${baseClasses} text-blue-600 hover:text-blue-800 hover:bg-blue-50 font-medium rounded-l-none`;
+    return `${baseClasses} text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md hover:border hover:border-primary/20 font-medium`;
   };
 
   // Explicit color helper to ensure icon and label use consistent color

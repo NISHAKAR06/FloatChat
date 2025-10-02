@@ -78,7 +78,7 @@ const Landing = () => {
           variant="ghost"
           size="sm"
           onClick={() => navigate('/login')}
-          className="text-white hover:bg-white/10 backdrop-blur-sm font-semibold"
+          className="text-white hover:bg-primary/20 hover:text-primary backdrop-blur-sm font-semibold transition-all duration-300"
         >
           {t('landing.common.login')}
         </Button>
@@ -86,7 +86,7 @@ const Landing = () => {
           variant="ghost"
           size="sm"
           onClick={() => navigate('/signup')}
-          className="text-white hover:bg-white/10 backdrop-blur-sm font-semibold"
+          className="text-white hover:bg-primary/20 hover:text-primary backdrop-blur-sm font-semibold transition-all duration-300"
         >
           {t('landing.common.signUp')}
         </Button>
@@ -94,7 +94,7 @@ const Landing = () => {
         {/* Language Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 backdrop-blur-sm">
+            <Button variant="ghost" size="sm" className="text-white hover:bg-primary/20 hover:text-primary backdrop-blur-sm transition-all duration-300">
               <Globe className="h-4 w-4" />
               <span className="ml-2">{language.toUpperCase()}</span>
             </Button>
@@ -104,7 +104,7 @@ const Landing = () => {
               <DropdownMenuItem
                 key={lang.code}
                 onClick={() => setLanguage(lang.code as any)}
-                className={language === lang.code ? 'bg-muted' : ''}
+                className={`${language === lang.code ? 'bg-primary/20 text-primary-foreground' : 'text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300'}`}
               >
                 {lang.name}
               </DropdownMenuItem>
@@ -115,20 +115,20 @@ const Landing = () => {
         {/* Theme Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 backdrop-blur-sm">
+            <Button variant="ghost" size="sm" className="text-white hover:bg-primary/20 hover:text-primary backdrop-blur-sm transition-all duration-300">
               {getThemeIcon()}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setTheme('light')}>
+            <DropdownMenuItem onClick={() => setTheme('light')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
               <Sun className="h-4 w-4 mr-2" />
               {t('landing.common.light')}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('dark')}>
+            <DropdownMenuItem onClick={() => setTheme('dark')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
               <Moon className="h-4 w-4 mr-2" />
               {t('landing.common.dark')}
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme('system')}>
+            <DropdownMenuItem onClick={() => setTheme('system')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
               <Monitor className="h-4 w-4 mr-2" />
               {t('landing.common.system')}
             </DropdownMenuItem>
@@ -161,7 +161,7 @@ const Landing = () => {
               variant="ghost"
               size="lg"
               onClick={() => navigate('/login')}
-              className="text-white hover:bg-white/10 backdrop-blur-sm font-semibold"
+              className="text-white hover:bg-primary/20 hover:text-primary backdrop-blur-sm font-semibold transition-all duration-300"
             >
               {t('landing.hero.getStarted')}
               <ArrowRight className="ml-2 h-5 w-5" />
@@ -169,7 +169,7 @@ const Landing = () => {
             <Button
               variant="ghost"
               size="lg"
-              className="text-white hover:bg-white/10 backdrop-blur-sm font-semibold"
+              className="text-white hover:bg-primary/20 hover:text-primary backdrop-blur-sm font-semibold transition-all duration-300"
             >
               {t('landing.hero.learnMore')}
             </Button>
@@ -200,7 +200,7 @@ const Landing = () => {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="bg-glass backdrop-blur-sm border-glass shadow-glass hover:shadow-ocean transition-all duration-300 hover:-translate-y-1">
+              <Card key={index} className="bg-glass backdrop-blur-sm border-glass shadow-glass hover:shadow-ocean transition-all duration-300 hover:-translate-y-1 hover-ocean">
                 <CardContent className="p-6 text-center">
                   <div className="bg-gradient-ocean rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
                     <feature.icon className="h-8 w-8 text-white" />

@@ -266,7 +266,7 @@ const Settings = () => {
 
           {/* Save Button */}
           <div className="flex justify-end">
-            <Button onClick={handleSaveSettings} size="lg">
+            <Button onClick={handleSaveSettings} size="lg" className="hover:shadow-lg transition-all duration-300 hover-ocean-glow ocean-ripple">
               <Save className="h-4 w-4 mr-2" />
               {t('common.save')} {t('settings.title')}
             </Button>

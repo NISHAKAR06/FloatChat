@@ -42,9 +42,9 @@ const AdminSidebar = () => {
 
   const isActive = (path: string) => currentPath === path;
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? '!text-black font-semibold' : '!text-blue-600 hover:!text-blue-800 hover:bg-blue-50 font-semibold';
+    isActive ? '!text-primary !font-semibold' : '!text-muted-foreground hover:!text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300 hover-ocean-wave !font-semibold';
 
-  const getItemColor = (active: boolean) => (active ? 'text-black' : 'text-blue-600');
+  const getItemColor = (active: boolean) => (active ? 'text-primary' : 'text-muted-foreground');
 
   return (
     <Sidebar className={`border-r ${collapsed ? 'w-14' : 'w-64'}`} collapsible="icon">
