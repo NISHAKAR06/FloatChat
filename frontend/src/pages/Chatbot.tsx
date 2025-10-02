@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import {
   MessageSquare,
   Send,
@@ -21,6 +22,7 @@ import {
   WifiOff,
   Bot,
 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Rectangle } from "recharts";
 
 interface Message {
   id: string;
@@ -956,32 +958,242 @@ const Chatbot = () => {
                                 </div>
                               )}
 
-                            {/* Statistics */}
+                            {/* Statistics with Professional Charts */}
                             {msg.statistics &&
                               Object.keys(msg.statistics).length > 0 && (
-                                <div className="mt-4 p-4 bg-slate-100/30 dark:bg-slate-700/30 rounded-lg border border-slate-200/30 dark:border-slate-600/30">
-                                  <h4 className="text-sm font-bold mb-3 text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                    Statistics
-                                  </h4>
-                                  <div className="grid grid-cols-2 gap-3 text-xs">
-                                    {Object.entries(msg.statistics).map(
-                                      ([key, value]: [string, any]) => (
-                                        <div
-                                          key={key}
-                                          className="flex justify-between items-center p-2 bg-white/50 dark:bg-slate-800/50 rounded-lg"
-                                        >
-                                          <span className="capitalize font-medium text-slate-700 dark:text-slate-300">
-                                            {key.replace(/_/g, " ")}:
-                                          </span>
-                                          <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
-                                            {typeof value === "object"
-                                              ? JSON.stringify(value)
-                                              : value}
-                                          </span>
+                                <div className="mt-6 p-6 bg-gradient-to-br from-slate-50/80 via-white/60 to-blue-50/40 dark:from-slate-800/80 dark:via-slate-900/60 dark:to-slate-800/40 rounded-2xl border border-slate-200/60 dark:border-slate-700/60 shadow-xl backdrop-blur-sm">
+                                  <div className="flex items-center gap-3 mb-6">
+                                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
+                                      <div className="w-3 h-3 bg-white rounded-full"></div>
+                                    </div>
+                                    <h4 className="text-lg font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-slate-100 dark:via-slate-200 dark:to-slate-300 bg-clip-text text-transparent">
+                                      Data Analysis & Insights
+                                    </h4>
+                                  </div>
+
+                                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {/* Total Profiles Chart - Professional Design */}
+                                    {msg.statistics.total_profiles && (
+                                      <div className="group">
+                                        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                                          <div className="flex items-center justify-between mb-4">
+                                            <h5 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                              <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+                                              Total ARGO Profiles
+                                            </h5>
+                                            <div className="px-3 py-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full border border-blue-200/50 dark:border-blue-700/50">
+                                              <span className="text-xs font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                                {msg.statistics.total_profiles.toLocaleString()}
+                                              </span>
+                                            </div>
+                                          </div>
+                                          <div className="h-36">
+                                            <ChartContainer
+                                              config={{
+                                                value: {
+                                                  label: "Profiles",
+                                                  color: "hsl(220, 70%, 50%)",
+                                                },
+                                              }}
+                                              className="h-full w-full"
+                                            >
+                                              <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart
+                                                  data={[{ name: "Total Profiles", value: msg.statistics.total_profiles }]}
+                                                  margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                                                >
+                                                  <defs>
+                                                    <linearGradient id="profileGradient" x1="0" y1="0" x2="0" y2="1">
+                                                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
+                                                      <stop offset="50%" stopColor="#6366f1" stopOpacity={0.7}/>
+                                                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.5}/>
+                                                    </linearGradient>
+                                                    <filter id="glow">
+                                                      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                                      <feMerge>
+                                                        <feMergeNode in="coloredBlur"/>
+                                                        <feMergeNode in="SourceGraphic"/>
+                                                      </feMerge>
+                                                    </filter>
+                                                  </defs>
+                                                  <CartesianGrid
+                                                    strokeDasharray="2 4"
+                                                    stroke="rgba(148, 163, 184, 0.2)"
+                                                    strokeWidth={1}
+                                                  />
+                                                  <XAxis
+                                                    dataKey="name"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{
+                                                      fontSize: 11,
+                                                      fill: 'rgb(100, 116, 139)',
+                                                      fontWeight: 500
+                                                    }}
+                                                    dy={10}
+                                                  />
+                                                  <YAxis
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{
+                                                      fontSize: 10,
+                                                      fill: 'rgb(100, 116, 139)'
+                                                    }}
+                                                    dx={-5}
+                                                  />
+                                                  <ChartTooltip
+                                                    content={<ChartTooltipContent />}
+                                                    cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+                                                  />
+                                                  <Bar
+                                                    dataKey="value"
+                                                    fill="url(#profileGradient)"
+                                                    radius={[6, 6, 0, 0]}
+                                                    stroke="rgba(59, 130, 246, 0.3)"
+                                                    strokeWidth={1}
+                                                    filter="url(#glow)"
+                                                  />
+                                                </BarChart>
+                                              </ResponsiveContainer>
+                                            </ChartContainer>
+                                          </div>
                                         </div>
-                                      )
+                                      </div>
                                     )}
+
+                                    {/* Geographic Coverage - Professional World Map */}
+                                    {msg.statistics.geographic_coverage && (
+                                      <div className="group">
+                                        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                                          <div className="flex items-center justify-between mb-4">
+                                            <h5 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                              <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
+                                              Geographic Coverage
+                                            </h5>
+                                            <div className="px-2 py-1 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-full border border-emerald-200/50 dark:border-emerald-700/50">
+                                              <span className="text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                                Global
+                                              </span>
+                                            </div>
+                                          </div>
+
+                                          <div className="relative h-36 bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/50 dark:from-slate-800 dark:via-slate-700/50 dark:to-slate-600/30 rounded-xl border border-slate-200/60 dark:border-slate-600/60 overflow-hidden shadow-inner">
+                                            {/* Enhanced World Map Background */}
+                                            <div className="absolute inset-0 opacity-20">
+                                              <svg viewBox="0 0 800 400" className="w-full h-full">
+                                                <defs>
+                                                  <pattern id="worldPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                                                    <circle cx="20" cy="20" r="1" fill="currentColor" opacity="0.3"/>
+                                                  </pattern>
+                                                </defs>
+                                                <rect width="100%" height="100%" fill="url(#worldPattern)"/>
+                                              </svg>
+                                            </div>
+
+                                            {/* Continental Outlines */}
+                                            <div className="absolute inset-4 border border-slate-300/40 dark:border-slate-600/40 rounded-lg"></div>
+
+                                            {/* Coverage Area with Enhanced Styling */}
+                                            {(() => {
+                                              const coverage = msg.statistics.geographic_coverage;
+                                              if (coverage && coverage.lat_range && coverage.lon_range) {
+                                                const [minLat, maxLat] = coverage.lat_range;
+                                                const [minLon, maxLon] = coverage.lon_range;
+
+                                                // Enhanced positioning for better visualization
+                                                const centerLat = (minLat + maxLat) / 2;
+                                                const centerLon = (minLon + maxLon) / 2;
+                                                const latRange = maxLat - minLat;
+                                                const lonRange = maxLon - minLon;
+
+                                                return (
+                                                  <div className="absolute animate-pulse">
+                                                    <div
+                                                      className="absolute bg-gradient-to-br from-emerald-400/70 via-teal-400/60 to-cyan-400/50 border-2 border-emerald-300/80 rounded-lg shadow-2xl backdrop-blur-sm"
+                                                      style={{
+                                                        left: `${25 + (centerLon + 180) * 50 / 360}%`,
+                                                        top: `${25 + (90 - centerLat) * 50 / 180}%`,
+                                                        width: `${Math.max(Math.min(lonRange * 50 / 360 * 100, 50), 15)}%`,
+                                                        height: `${Math.max(Math.min(latRange * 50 / 180 * 100, 50), 15)}%`,
+                                                        transform: 'translate(-50%, -50%)',
+                                                        boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)'
+                                                      }}
+                                                    >
+                                                      {/* Inner glow effect */}
+                                                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-lg"></div>
+                                                    </div>
+
+                                                    {/* Coverage indicators */}
+                                                    <div className="absolute top-0 left-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"></div>
+                                                    <div className="absolute top-0 right-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50" style={{animationDelay: '0.5s'}}></div>
+                                                    <div className="absolute bottom-0 left-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50" style={{animationDelay: '1s'}}></div>
+                                                    <div className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50" style={{animationDelay: '1.5s'}}></div>
+                                                  </div>
+                                                );
+                                              }
+                                              return null;
+                                            })()}
+
+                                            {/* Enhanced Coordinate Display */}
+                                            <div className="absolute bottom-2 left-2 right-2">
+                                              <div className="bg-black/20 dark:bg-black/40 backdrop-blur-sm rounded-lg p-2 text-center">
+                                                <div className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                                  Coordinate Range
+                                                </div>
+                                                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+                                                  <span>
+                                                    Lat: {msg.statistics.geographic_coverage?.lat_range?.map((n: number) => n.toFixed(1)).join('° - ')}°
+                                                  </span>
+                                                  <span>
+                                                    Lon: {msg.statistics.geographic_coverage?.lon_range?.map((n: number) => n.toFixed(1)).join('° - ')}°
+                                                  </span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Additional Statistics - Professional Cards */}
+                                    {Object.entries(msg.statistics).filter(([key]) =>
+                                      key !== 'total_profiles' && key !== 'geographic_coverage'
+                                    ).map(([key, value]: [string, any], index: number) => (
+                                      <div
+                                        key={key}
+                                        className="group lg:col-span-2"
+                                      >
+                                        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl p-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
+                                          <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                              <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${
+                                                index % 3 === 0 ? 'from-orange-400 to-red-400' :
+                                                index % 3 === 1 ? 'from-pink-400 to-purple-400' :
+                                                'from-cyan-400 to-blue-400'
+                                              } shadow-sm`}></div>
+                                              <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm capitalize">
+                                                {key.replace(/_/g, " ")}
+                                              </span>
+                                            </div>
+                                            <div className={`px-3 py-1 rounded-full border ${
+                                              index % 3 === 0 ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700' :
+                                              index % 3 === 1 ? 'bg-pink-50 border-pink-200 dark:bg-pink-900/20 dark:border-pink-700' :
+                                              'bg-cyan-50 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-700'
+                                            }`}>
+                                              <span className={`text-sm font-bold ${
+                                                index % 3 === 0 ? 'text-orange-700 dark:text-orange-300' :
+                                                index % 3 === 1 ? 'text-pink-700 dark:text-pink-300' :
+                                                'text-cyan-700 dark:text-cyan-300'
+                                              }`}>
+                                                {typeof value === "object"
+                                                  ? JSON.stringify(value)
+                                                  : value}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
                                 </div>
                               )}
