@@ -1,82 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Upload, Database, CheckCircle, XCircle, Clock, FileText, HardDrive, Activity } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Upload, Database, CheckCircle, XCircle, Clock, FileText, HardDrive, Activity, RefreshCw, Eye, Trash2 } from 'lucide-react';
+import NetCDFUpload from '@/components/NetCDFUpload';
+import { api } from '@/lib/api';
 
-interface DataFile {
+interface Dataset {
   id: string;
   filename: string;
-  size: string;
-  uploadDate: string;
-  status: 'processing' | 'completed' | 'failed';
-  recordCount: number;
-  dataType: string;
-  progress?: number;
+  status: 'uploaded' | 'processing' | 'completed' | 'failed';
+  upload_time: string;
+  variables: string[];
+  dimensions: any;
+  value_count: number;
+  embedding_count: number;
+  uploaded_by: string;
 }
 
 const DataManagement = () => {
   const { t } = useLanguage();
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const dataFiles: DataFile[] = [
-    {
-      id: '1',
-      filename: 'argo_pacific_2024_01.nc',
-      size: '245 MB',
-      uploadDate: '2024-01-20',
-      status: 'completed',
-      recordCount: 125000,
-      dataType: 'CTD Profiles'
-    },
-    {
-      id: '2',
-      filename: 'argo_atlantic_bgc_2024_01.nc',
-      size: '189 MB',
-      uploadDate: '2024-01-19',
-      status: 'processing',
-      recordCount: 89000,
-      dataType: 'BGC Data',
-      progress: 67
-    },
-    {
-      id: '3',
-      filename: 'argo_indian_2024_01.nc',
-      size: '156 MB',  
-      uploadDate: '2024-01-18',
-      status: 'completed',
-      recordCount: 78000,
-      dataType: 'CTD Profiles'
-    },
-    {
-      id: '4',
-      filename: 'argo_mediterranean_2024_01.nc',
-      size: '98 MB',
-      uploadDate: '2024-01-17',
-      status: 'failed',
-      recordCount: 0,
-      dataType: 'CTD Profiles'
-    },
-    {
-      id: '5',
-      filename: 'argo_arctic_2024_01.nc',
-      size: '67 MB',
-      uploadDate: '2024-01-16',
-      status: 'completed',
-      recordCount: 34000,
-      dataType: 'CTD Profiles'
+  // Fetch datasets from backend
+  const fetchDatasets = async () => {
+    try {
+      const response = await fetch('/api/datasets/datasets/', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDatasets(data);
+      } else {
+        console.error('Failed to fetch datasets');
+      }
+    } catch (error) {
+      console.error('Error fetching datasets:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  // Refresh datasets
+  const refreshDatasets = async () => {
+    setRefreshing(true);
+    await fetchDatasets();
+    setRefreshing(false);
+  };
+
+  // Only fetch datasets when explicitly requested
+  // useEffect(() => {
+  //   fetchDatasets();
+  // }, []);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'processing': return <Clock className="h-4 w-4 text-yellow-500" />;
       case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'uploaded': return <Upload className="h-4 w-4 text-blue-500" />;
       default: return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
@@ -86,30 +77,20 @@ const DataManagement = () => {
       case 'completed': return 'bg-green-500/10 text-green-500 border-green-500/20';
       case 'processing': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
       case 'failed': return 'bg-red-500/10 text-red-500 border-red-500/20';
+      case 'uploaded': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
     }
   };
 
-  const handleUpload = () => {
-    setIsUploading(true);
-    setUploadProgress(0);
-    
-    const interval = setInterval(() => {
-      setUploadProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsUploading(false);
-          return 100;
-        }
-        return prev + 10;
-      });
-    }, 500);
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
   };
 
-  const totalFiles = dataFiles.length;
-  const completedFiles = dataFiles.filter(f => f.status === 'completed').length;
-  const totalRecords = dataFiles.filter(f => f.status === 'completed').reduce((sum, f) => sum + f.recordCount, 0);
-  const totalSize = dataFiles.reduce((sum, f) => sum + parseFloat(f.size.replace(' MB', '')), 0);
+  // Calculate statistics
+  const totalFiles = datasets.length;
+  const completedFiles = datasets.filter(d => d.status === 'completed').length;
+  const totalRecords = datasets.filter(d => d.status === 'completed').reduce((sum, d) => sum + d.value_count, 0);
+  const totalEmbeddings = datasets.filter(d => d.status === 'completed').reduce((sum, d) => sum + d.embedding_count, 0);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -122,10 +103,34 @@ const DataManagement = () => {
             Upload, process, and manage ARGO float NetCDF files
           </p>
         </div>
-        <Button onClick={handleUpload} disabled={isUploading} className="flex items-center gap-2">
-          <Upload className="h-4 w-4" />
-          Upload NetCDF File
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={refreshDatasets}
+            disabled={refreshing}
+            variant="outline"
+            size="sm"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Upload NetCDF File
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Upload NetCDF Data</DialogTitle>
+                <DialogDescription>
+                  Upload and process NetCDF files for the oceanographic database
+                </DialogDescription>
+              </DialogHeader>
+              <NetCDFUpload />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -143,7 +148,7 @@ const DataManagement = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -157,7 +162,7 @@ const DataManagement = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -171,111 +176,115 @@ const DataManagement = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-purple-500/10 rounded-lg">
-                <HardDrive className="h-5 w-5 text-purple-500" />
+                <Activity className="h-5 w-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Storage Used</p>
-                <p className="text-2xl font-bold">{totalSize.toFixed(1)} MB</p>
+                <p className="text-sm text-muted-foreground">Embeddings</p>
+                <p className="text-2xl font-bold">{totalEmbeddings.toLocaleString()}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Upload Section */}
-      {isUploading && (
+      {/* Loading State */}
+      {loading && (
         <Card>
           <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Upload className="h-5 w-5 text-primary" />
-                <h3 className="font-semibold">Uploading File...</h3>
-              </div>
-              <Progress value={uploadProgress} className="w-full" />
-              <p className="text-sm text-muted-foreground">
-                Processing: {uploadProgress}% - Converting NetCDF to PostgreSQL format
-              </p>
+            <div className="flex items-center justify-center">
+              <RefreshCw className="h-6 w-6 animate-spin mr-2" />
+              <p>Loading datasets...</p>
             </div>
           </CardContent>
         </Card>
       )}
 
       {/* Data Files Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            <Database className="h-5 w-5" />
-            Data Files
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Filename</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Records</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Upload Date</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {dataFiles.map((file) => (
-                <TableRow key={file.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{file.filename}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{file.dataType}</Badge>
-                  </TableCell>
-                  <TableCell>{file.size}</TableCell>
-                  <TableCell>
-                    {file.status === 'completed' ? file.recordCount.toLocaleString() : '-'}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getStatusIcon(file.status)}
-                      <Badge className={`capitalize ${getStatusColor(file.status)}`}>
-                        {file.status}
-                      </Badge>
-                      {file.status === 'processing' && file.progress && (
-                        <span className="text-xs text-muted-foreground">
-                          {file.progress}%
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(file.uploadDate).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button size="sm" variant="outline">
-                        View
-                      </Button>
-                      {file.status === 'failed' && (
-                        <Button size="sm" variant="outline">
-                          Retry
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      {!loading && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Database className="h-5 w-5" />
+              Data Files
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {datasets.length === 0 ? (
+              <div className="text-center py-8">
+                <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No datasets uploaded yet</p>
+                <p className="text-sm text-muted-foreground">Upload your first NetCDF file to get started</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Filename</TableHead>
+                    <TableHead>Variables</TableHead>
+                    <TableHead>Records</TableHead>
+                    <TableHead>Embeddings</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Upload Date</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {datasets.map((dataset) => (
+                    <TableRow key={dataset.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{dataset.filename}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {dataset.variables?.length || 0} variables
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {dataset.status === 'completed' ? dataset.value_count.toLocaleString() : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {dataset.status === 'completed' ? dataset.embedding_count.toLocaleString() : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(dataset.status)}
+                          <Badge className={`capitalize ${getStatusColor(dataset.status)}`}>
+                            {dataset.status}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {formatDate(dataset.upload_time)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button size="sm" variant="outline">
+                            <Eye className="h-3 w-3 mr-1" />
+                            View
+                          </Button>
+                          {dataset.status === 'failed' && (
+                            <Button size="sm" variant="outline">
+                              Retry
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Processing Pipeline */}
       <Card>

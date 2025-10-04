@@ -100,3 +100,5 @@ test_llm_embedding.py
 test_what_is_argo.py
 test_fast_query.py
 src=rag_pipeline.py
+backend/update_admin.py
+netcdf

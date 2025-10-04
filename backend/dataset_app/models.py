@@ -5,99 +5,157 @@ from auth_app.models import CustomUser
 class NetCDFDataset(models.Model):
     """Model for storing NetCDF dataset metadata"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    file_path = models.CharField(max_length=500)
-    file_size = models.BigIntegerField()  # Size in bytes
-    uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    upload_date = models.DateTimeField(auto_now_add=True)
+    filename = models.CharField(max_length=255)
+    file_path = models.CharField(max_length=500, blank=True)  # Path to the uploaded file
+    upload_time = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=[
         ('uploaded', 'Uploaded'),
         ('processing', 'Processing'),
         ('completed', 'Completed'),
         ('failed', 'Failed')
     ], default='uploaded')
-    variable_names = models.JSONField(default=list)  # List of variables in the file
-    time_coverage = models.JSONField(null=True, blank=True)  # Time range
-    spatial_coverage = models.JSONField(null=True, blank=True)  # Lat/lon bounds
-    error_message = models.TextField(blank=True)
+    variables = models.JSONField(default=list)  # List of variables in the file
+    dimensions = models.JSONField(null=True, blank=True)  # Dimensions info
+    uploaded_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['-upload_date']
+        ordering = ['-upload_time']
+        db_table = 'datasets'
 
     def __str__(self):
-        return self.name
+        return self.filename
 
-class NetCDFSlice(models.Model):
-    """Model for storing preprocessed NetCDF slices with embeddings"""
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class NetCDFValue(models.Model):
+    """Model for storing flattened NetCDF data values"""
+    id = models.BigAutoField(primary_key=True)
     dataset = models.ForeignKey(NetCDFDataset, on_delete=models.CASCADE)
     variable = models.CharField(max_length=100)
-    region = models.CharField(max_length=100)
     time = models.DateTimeField()
+    lat = models.FloatField()
+    lon = models.FloatField()
     depth = models.FloatField(null=True, blank=True)
-    lat_min = models.FloatField()
-    lat_max = models.FloatField()
-    lon_min = models.FloatField()
-    lon_max = models.FloatField()
-    slice_data = models.JSONField()  # Array of values
-    embedding = models.JSONField()  # 768-dimensional embedding vector
-    summary = models.TextField()
-    source_file = models.CharField(max_length=255)
+    value = models.FloatField()
 
     class Meta:
+        db_table = 'dataset_values'
         indexes = [
-            models.Index(fields=['variable', 'region', 'time']),
-            models.Index(fields=['lat_min', 'lat_max', 'lon_min', 'lon_max']),
+            models.Index(fields=['dataset', 'variable', 'time']),
+            models.Index(fields=['lat', 'lon']),
+        ]
+
+    def __str__(self):
+        return f"{self.variable} - {self.time} - ({self.lat}, {self.lon})"
+
+class NetCDFEmbedding(models.Model):
+    """Model for storing NetCDF embeddings with pgvector"""
+    id = models.AutoField(primary_key=True)
+    dataset = models.ForeignKey(NetCDFDataset, on_delete=models.CASCADE)
+    variable = models.CharField(max_length=100)
+    time = models.DateTimeField()
+    region = models.CharField(max_length=100)
+    embedding = models.TextField()  # Store as text for now, will use vector field in raw SQL
+    summary = models.TextField()
+
+    class Meta:
+        db_table = 'dataset_embeddings'
+        indexes = [
+            models.Index(fields=['dataset', 'variable', 'time']),
+            models.Index(fields=['region']),
         ]
 
     def __str__(self):
         return f"{self.variable} - {self.region} - {self.time}"
 
-# Create the database table for vector storage (for Neon DB)
-def create_vector_table():
-    """Create the vector table for storing embeddings"""
+def create_vector_tables():
+    """Create the database tables for NetCDF data storage"""
     from django.db import connection
 
-    with connection.cursor() as cursor:
-        # Create extension if not exists
-        cursor.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    # Check if we're using PostgreSQL or SQLite
+    is_postgres = connection.vendor == 'postgresql'
 
-        # Create the main slices table
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS netcdf_slices (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                dataset_id UUID REFERENCES dataset_app_netcdfdataset(id) ON DELETE CASCADE,
-                variable VARCHAR(100) NOT NULL,
-                region VARCHAR(100) NOT NULL,
-                time TIMESTAMP NOT NULL,
-                depth FLOAT,
-                lat_min FLOAT NOT NULL,
-                lat_max FLOAT NOT NULL,
-                lon_min FLOAT NOT NULL,
-                lon_max FLOAT NOT NULL,
-                slice_data JSONB NOT NULL,
-                embedding vector(768),
-                summary TEXT NOT NULL,
-                source_file VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
+    try:
+        with connection.cursor() as cursor:
+            if is_postgres:
+                # PostgreSQL with pgvector support
+                # Create vector extension if not exists
+                cursor.execute("CREATE EXTENSION IF NOT EXISTS vector;")
 
-        # Create indexes for performance
-        cursor.execute("""
-            CREATE INDEX IF NOT EXISTS idx_netcdf_slices_variable_region_time
-            ON netcdf_slices(variable, region, time);
-        """)
+                # Create datasets table
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS datasets (
+                        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                        filename TEXT NOT NULL,
+                        upload_time TIMESTAMP DEFAULT now(),
+                        status TEXT DEFAULT 'uploaded',
+                        variables TEXT[],
+                        dimensions JSONB,
+                        uploaded_by UUID REFERENCES auth_app_customuser(id) ON DELETE CASCADE
+                    );
+                """)
 
-        cursor.execute("""
-            CREATE INDEX IF NOT EXISTS idx_netcdf_slices_spatial
-            ON netcdf_slices(lat_min, lat_max, lon_min, lon_max);
-        """)
+                # Create dataset_values table for flattened data
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS dataset_values (
+                        id BIGSERIAL PRIMARY KEY,
+                        dataset_id UUID REFERENCES datasets(id) ON DELETE CASCADE,
+                        variable TEXT NOT NULL,
+                        time TIMESTAMP NOT NULL,
+                        lat REAL NOT NULL,
+                        lon REAL NOT NULL,
+                        depth REAL,
+                        value REAL NOT NULL
+                    );
+                """)
 
-        # Create vector similarity index
-        cursor.execute("""
-            CREATE INDEX IF NOT EXISTS idx_netcdf_slices_embedding
-            ON netcdf_slices USING ivfflat (embedding vector_cosine_ops)
-            WITH (lists = 100);
-        """)
+                # Create dataset_embeddings table for vector storage
+                cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS dataset_embeddings (
+                        id SERIAL PRIMARY KEY,
+                        dataset_id UUID REFERENCES datasets(id) ON DELETE CASCADE,
+                        variable TEXT NOT NULL,
+                        time TIMESTAMP NOT NULL,
+                        region TEXT NOT NULL,
+                        embedding vector(768) NOT NULL,
+                        summary TEXT NOT NULL
+                    );
+                """)
+
+                # Create indexes for performance
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_datasets_upload_time
+                    ON datasets(upload_time);
+                """)
+
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_dataset_values_dataset_variable_time
+                    ON dataset_values(dataset_id, variable, time);
+                """)
+
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_dataset_values_spatial
+                    ON dataset_values(lat, lon);
+                """)
+
+                # Create vector similarity index
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_dataset_embeddings_vector
+                    ON dataset_embeddings USING ivfflat (embedding vector_cosine_ops)
+                    WITH (lists = 100);
+                """)
+
+                cursor.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_dataset_embeddings_dataset_variable
+                    ON dataset_embeddings(dataset_id, variable);
+                """)
+            else:
+                # SQLite fallback - simplified table structure
+                print("Using SQLite - skipping pgvector extensions")
+
+                # Note: Tables are created via Django migrations, so we just ensure
+                # they're set up correctly. No need for raw SQL here since Django
+                # models handle table creation in SQLite.
+
+    except Exception as e:
+        print(f"Error creating vector tables: {e}")
+        # Don't raise error - NetCDF processing can continue without raw table creation
+        # Django migrations already handle table creation

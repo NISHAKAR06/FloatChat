@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.db import connection
-from dataset_app.models import create_vector_table
+from dataset_app.models import create_vector_tables
 
 class Command(BaseCommand):
     help = 'Initialize database tables and extensions for NetCDF processing'
@@ -19,7 +19,7 @@ class Command(BaseCommand):
 
         try:
             # Create vector extension and tables
-            create_vector_table()
+            create_vector_tables()
 
             self.stdout.write(
                 self.style.SUCCESS('✅ Database initialized successfully!')
@@ -28,7 +28,13 @@ class Command(BaseCommand):
                 self.style.SUCCESS('Created tables:')
             )
             self.stdout.write(
-                self.style.SUCCESS('  - netcdf_slices (with vector embeddings)')
+                self.style.SUCCESS('  - datasets (metadata storage)')
+            )
+            self.stdout.write(
+                self.style.SUCCESS('  - dataset_values (flattened data)')
+            )
+            self.stdout.write(
+                self.style.SUCCESS('  - dataset_embeddings (vector storage)')
             )
             self.stdout.write(
                 self.style.SUCCESS('  - Indexes for performance optimization')

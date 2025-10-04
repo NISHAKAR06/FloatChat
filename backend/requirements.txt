@@ -1,3 +1,4 @@
+# Core Django Requirements
 gunicorn
 django
 djangorestframework
@@ -10,22 +11,26 @@ requests
 pillow
 python-decouple
 pgvector
-numpy
-groq
-sqlalchemy
-asyncpg
-aiofiles
-python-multipart
-fastapi==0.104.1
-uvicorn==0.24.0
-websockets==12.0
-pydantic==2.5.0
-netCDF4==1.7.2
-xarray==2024.9.0
-pandas==2.2.2
-matplotlib==3.9.2
-plotly==5.24.1
-sentence-transformers==2.7.0
+python-dotenv==1.0.1
+
+# Async and API
 celery==5.3.4
 redis==5.0.1
-python-dotenv==1.0.1
+django-celery-beat==2.5.0
+
+# NetCDF Processing (Install these manually if needed)
+# netCDF4==1.7.2
+# xarray==2024.9.0
+# numpy
+# pandas==2.2.2
+
+# AI/ML (Install these manually if needed)
+# sentence-transformers==2.7.0
+# torch>=1.9.0
+# transformers>=4.21.0
+
+# Optional for development
+# matplotlib==3.9.2
+# plotly==5.24.1
+# fastapi==0.104.1
+# uvicorn==0.24.0

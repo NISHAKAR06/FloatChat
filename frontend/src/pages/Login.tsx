@@ -8,6 +8,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Waves, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 
 const Login = () => {
   const { t } = useLanguage();
@@ -22,40 +23,81 @@ const Login = () => {
     confirmPassword: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock authentication logic
-    // In real implementation, this would connect to Supabase
-    if (isLogin) {
-      // Check for admin credentials (demo purposes)
-      if (formData.email === 'admin@oceanic.ai' && formData.password === 'admin123') {
-        toast({
-          title: "Success",
-          description: "Logged in as Admin",
-        });
-        navigate('/admin');
+
+    try {
+      if (isLogin) {
+        // Use the API client for login
+        const result = await api.login(formData.email, formData.password);
+
+        if (result.status === 200 && result.data) {
+          // Check if user is admin
+          const isAdmin = formData.email === 'admin@oceanic.ai' || result.data.is_admin;
+
+          toast({
+            title: "Success",
+            description: `Logged in successfully${isAdmin ? ' as Admin' : ''}`,
+          });
+
+          // Navigate based on user role
+          if (isAdmin) {
+            navigate('/admin');
+          } else {
+            navigate('/dashboard');
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: result.error || "Login failed",
+            variant: "destructive",
+          });
+        }
       } else {
-        toast({
-          title: "Success", 
-          description: "Logged in successfully",
+        // Registration API call
+        if (formData.password !== formData.confirmPassword) {
+          toast({
+            title: "Error",
+            description: "Passwords do not match",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const response = await fetch('/api/auth/register/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: formData.email,
+            email: formData.email,
+            password: formData.password,
+          }),
         });
-        navigate('/dashboard');
+
+        const data = await response.json();
+
+        if (response.ok) {
+          toast({
+            title: "Success",
+            description: "Account created successfully",
+          });
+          navigate('/dashboard');
+        } else {
+          toast({
+            title: "Error",
+            description: data.error || "Registration failed",
+            variant: "destructive",
+          });
+        }
       }
-    } else {
-      if (formData.password !== formData.confirmPassword) {
-        toast({
-          title: "Error",
-          description: "Passwords do not match",
-          variant: "destructive",
-        });
-        return;
-      }
+    } catch (error) {
       toast({
-        title: "Success",
-        description: "Account created successfully",
+        title: "Error",
+        description: "Network error. Please try again.",
+        variant: "destructive",
       });
-      navigate('/dashboard');
     }
   };
 
@@ -183,7 +225,7 @@ const Login = () => {
             {isLogin && (
               <div className="mt-6 p-3 bg-muted/50 rounded-lg border">
                 <p className="text-xs text-muted-foreground text-center">
-                  {t('auth.demoHint')}
+                  Demo: Use any email/password to register, or login as admin@example.com / adminpassword
                 </p>
               </div>
             )}

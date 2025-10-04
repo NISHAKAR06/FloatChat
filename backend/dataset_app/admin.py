@@ -1,57 +1,67 @@
 from django.contrib import admin
-from .models import NetCDFDataset, NetCDFSlice
+from .models import NetCDFDataset, NetCDFValue, NetCDFEmbedding
 
 @admin.register(NetCDFDataset)
 class NetCDFDatasetAdmin(admin.ModelAdmin):
-    list_display = ['name', 'uploaded_by', 'status', 'upload_date', 'file_size']
-    list_filter = ['status', 'upload_date', 'uploaded_by']
-    search_fields = ['name', 'description']
-    readonly_fields = ['id', 'upload_date', 'file_size']
+    list_display = ['filename', 'uploaded_by', 'status', 'upload_time']
+    list_filter = ['status', 'upload_time', 'uploaded_by']
+    search_fields = ['filename']
+    readonly_fields = ['id', 'upload_time']
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'description', 'uploaded_by')
+            'fields': ('filename', 'uploaded_by', 'status')
         }),
-        ('File Information', {
-            'fields': ('file_path', 'file_size', 'status')
-        }),
-        ('Coverage Information', {
-            'fields': ('variable_names', 'time_coverage', 'spatial_coverage'),
-            'classes': ('collapse',)
-        }),
-        ('Error Information', {
-            'fields': ('error_message',),
+        ('Dataset Information', {
+            'fields': ('variables', 'dimensions'),
             'classes': ('collapse',)
         }),
         ('Metadata', {
-            'fields': ('id', 'upload_date'),
+            'fields': ('id', 'upload_time'),
             'classes': ('collapse',)
         }),
     )
 
-@admin.register(NetCDFSlice)
-class NetCDFSliceAdmin(admin.ModelAdmin):
-    list_display = ['variable', 'region', 'time', 'depth', 'dataset']
+@admin.register(NetCDFValue)
+class NetCDFValueAdmin(admin.ModelAdmin):
+    list_display = ['variable', 'time', 'lat', 'lon', 'value', 'dataset']
+    list_filter = ['variable', 'time', 'dataset']
+    search_fields = ['variable']
+    readonly_fields = ['id']
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('dataset', 'variable', 'time', 'value')
+        }),
+        ('Spatial Information', {
+            'fields': ('lat', 'lon', 'depth')
+        }),
+        ('Metadata', {
+            'fields': ('id',),
+            'classes': ('collapse',)
+        }),
+    )
+
+@admin.register(NetCDFEmbedding)
+class NetCDFEmbeddingAdmin(admin.ModelAdmin):
+    list_display = ['variable', 'region', 'time', 'dataset']
     list_filter = ['variable', 'region', 'time', 'dataset']
     search_fields = ['variable', 'region', 'summary']
     readonly_fields = ['id', 'embedding']
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('dataset', 'variable', 'region', 'time', 'depth')
+            'fields': ('dataset', 'variable', 'region', 'time')
         }),
-        ('Spatial Coverage', {
-            'fields': ('lat_min', 'lat_max', 'lon_min', 'lon_max')
-        }),
-        ('Data', {
-            'fields': ('slice_data', 'summary')
+        ('Content', {
+            'fields': ('summary',)
         }),
         ('Embedding', {
             'fields': ('embedding',),
             'classes': ('collapse',)
         }),
         ('Metadata', {
-            'fields': ('id', 'source_file'),
+            'fields': ('id',),
             'classes': ('collapse',)
         }),
     )

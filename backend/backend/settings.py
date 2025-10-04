@@ -99,27 +99,12 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 
 # Database
-# Use DATABASE_URL from environment if present (Render uses PostgreSQL)
-import dj_database_url
-
-# Set default DATABASE_URL for development if not set
-os.environ.setdefault('DATABASE_URL', f"sqlite:///{BASE_DIR}/db.sqlite3")
-
+# Use SQLite for development (simplified configuration)
 DATABASES = {
-    'default': dj_database_url.config()
-}
-
-# Add vector database configuration for ARGO data
-DATABASES['vector'] = {
-    'ENGINE': 'django.db.backends.postgresql',
-    'NAME': os.getenv('VECTOR_DB_NAME', 'vectordb'),
-    'USER': os.getenv('VECTOR_DB_USER', 'postgres'),
-    'PASSWORD': os.getenv('VECTOR_DB_PASSWORD', 'postgres'),
-    'HOST': os.getenv('VECTOR_DB_HOST', 'localhost'),
-    'PORT': os.getenv('VECTOR_DB_PORT', '5432'),
-    'OPTIONS': {
-        'sslmode': 'require',
-    },
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
 
 # NetCDF processing settings
@@ -171,11 +156,18 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", SECRET_KEY)
 # Set debug from environment
 DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
 
+# Suppress TensorFlow warnings
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 AUTH_USER_MODEL = "auth_app.CustomUser"
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',  # Changed to allow public access by default
     )
 }
 
@@ -189,3 +181,11 @@ CORS_ALLOWED_ORIGINS = [
 
 # For development, you can use
 CORS_ALLOW_CREDENTIALS = True
+
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE

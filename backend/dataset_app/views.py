@@ -1,30 +1,41 @@
 import os
 import json
 import logging
+import uuid
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.db import models
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import NetCDFDataset, NetCDFSlice
-from .serializers import NetCDFDatasetSerializer, NetCDFSliceSerializer
-import netCDF4 as nc
-import numpy as np
+from .models import NetCDFDataset, NetCDFValue, NetCDFEmbedding
+from .serializers import NetCDFDatasetSerializer, NetCDFValueSerializer, NetCDFEmbeddingSerializer
+from .tasks import process_netcdf_file_task
 from datetime import datetime, timedelta
 import requests
 from django.conf import settings
+
+# Try to import netCDF4, but don't fail if not available
+try:
+    import netCDF4 as nc
+    import numpy as np
+    NETCDF4_AVAILABLE = True
+except ImportError:
+    NETCDF4_AVAILABLE = False
+    logger = logging.getLogger(__name__)
+    logger.warning("netCDF4 not available, NetCDF processing will be limited")
 
 logger = logging.getLogger(__name__)
 
 class NetCDFDatasetViewSet(viewsets.ModelViewSet):
     queryset = NetCDFDataset.objects.all()
     serializer_class = NetCDFDatasetSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Require authentication for dataset operations
 
     def perform_create(self, serializer):
         serializer.save(uploaded_by=self.request.user)
@@ -45,8 +56,17 @@ class NetCDFDatasetViewSet(viewsets.ModelViewSet):
             dataset.status = 'processing'
             dataset.save()
 
+            # Get the file path from the dataset
+            file_path = dataset.file_path if hasattr(dataset, 'file_path') else None
+
+            if not file_path:
+                return Response(
+                    {'error': 'File path not found for dataset'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             # Process the file asynchronously
-            process_netcdf_file.delay(dataset.id)
+            process_netcdf_file_task.delay(dataset.id, file_path)
 
             return Response({'message': 'Processing started'})
 
@@ -61,9 +81,9 @@ class NetCDFDatasetViewSet(viewsets.ModelViewSet):
             )
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def upload_netcdf_file(request):
-    """Upload and validate NetCDF file"""
+    """Upload and validate NetCDF file (Admin only)"""
     if 'file' not in request.FILES:
         return Response(
             {'error': 'No file provided'},
@@ -71,8 +91,6 @@ def upload_netcdf_file(request):
         )
 
     file_obj = request.FILES['file']
-    name = request.data.get('name', file_obj.name)
-    description = request.data.get('description', '')
 
     # Validate file extension
     if not file_obj.name.endswith('.nc'):
@@ -81,47 +99,93 @@ def upload_netcdf_file(request):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    # Save file temporarily for processing
-    temp_path = os.path.join(settings.MEDIA_ROOT, 'temp', file_obj.name)
-    os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+    # Create unique filename to avoid conflicts
+    file_extension = os.path.splitext(file_obj.name)[1]
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
 
-    with open(temp_path, 'wb+') as destination:
-        for chunk in file_obj.chunks():
-            destination.write(chunk)
+    # Save file to media/netcdf directory
+    netcdf_dir = os.path.join(settings.MEDIA_ROOT, 'netcdf')
+    os.makedirs(netcdf_dir, exist_ok=True)
+    file_path = os.path.join(netcdf_dir, unique_filename)
 
     try:
-        # Validate NetCDF file
-        with nc.Dataset(temp_path, 'r') as dataset:
-            # Extract basic metadata
-            variable_names = list(dataset.variables.keys())
-            time_coverage = extract_time_coverage(dataset)
-            spatial_coverage = extract_spatial_coverage(dataset)
+        # Save the uploaded file
+        with open(file_path, 'wb+') as destination:
+            for chunk in file_obj.chunks():
+                destination.write(chunk)
+
+        # Validate and extract metadata from NetCDF file
+        if not NETCDF4_AVAILABLE:
+            # Clean up file and return error if netCDF4 not available
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            return Response(
+                {'error': 'NetCDF processing libraries are not available on this server'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        try:
+            with nc.Dataset(file_path, 'r') as dataset:
+                # Extract basic metadata
+                variables = list(dataset.variables.keys())
+                dimensions = {}
+
+                for dim_name, dim in dataset.dimensions.items():
+                    dimensions[dim_name] = {
+                        'size': len(dim),
+                        'unlimited': dim.isunlimited()
+                    }
+
+                # Validate that file has required dimensions and variables
+                has_time = any(dim in ['time', 'TIME'] for dim in dataset.dimensions.keys())
+                has_lat = any(var in ['lat', 'latitude', 'LAT', 'LATITUDE'] for var in dataset.variables.keys())
+                has_lon = any(var in ['lon', 'longitude', 'LON', 'LONGITUDE'] for var in dataset.variables.keys())
+
+                if not (has_time and has_lat and has_lon):
+                    # Clean up invalid file
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                    return Response(
+                        {'error': 'NetCDF file must contain time, latitude, and longitude variables'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+        except Exception as e:
+            logger.error(f"Error validating NetCDF file: {e}")
+            # Clean up invalid file
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            return Response(
+                {'error': f'Invalid NetCDF file: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         # Create dataset record
         dataset_obj = NetCDFDataset.objects.create(
-            name=name,
-            description=description,
-            file_path=temp_path,
-            file_size=file_obj.size,
-            uploaded_by=request.user,
-            variable_names=variable_names,
-            time_coverage=time_coverage,
-            spatial_coverage=spatial_coverage,
-            status='uploaded'
+            filename=file_obj.name,
+            file_path=file_path,
+            status='uploaded',
+            variables=variables,
+            dimensions=dimensions,
+            uploaded_by=request.user
         )
+
+        # Trigger async processing
+        process_netcdf_file_task.delay(dataset_obj.id, file_path)
 
         return Response({
             'message': 'File uploaded successfully',
             'dataset_id': dataset_obj.id,
-            'metadata': {
-                'variables': variable_names,
-                'time_coverage': time_coverage,
-                'spatial_coverage': spatial_coverage
-            }
+            'status': 'uploaded',
+            'variables': variables,
+            'dimensions': dimensions
         })
 
     except Exception as e:
         logger.error(f"Error processing uploaded file: {e}")
+        # Clean up file if it was saved
+        if os.path.exists(file_path):
+            os.remove(file_path)
         return Response(
             {'error': f'Error processing file: {str(e)}'},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -172,19 +236,66 @@ def extract_spatial_coverage(dataset):
     return None
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_dataset_status(request, dataset_id):
+    """Get dataset processing status"""
+    try:
+        dataset = NetCDFDataset.objects.get(id=dataset_id)
+
+        # Get counts for dashboard
+        value_count = NetCDFValue.objects.filter(dataset=dataset).count()
+        embedding_count = NetCDFEmbedding.objects.filter(dataset=dataset).count()
+
+        status_data = {
+            'id': dataset.id,
+            'filename': dataset.filename,
+            'status': dataset.status,
+            'upload_time': dataset.upload_time,
+            'variables': dataset.variables,
+            'dimensions': dataset.dimensions,
+            'value_count': value_count,
+            'embedding_count': embedding_count,
+            'uploaded_by': dataset.uploaded_by.username if dataset.uploaded_by else None
+        }
+
+        return Response(status_data)
+    except NetCDFDataset.DoesNotExist:
+        return Response(
+            {'error': 'Dataset not found'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def get_dataset_metadata(request, dataset_id):
     """Get detailed metadata for a dataset"""
     try:
         dataset = NetCDFDataset.objects.get(id=dataset_id)
-        slices = NetCDFSlice.objects.filter(dataset=dataset)
+
+        # Get sample data for preview
+        sample_values = NetCDFValue.objects.filter(dataset=dataset)[:100]
+        sample_embeddings = NetCDFEmbedding.objects.filter(dataset=dataset)[:10]
 
         metadata = {
-            'dataset': NetCDFDatasetSerializer(dataset).data,
-            'slice_count': slices.count(),
-            'variables': dataset.variable_names,
-            'time_coverage': dataset.time_coverage,
-            'spatial_coverage': dataset.spatial_coverage,
-            'slices': NetCDFSliceSerializer(slices[:10], many=True).data  # First 10 slices
+            'dataset': {
+                'id': dataset.id,
+                'filename': dataset.filename,
+                'status': dataset.status,
+                'upload_time': dataset.upload_time,
+                'variables': dataset.variables,
+                'dimensions': dataset.dimensions,
+                'uploaded_by': dataset.uploaded_by.username if dataset.uploaded_by else None
+            },
+            'statistics': {
+                'total_values': NetCDFValue.objects.filter(dataset=dataset).count(),
+                'total_embeddings': NetCDFEmbedding.objects.filter(dataset=dataset).count(),
+                'unique_variables': len(set(NetCDFValue.objects.filter(dataset=dataset).values_list('variable', flat=True))),
+                'time_range': get_time_range(dataset)
+            },
+            'sample_data': {
+                'values': list(sample_values.values('variable', 'time', 'lat', 'lon', 'value')[:20]),
+                'embeddings': list(sample_embeddings.values('variable', 'time', 'region', 'summary')[:5])
+            }
         }
 
         return Response(metadata)
@@ -194,167 +305,24 @@ def get_dataset_metadata(request, dataset_id):
             status=status.HTTP_404_NOT_FOUND
         )
 
-# Celery task for async processing (if Celery is configured)
-try:
-    from celery import shared_task
-
-    @shared_task
-    def process_netcdf_file(dataset_id):
-        """Async task to process NetCDF file and create slices"""
-        try:
-            dataset = NetCDFDataset.objects.get(id=dataset_id)
-            process_netcdf_slices(dataset)
-            dataset.status = 'completed'
-            dataset.save()
-        except Exception as e:
-            logger.error(f"Error in async processing: {e}")
-            if 'dataset' in locals():
-                dataset.status = 'failed'
-                dataset.error_message = str(e)
-                dataset.save()
-
-except ImportError:
-    # Celery not available, create sync function
-    def process_netcdf_file(dataset_id):
-        """Sync processing of NetCDF file"""
-        try:
-            dataset = NetCDFDataset.objects.get(id=dataset_id)
-            process_netcdf_slices(dataset)
-            dataset.status = 'completed'
-            dataset.save()
-        except Exception as e:
-            logger.error(f"Error in sync processing: {e}")
-            if 'dataset' in locals():
-                dataset.status = 'failed'
-                dataset.error_message = str(e)
-                dataset.save()
-
-def process_netcdf_slices(dataset):
-    """Process NetCDF file and create slices with embeddings"""
+def get_time_range(dataset):
+    """Get the time range for a dataset"""
     try:
-        with nc.Dataset(dataset.file_path, 'r') as nc_dataset:
-            # Get coordinate variables
-            lat_var = nc_dataset.variables.get('lat') or nc_dataset.variables.get('latitude')
-            lon_var = nc_dataset.variables.get('lon') or nc_dataset.variables.get('longitude')
-            time_var = nc_dataset.variables.get('time')
-            depth_var = nc_dataset.variables.get('depth') or nc_dataset.variables.get('z')
+        time_values = NetCDFValue.objects.filter(dataset=dataset).aggregate(
+            min_time=models.Min('time'),
+            max_time=models.Max('time')
+        )
+        if time_values['min_time'] and time_values['max_time']:
+            return {
+                'start': time_values['min_time'].isoformat(),
+                'end': time_values['max_time'].isoformat()
+            }
+    except:
+        pass
+    return None
 
-            if not lat_var or not lon_var or not time_var:
-                raise ValueError("Required coordinate variables (lat, lon, time) not found")
-
-            # Process each variable
-            for var_name in dataset.variable_names:
-                if var_name in ['lat', 'lon', 'latitude', 'longitude', 'time', 'depth', 'z']:
-                    continue  # Skip coordinate variables
-
-                var = nc_dataset.variables[var_name]
-
-                # Determine dimensions
-                if len(var.dimensions) < 3:
-                    logger.warning(f"Variable {var_name} has insufficient dimensions")
-                    continue
-
-                # Process each time slice
-                for t_idx in range(len(time_var)):
-                    try:
-                        # Extract time
-                        if hasattr(time_var, 'units') and time_var.units:
-                            current_time = nc.num2date(time_var[t_idx], time_var.units)
-                        else:
-                            current_time = datetime.now()  # Fallback
-
-                        # Extract slice data
-                        if len(var.dimensions) == 3:  # time, lat, lon
-                            slice_data = var[t_idx, :, :].filled(np.nan).tolist()
-                        elif len(var.dimensions) == 4 and depth_var is not None:  # time, depth, lat, lon
-                            # For now, take surface layer (first depth)
-                            slice_data = var[t_idx, 0, :, :].filled(np.nan).tolist()
-                            current_depth = float(depth_var[0]) if len(depth_var) > 0 else None
-                        else:
-                            logger.warning(f"Unsupported dimensions for variable {var_name}")
-                            continue
-
-                        # Calculate spatial bounds
-                        lat_min, lat_max = float(lat_var[0]), float(lat_var[-1])
-                        lon_min, lon_max = float(lon_var[0]), float(lon_var[-1])
-
-                        # Generate region name based on spatial coverage
-                        region = determine_region(lat_min, lat_max, lon_min, lon_max)
-
-                        # Generate summary
-                        valid_data = [val for val in np.array(slice_data).flatten() if not np.isnan(val)]
-                        if valid_data:
-                            summary = f"{var_name} values in {region} region: min={min(valid_data):.2f}, max={max(valid_data):.2f}, mean={np.mean(valid_data):.2f}"
-                        else:
-                            summary = f"{var_name} data in {region} region (no valid values)"
-
-                        # Generate embedding (placeholder - would use actual embedding model)
-                        embedding = generate_embedding(summary)
-
-                        # Create slice record
-                        NetCDFSlice.objects.create(
-                            dataset=dataset,
-                            variable=var_name,
-                            region=region,
-                            time=current_time,
-                            depth=current_depth,
-                            lat_min=lat_min,
-                            lat_max=lat_max,
-                            lon_min=lon_min,
-                            lon_max=lon_max,
-                            slice_data=slice_data,
-                            embedding=embedding,
-                            summary=summary,
-                            source_file=dataset.file_path
-                        )
-
-                    except Exception as e:
-                        logger.error(f"Error processing slice for {var_name} at time {t_idx}: {e}")
-                        continue
-
-    except Exception as e:
-        logger.error(f"Error processing NetCDF file: {e}")
-        raise
-
-def determine_region(lat_min, lat_max, lon_min, lon_max):
-    """Determine ocean region based on coordinates"""
-    # Indian Ocean region (simplified)
-    if (20 <= lon_min <= 150 and lon_min <= 150 and
-        -90 <= lat_min <= 30 and lat_max <= 30):
-        return "Indian Ocean"
-
-    # More specific regions within Indian Ocean
-    if lat_min >= -10 and lat_max <= 25 and lon_min >= 40 and lon_max <= 100:
-        return "Northern Indian Ocean"
-    elif lat_min >= -60 and lat_max <= -10 and lon_min >= 20 and lon_max <= 150:
-        return "Southern Indian Ocean"
-    elif lat_min >= -20 and lat_max <= 10 and lon_min >= 50 and lon_max <= 90:
-        return "Bay of Bengal"
-    elif lat_min >= -30 and lat_max <= -10 and lon_min >= 50 and lon_max <= 80:
-        return "Southern Indian Ocean"
-
-    return "Indian Ocean"
-
-def generate_embedding(text):
-    """Generate embedding vector for text (placeholder implementation)"""
-    # In production, this would use a proper embedding model like sentence-transformers
-    # For now, return a dummy 768-dimensional vector
-    import hashlib
-
-    # Create a simple hash-based embedding
-    hash_obj = hashlib.md5(text.encode())
-    hash_bytes = hash_obj.digest()
-
-    # Convert to 768-dimensional vector (normalize to unit length)
-    embedding = []
-    for i in range(768):
-        # Use hash bytes to generate pseudo-random values
-        byte_val = hash_bytes[i % len(hash_bytes)]
-        # Normalize to [-1, 1] range
-        normalized_val = (byte_val - 128) / 128.0
-        embedding.append(normalized_val)
-
-    return embedding
+# Note: Processing functions moved to tasks.py for better organization
+# The actual processing is handled by the Celery tasks in tasks.py
 
 def initialize_database():
     """Initialize database tables and extensions"""
