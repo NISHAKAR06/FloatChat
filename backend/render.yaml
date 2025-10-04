@@ -4,13 +4,25 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn backend.wsgi
+    startCommand: uvicorn backend.asgi:application --host 0.0.0.0 --port $PORT
     envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: backend.settings
       - key: DJANGO_SECRET_KEY
         sync: false
       - key: DJANGO_DEBUG
         value: "False"
       - key: DATABASE_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: DATABASE_URI
+        sync: false
+      - key: REDIS_URL
         sync: false
     autoDeploy: true
     buildFilter:
