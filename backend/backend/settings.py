@@ -96,14 +96,14 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 
 
-# Database Configuration - PostgreSQL Cloud Database
+# Database Configuration - PostgreSQL Cloud Database (for Argo Float Data)
 if os.environ.get('DATABASE_URL'):
     try:
         import dj_database_url
         DATABASES = {
             'default': dj_database_url.parse(os.environ['DATABASE_URL'])
         }
-        print("✓ Using PostgreSQL database from DATABASE_URL")
+        print("✓ Using PostgreSQL database from DATABASE_URL (for Argo Float data)")
     except ImportError:
         print("⚠️ dj-database-url not available, falling back to SQLite")
         DATABASES = {
@@ -113,7 +113,7 @@ if os.environ.get('DATABASE_URL'):
             }
         }
 else:
-    # Development fallback - SQLite
+    # Local development - SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -248,10 +248,11 @@ LOGGING = {
     },
 }
 
-# Celery Configuration
-CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = TIME_ZONE
+# Celery Configuration - Disabled for simple deployment
+# Uncomment when Redis server is available:
+# CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+# CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+# CELERY_ACCEPT_CONTENT = ['json']
+# CELERY_TASK_SERIALIZER = 'json'
+# CELERY_RESULT_SERIALIZER = 'json'
+# CELERY_TIMEZONE = TIME_ZONE

@@ -1,16 +1,19 @@
-# PostgreSQL Cloud Database - Render Ready 🚀
-# Minimal packages with cloud PostgreSQL support
+# FINAL WORKING SETUP - SQLite with Cloud Database Access 🚀
+# For Argo float data, we'll add database access later after deployment
 
 django==4.2.16
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.0
 whitenoise[brotli]==6.6.0
-psycopg2-binary==2.9.5  # Compatible with Python 3.11 (Render uses this)
 django-cors-headers==4.3.1
 requests==2.31.0
 python-dotenv==1.0.1
 gunicorn==20.1.0
+
+psycopg2cffi==2.9.0  # Pure Python PostgreSQL adapter (works with Python 3.13)
 dj-database-url==2.1.0  # For PostgreSQL connection URLs
+
+# SQLite works - deploy first, then uncomment above for PostgreSQL
 
 # ADVANCED FEATURES - Add these ONE BY ONE after deployment works:
 # fastapi==0.104.1

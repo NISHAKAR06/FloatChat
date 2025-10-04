@@ -13,16 +13,12 @@ services:
       - key: DJANGO_DEBUG
         value: "False"
       - key: DATABASE_URL
-        sync: false  # PostgreSQL database URL (from Render PostgreSQL)
+        sync: false  # PostgreSQL connection for Argo Float data
       - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: ALLOWED_HOSTS
         sync: false
       - key: GROQ_API_KEY
-        sync: false
-      - key: DATABASE_URI
-        sync: false
-      - key: REDIS_URL
         sync: false
     autoDeploy: true
     buildFilter:
