@@ -192,10 +192,38 @@ REST_FRAMEWORK = {
 }
 
 # CORS settings - configurable via environment variables
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "https://float-chat-vyuga.vercel.app,https://floatchat-backend-z6ws.onrender.com,http://localhost:3000,http://localhost:5173").split(",")
+CORS_ALLOWED_ORIGINS = [
+    origin.strip() for origin in os.environ.get(
+        "CORS_ALLOWED_ORIGINS",
+        "https://float-chat-vyuga.vercel.app,https://floatchat-backend-z6ws.onrender.com,http://localhost:3000,http://localhost:5173"
+    ).split(",")
+]
 
-# For development, you can use
+# CORS configuration for different environments
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = os.environ.get("CORS_ALLOW_ALL_ORIGINS", "False").lower() == "true"
+
+# Additional CORS settings for preflight requests
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
 
 # Logging Configuration
 LOGGING = {
