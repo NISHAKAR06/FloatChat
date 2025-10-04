@@ -13,7 +13,7 @@ services:
       - key: DJANGO_DEBUG
         value: "False"
       - key: DATABASE_URL
-        sync: false
+        sync: false  # PostgreSQL database URL (from Render PostgreSQL)
       - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: ALLOWED_HOSTS

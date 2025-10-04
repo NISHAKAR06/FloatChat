@@ -96,23 +96,24 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 
 
-# Database Configuration
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DATABASE_NAME', 'float_chat'),
-        'USER': os.environ.get('DATABASE_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD', ''),
-        'HOST': os.environ.get('DATABASE_HOST', 'localhost'),
-        'PORT': os.environ.get('DATABASE_PORT', '5432'),
-    }
-}
-
-# Fallback to SQLite for development if DATABASE_URL is not provided
+# Database Configuration - PostgreSQL Cloud Database
 if os.environ.get('DATABASE_URL'):
-    import dj_database_url
-    DATABASES['default'] = dj_database_url.parse(os.environ['DATABASE_URL'])
-elif os.environ.get('DJANGO_DEBUG', 'False') == 'True':
+    try:
+        import dj_database_url
+        DATABASES = {
+            'default': dj_database_url.parse(os.environ['DATABASE_URL'])
+        }
+        print("✓ Using PostgreSQL database from DATABASE_URL")
+    except ImportError:
+        print("⚠️ dj-database-url not available, falling back to SQLite")
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+else:
+    # Development fallback - SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

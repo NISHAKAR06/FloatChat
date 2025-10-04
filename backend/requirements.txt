@@ -1,27 +1,23 @@
-# ULTRA-MINIMAL - ONLY PACKAGES THAT DEFINITELY WORK
-# Core Django functionality only
+# PostgreSQL Cloud Database - Render Ready 🚀
+# Minimal packages with cloud PostgreSQL support
 
 django==4.2.16
 djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.0
 whitenoise[brotli]==6.6.0
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.5  # Compatible with Python 3.11 (Render uses this)
 django-cors-headers==4.3.1
 requests==2.31.0
 python-dotenv==1.0.1
 gunicorn==20.1.0
+dj-database-url==2.1.0  # For PostgreSQL connection URLs
 
-# Essential authentication (remove pillow temporarily)
-djangorestframework-simplejwt==5.3.0
-# pillow==10.2.0  # Temporarily commented - causes build wheel error
-
-# Database utilities
-dj-database-url==2.1.0
-
-# FastAPI temporarily removed for deployment stability
+# ADVANCED FEATURES - Add these ONE BY ONE after deployment works:
 # fastapi==0.104.1
 # uvicorn[standard]==0.24.0
-
-# DO NOT ADD THESE UNTIL BASIC DEPLOYMENT WORKS:
-# pgvector (causes build errors)
-# websockets, numpy, pandas, matplotlib
-# scikit-learn, torch, transformers, sentence-transformers
+# numpy
+# pandas
+# pillow
+# pgvector
+# transformers
+# torch
