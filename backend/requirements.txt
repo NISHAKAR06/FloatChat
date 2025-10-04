@@ -19,8 +19,8 @@ uvicorn[standard]==0.24.0
 pgvector==0.2.4
 
 # ADD THESE ONE AT A TIME AFTER BASIC DEPLOYMENT WORKS:
-# pillow==10.2.0
-# djangorestframework-simplejwt==5.3.0
+pillow==10.2.0
+djangorestframework-simplejwt==5.3.0
 # websockets==11.0.3
 # numpy
 # pandas
