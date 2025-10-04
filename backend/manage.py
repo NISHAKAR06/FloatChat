@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+
+# Register psycopg2cffi as psycopg2 before any Django imports
+try:
+    from psycopg2cffi import compat
+    compat.register()
+except ImportError:
+    pass
+
 import os
 import sys
 

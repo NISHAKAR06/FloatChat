@@ -17,7 +17,13 @@ def create_fallback_config() -> Config:
     if db_uri:
         try:
             # Test if the database URI is accessible
-            import psycopg2
+            # Try psycopg2cffi first (for Python 3.13 compatibility), then psycopg2
+            try:
+                from psycopg2cffi import compat
+                compat.register()
+                import psycopg2cffi as psycopg2
+            except ImportError:
+                import psycopg2
             # Parse connection parameters
             parts = db_uri.replace("postgresql://", "").split("@")
             if len(parts) >= 2:

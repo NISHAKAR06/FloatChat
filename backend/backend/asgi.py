@@ -7,6 +7,13 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 """
 
+# Register psycopg2cffi as psycopg2 before any Django imports
+try:
+    from psycopg2cffi import compat
+    compat.register()
+except ImportError:
+    pass
+
 import os
 from django.core.asgi import get_asgi_application
 from django.conf import settings

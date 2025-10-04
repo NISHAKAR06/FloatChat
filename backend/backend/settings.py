@@ -10,6 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+# Register psycopg2cffi as psycopg2 before any Django imports
+try:
+    from psycopg2cffi import compat
+    compat.register()
+except ImportError:
+    pass
+
 from pathlib import Path
 import os
 from dotenv import load_dotenv

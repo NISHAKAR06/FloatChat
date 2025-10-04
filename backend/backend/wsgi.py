@@ -7,6 +7,13 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
 """
 
+# Register psycopg2cffi as psycopg2 before any Django imports
+try:
+    from psycopg2cffi import compat
+    compat.register()
+except ImportError:
+    pass
+
 import os
 
 from django.core.wsgi import get_wsgi_application
