@@ -1,0 +1,385 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Ocean-inspired professional design system */
+    --background: 220 20% 98%;
+    --foreground: 210 85% 40%;
+
+    --card: 220 20% 100%;
+    --card-foreground: 220 15% 15%;
+
+    --popover: 220 20% 100%;
+    --popover-foreground: 220 15% 15%;
+
+    /* Ocean blue primary theme */
+    --primary: 210 85% 40%;
+    --primary-foreground: 210 40% 98%;
+    --primary-glow: 210 85% 50%;
+
+    /* Teal secondary */
+    --secondary: 185 25% 95%;
+    --secondary-foreground: 185 85% 25%;
+
+    --muted: 220 15% 96%;
+    --muted-foreground: 220 10% 50%;
+
+    /* Ocean teal accent */
+    --accent: 185 85% 35%;
+    --accent-foreground: 185 10% 98%;
+
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 15% 90%;
+    --input: 220 15% 94%;
+    --ring: 210 85% 40%;
+
+    --radius: 0.75rem;
+
+    /* Custom ocean gradients */
+    --gradient-ocean: linear-gradient(135deg, hsl(210 85% 40%), hsl(185 85% 35%));
+    --gradient-depth: linear-gradient(180deg, hsl(210 85% 40%), hsl(210 85% 20%));
+    --gradient-surface: linear-gradient(135deg, hsl(220 20% 98%), hsl(210 30% 95%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 85% 15%) 0%, hsl(185 85% 20%) 50%, hsl(210 85% 40%) 100%);
+    
+    /* Glassmorphism effects */
+    --glass-bg: hsla(220, 20%, 100%, 0.8);
+    --glass-border: hsla(220, 15%, 90%, 0.3);
+    --glass-shadow: 0 8px 32px hsla(210, 85%, 40%, 0.1);
+
+    /* Scientific data colors */
+    --data-temp: 15 75% 55%;
+    --data-salinity: 185 75% 45%;
+    --data-depth: 210 85% 30%;
+    
+    /* Animation curves */
+    --ease-ocean: cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.3s var(--ease-ocean);
+
+    /* Enhanced Ocean Blue Hover Effects */
+    --hover-ocean-bg: hsla(210, 85%, 40%, 0.15);
+    --hover-ocean-border: hsla(210, 85%, 40%, 0.3);
+    --hover-ocean-glow: 0 0 20px hsla(210, 85%, 40%, 0.4);
+    --hover-ocean-transform: scale(1.02) translateY(-2px);
+    --hover-ocean-shadow: 0 10px 25px hsla(210, 85%, 40%, 0.25);
+
+    --sidebar-background: 220 20% 98%;
+
+    --sidebar-foreground: 210 85% 40%;
+
+    --sidebar-primary: 210 85% 40%;
+
+    --sidebar-primary-foreground: 210 40% 98%;
+
+    --sidebar-accent: 210 30% 95%;
+
+    --sidebar-accent-foreground: 210 85% 25%;
+
+    --sidebar-border: 210 30% 90%;
+
+    --sidebar-ring: 210 85% 40%;
+  }
+
+  .dark {
+    /* Dark ocean depths theme */
+    --background: 210 85% 8%;
+    --foreground: 210 85% 70%;
+
+    --card: 210 85% 10%;
+    --card-foreground: 210 40% 95%;
+
+    --popover: 210 85% 10%;
+    --popover-foreground: 210 40% 95%;
+
+    /* Glowing ocean primary in dark */
+    --primary: 210 85% 60%;
+    --primary-foreground: 210 85% 8%;
+    --primary-glow: 210 85% 70%;
+
+    /* Dark teal secondary */
+    --secondary: 185 85% 15%;
+    --secondary-foreground: 185 85% 80%;
+
+    --muted: 210 85% 12%;
+    --muted-foreground: 210 20% 65%;
+
+    /* Bright teal accent for dark mode */
+    --accent: 185 85% 50%;
+    --accent-foreground: 185 85% 8%;
+
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 95%;
+
+    --border: 210 85% 20%;
+    --input: 210 85% 15%;
+    --ring: 210 85% 60%;
+
+    /* Dark mode gradients */
+    --gradient-ocean: linear-gradient(135deg, hsl(210 85% 40%), hsl(185 85% 45%));
+    --gradient-depth: linear-gradient(180deg, hsl(210 85% 8%), hsl(210 85% 25%));
+    --gradient-surface: linear-gradient(135deg, hsl(210 85% 8%), hsl(210 85% 12%));
+    --gradient-hero: linear-gradient(135deg, hsl(210 85% 5%) 0%, hsl(185 85% 15%) 50%, hsl(210 85% 30%) 100%);
+    
+    /* Dark glassmorphism */
+    --glass-bg: hsla(210, 85%, 10%, 0.8);
+    --glass-border: hsla(210, 85%, 20%, 0.3);
+    --glass-shadow: 0 8px 32px hsla(210, 85%, 60%, 0.2);
+
+    /* Dark data colors */
+    --data-temp: 15 75% 65%;
+    --data-salinity: 185 75% 55%;
+    --data-depth: 210 85% 70%;
+
+    /* Enhanced Ocean Blue Hover Effects - Dark Mode */
+    --hover-ocean-bg: hsla(210, 85%, 60%, 0.2);
+    --hover-ocean-border: hsla(210, 85%, 60%, 0.4);
+    --hover-ocean-glow: 0 0 20px hsla(210, 85%, 60%, 0.5);
+    --hover-ocean-transform: scale(1.02) translateY(-2px);
+    --hover-ocean-shadow: 0 10px 25px hsla(210, 85%, 60%, 0.3);
+
+
+
+    /* Sidebar dark theme */
+    --sidebar-background: 210 85% 8%;
+    --sidebar-foreground: 210 85% 70%;
+    --sidebar-primary: 210 85% 60%;
+    --sidebar-primary-foreground: 210 85% 8%;
+    --sidebar-accent: 210 85% 12%;
+    --sidebar-accent-foreground: 210 85% 70%;
+    --sidebar-border: 210 85% 18%;
+    --sidebar-ring: 210 85% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Prevent page scrolling for chatbot interface only */
+  .chatbot-page body {
+    overflow: hidden;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  .chatbot-page html {
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .chatbot-page #root {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Floating Chatbot Button Styling */
+  .floating-chatbot-button {
+    position: fixed !important;
+    bottom: 1.5rem !important;
+    right: 1.5rem !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 3.5rem !important;
+    height: 3.5rem !important;
+    border-radius: 9999px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow:
+      0 20px 40px -12px rgba(0, 0, 0, 0.25),
+      0 8px 16px -4px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .floating-chatbot-button:hover {
+    transform: scale(1.05) translateY(-2px) !important;
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.35),
+      0 12px 24px -6px rgba(0, 0, 0, 0.15),
+      0 0 0 1px rgba(255, 255, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    animation: oceanBounce 0.6s ease-in-out !important;
+  }
+
+  .floating-chatbot-button:active {
+    transform: scale(0.95) !important;
+  }
+
+  /* Dark mode enhancements */
+  .dark .floating-chatbot-button {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow:
+      0 20px 40px -12px rgba(0, 0, 0, 0.5),
+      0 8px 16px -4px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .dark .floating-chatbot-button:hover {
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.7),
+      0 12px 24px -6px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+  }
+
+  /* Mobile responsive adjustments */
+  @media (max-width: 768px) {
+    .floating-chatbot-button {
+      bottom: 1rem !important;
+      right: 1rem !important;
+      width: 3rem !important;
+      height: 3rem !important;
+    }
+  }
+
+  /* Force positioning on all layouts - override any page conflicts */
+  .floating-chatbot-button {
+    transform: none !important;
+    margin: 0 !important;
+    float: none !important;
+    clear: none !important;
+    flex: none !important;
+    grid-area: none !important;
+    order: unset !important;
+  }
+
+  /* Specific overrides for different page layouts */
+  body.floating-chatbot-active .floating-chatbot-button,
+  html.floating-chatbot-active .floating-chatbot-button,
+  #root .floating-chatbot-button {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 10000 !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+  }
+
+  /* Pulse animation for attention */
+  .floating-chatbot-button.pulse {
+    animation: floatPulse 2s ease-in-out infinite alternate !important;
+  }
+
+  @keyframes floatPulse {
+    from {
+      box-shadow:
+        0 20px 40px -12px rgba(210, 85, 40, 0.4),
+        0 8px 16px -4px rgba(210, 85, 40, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    to {
+      box-shadow:
+        0 30px 60px -12px rgba(210, 85, 40, 0.6),
+        0 12px 24px -4px rgba(210, 85, 40, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+  }
+
+  /* Enhanced Ocean Blue Hover Utility Classes */
+  .hover-ocean {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-ocean:hover {
+    background: var(--hover-ocean-bg);
+    border-color: var(--hover-ocean-border);
+    box-shadow: var(--hover-ocean-shadow);
+    transform: var(--hover-ocean-transform);
+    color: hsl(var(--primary));
+  }
+
+  .hover-ocean-glow {
+    transition: all 0.3s ease;
+  }
+
+  .hover-ocean-glow:hover {
+    box-shadow: var(--hover-ocean-glow);
+    border-color: hsl(var(--primary));
+  }
+
+  .hover-ocean-bounce:hover {
+    animation: oceanBounce 0.6s ease-in-out;
+  }
+
+  @keyframes oceanBounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-8px);
+    }
+    60% {
+      transform: translateY(-4px);
+    }
+  }
+
+  .hover-ocean-wave:hover {
+    animation: oceanWave 0.8s ease-in-out;
+  }
+
+  @keyframes oceanWave {
+    0% {
+      transform: translateX(0) scale(1);
+    }
+    25% {
+      transform: translateX(-2px) scale(1.01);
+    }
+    50% {
+      transform: translateX(2px) scale(1.01);
+    }
+    75% {
+      transform: translateX(-1px) scale(1.01);
+    }
+    100% {
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  /* Ocean ripple effect for buttons */
+  .ocean-ripple {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ocean-ripple::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: hsla(var(--primary), 0.3);
+    transition: width 0.6s, height 0.6s, margin-top 0.6s, margin-left 0.6s;
+    transform: translate(-50%, -50%);
+  }
+
+  .ocean-ripple:hover::before {
+    width: 300px;
+    height: 300px;
+    margin-top: -150px;
+    margin-left: -150px;
+  }
+}

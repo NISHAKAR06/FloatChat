@@ -1,0 +1,41 @@
+# Core Django Requirements
+gunicorn
+django
+djangorestframework
+djangorestframework-simplejwt
+whitenoise
+psycopg2-binary
+dj-database-url==0.5.0
+django-cors-headers
+requests
+pillow
+python-decouple
+pgvector
+python-dotenv==1.0.1
+
+# Async and API
+celery==5.3.4
+redis==5.0.1
+django-celery-beat==2.5.0
+
+# Data processing libraries for NetCDF and AI features
+netCDF4==1.7.2
+xarray==2024.9.0
+numpy
+pandas==2.2.2
+
+# AI/ML libraries for chat and data processing
+sentence-transformers==2.7.0
+torch>=1.9.0
+transformers>=4.21.0
+
+# Visualization libraries
+matplotlib==3.9.2
+plotly==5.24.1
+
+# FastAPI service (if used)
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# Machine learning and data science libraries
+scikit-learn==1.5.1

@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: floatchat-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn backend.wsgi
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        sync: false
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - backend/**
+    rootDir: backend
+  - type: web
+    name: floatchat-frontend
+    env: static
+    buildCommand: yarn install && yarn build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - frontend/**
+    rootDir: frontend

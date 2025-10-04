@@ -1,0 +1,98 @@
+# Environment variables (contains sensitive data)
+.env.local
+.env.development
+.env.production.local
+.env.test
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Vite
+dist/
+dist-ssr/
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Temporary files
+temp/
+tmp/
+.cache/
+
+# NetCDF data files (can be large)
+*.nc
+
+# AI/ML models and data
+models/
+checkpoints/
+*.h5
+*.pb
+*.tflite
+*.onnx
+
+# Database
+*.db
+*.sqlite3
+postgresql/
+neo4j/
+
+# Logs
+logs/
+*.log
+
+# Secrets (DO NOT COMMIT THESE)
+.env*
+backend/update_admin.py
