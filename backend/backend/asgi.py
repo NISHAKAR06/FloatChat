@@ -16,42 +16,50 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 # Get Django ASGI application
 django_application = get_asgi_application()
 
-# Import and integrate FastAPI for AI chat features
+# Import and integrate FastAPI for AI chat features (optional)
 try:
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
-    from starlette.middleware.base import BaseHTTPMiddleware
 
-    # Import our FastAPI service
-    from fastapi_service.main import app as fastapi_app
-    from fastapi_service.main import chatbot
+    # Try to import FastAPI service components
+    fastapi_available = True
+    try:
+        from fastapi_service.main import app as fastapi_app
+        from fastapi_service.main import chatbot
+        print("✓ ASGI: FastAPI service components loaded successfully")
+    except ImportError as fastapi_import_error:
+        print(f"⚠️  ASGI: FastAPI service not available ({fastapi_import_error})")
+        fastapi_available = False
 
-    # Create integrated application
-    from starlette.applications import Starlette
-    from starlette.routing import Mount
-    from starlette.middleware import Middleware
+    if fastapi_available:
+        # Create integrated application
+        from starlette.applications import Starlette
+        from starlette.routing import Mount
 
-    # Django CORS settings as list
-    django_cors_origins = getattr(settings, 'CORS_ALLOWED_ORIGINS', ['*'])
+        # Django CORS settings as list
+        django_cors_origins = getattr(settings, 'CORS_ALLOWED_ORIGINS', ['*'])
 
-    # FastAPI app with CORS (for chat endpoints)
-    fastapi_app.add_middleware(
-        CORSMiddleware,
-        allow_origins=django_cors_origins,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+        # FastAPI app with CORS (for chat endpoints)
+        fastapi_app.add_middleware(
+            CORSMiddleware,
+            allow_origins=django_cors_origins,
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
-    # Mount FastAPI under /api/chat path to avoid conflicts
-    application = Starlette(
-        routes=[
-            Mount("/api/chat", fastapi_app, name="fastapi-chat"),
-            Mount("/", django_application, name="django"),
-        ]
-    )
+        # Mount FastAPI under /api/chat path to avoid conflicts
+        application = Starlette(
+            routes=[
+                Mount("/api/chat", fastapi_app, name="fastapi-chat"),
+                Mount("/", django_application, name="django"),
+            ]
+        )
 
-    print("✓ ASGI: Successfully integrated FastAPI with Django (Single deployment)")
+        print("✓ ASGI: Successfully integrated FastAPI with Django (Single deployment)")
+    else:
+        print("⚠️  ASGI: FastAPI components not available, running Django only")
+        application = django_application
 
 except ImportError as e:
     print(f"⚠️  ASGI: FastAPI not available ({e}), running Django only")

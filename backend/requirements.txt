@@ -1,31 +1,25 @@
-# DEPLOYMENT VERIFICATION - MINIMAL PACKAGES
-# Only pre-compiled packages that work on Render
+# ULTRA-MINIMAL - ONLY PACKAGES THAT DEFINITELY WORK
+# Core Django functionality only
 
 django==4.2.16
 djangorestframework==3.14.0
 whitenoise[brotli]==6.6.0
 psycopg2-binary==2.9.9
-dj-database-url==2.1.0
 django-cors-headers==4.3.1
 requests==2.31.0
 python-dotenv==1.0.1
 gunicorn==20.1.0
 
-# FastAPI for chat
+# Essential authentications
+djangorestframework-simplejwt==5.3.0
+pillow==10.2.0
+
+# FastAPI integration
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
+dj-database-url==2.1.0
 
-# Basic server utilities
-pgvector==0.2.4
-
-# ADD THESE ONE AT A TIME AFTER BASIC DEPLOYMENT WORKS:
-pillow==10.2.0
-djangorestframework-simplejwt==5.3.0
-# websockets==11.0.3
-# numpy
-# pandas
-# matplotlib
-# scikit-learn
-# torch
-# transformers
-# sentence-transformers
+# DO NOT ADD THESE UNTIL BASIC DEPLOYMENT WORKS:
+# pgvector (causes build errors)
+# websockets, numpy, pandas, matplotlib
+# scikit-learn, torch, transformers, sentence-transformers
