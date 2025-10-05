@@ -27,17 +27,17 @@ plotly>=5.18.0
 kaleido>=0.2.0
 
 # FastAPI service (for RAG pipeline) - Python 3.13 compatible
-fastapi==0.109.0
-uvicorn==0.27.0
-pydantic==2.5.0
-httpx==0.27.0  # Required for async HTTP requests
+fastapi>=0.110.0  # Newer version with Python 3.13 pre-built wheels
+uvicorn>=0.27.0
+pydantic>=2.6.0  # Newer version with pre-built pydantic-core for Python 3.13
+httpx>=0.27.0  # Required for async HTTP requests
 
 # AI/LLM Integration (for RAG pipeline)
-groq==0.9.0  # Groq API client for fast LLM inference
+groq>=0.9.0  # Groq API client for fast LLM inference
 # ollama  # Optional - only for local Ollama setup
 
-# MCP Server (Model Context Protocol) - Python 3.13 compatible
-mcp==1.0.0  # Model Context Protocol server
+# MCP Server (Model Context Protocol) - Python 3.13 compatible  
+# mcp>=1.0.0  # Commented out - will be installed separately if needed
 
 # Optional - Advanced AI packages (uncomment if needed for embeddings)
 # sentence-transformers>=2.7.0  # For local embeddings
