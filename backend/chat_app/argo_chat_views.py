@@ -155,8 +155,22 @@ def process_enhanced_argo_chat(request):
 
         # FORCE cloud database usage - no fallback to fake data
         try:
-            from fastapi_service.rag_pipeline import create_rag_pipeline
-            from fastapi_service.database import get_ocean_region_stats
+            import sys
+            import traceback
+            
+            try:
+                from fastapi_service.rag_pipeline import create_rag_pipeline
+            except SyntaxError as se:
+                logger.error(f"❌ Syntax error importing rag_pipeline: {se}")
+                logger.error(f"   File: {se.filename}, Line: {se.lineno}")
+                raise Exception(f"Import error in {se.filename} line {se.lineno}: {se.msg}")
+            
+            try:
+                from fastapi_service.database import get_ocean_region_stats
+            except SyntaxError as se:
+                logger.error(f"❌ Syntax error importing database: {se}")
+                logger.error(f"   File: {se.filename}, Line: {se.lineno}")
+                raise Exception(f"Import error in {se.filename} line {se.lineno}: {se.msg}")
 
             rag_pipeline = create_rag_pipeline()
 
