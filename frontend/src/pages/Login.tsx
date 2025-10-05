@@ -213,7 +213,7 @@ const Login = () => {
             {isLogin && (
               <div className="mt-6 p-3 bg-muted/50 rounded-lg border">
                 <p className="text-xs text-muted-foreground text-center">
-                  Demo: Use any email/password to register, or login as admin@example.com / adminpassword
+                  Demo: Use any email/password to register, or login as admin@oceanic.ai / admin123
                 </p>
               </div>
             )}
