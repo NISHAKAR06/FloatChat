@@ -39,14 +39,21 @@ def check_rag_integration():
 
         # Check for required environment variables
         db_uri = os.getenv("DATABASE_URI")
-        ollama_url = os.getenv("OLLAMA_URL")
+        groq_api_key = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API")
+        
+        # Ollama is optional - system uses Groq API in production
+        ollama_url = os.getenv("OLLAMA_URL", "http://localhost:11434")
 
-        if not db_uri or not ollama_url:
-            logger.warning("❌ Environment variables missing - DATABASE_URI, OLLAMA_URL required")
+        if not db_uri:
+            logger.warning("❌ Environment variable missing - DATABASE_URI required")
             logger.warning(f"   DATABASE_URI: {'✓' if db_uri else '✗'}")
-            logger.warning(f"   OLLAMA_URL: {'✓' if ollama_url else '✗'}")
             return False
+        
+        if not groq_api_key:
+            logger.warning("⚠️ GROQ_API_KEY not set - LLM responses will use fallback")
+            logger.warning(f"   GROQ_API_KEY: {'✓' if groq_api_key else '✗'}")
 
+        logger.info(f"✅ RAG integration available - DATABASE_URI: ✓, GROQ_API: {'✓' if groq_api_key else '✗'}, OLLAMA: {'✓' if ollama_url else 'optional'}")
         return True
     except ImportError as e:
         logger.warning(f"❌ RAG pipeline import failed: {e}")
@@ -248,7 +255,7 @@ def process_enhanced_argo_chat(request):
             # No fallback - must use real data
             return JsonResponse({
                 'error': f'ARGO pipeline failed - {str(e)}',
-                'solution': 'Ensure DATABASE_URI, OLLAMA_URL, and cloud data are properly configured'
+                'solution': 'Ensure DATABASE_URI and GROQ_API_KEY are properly configured in Render environment variables'
             }, status=500)
 
     except Exception as e:
