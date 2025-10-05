@@ -2,8 +2,13 @@ import logging
 import os
 import hashlib
 from datetime import datetime
-from celery import shared_task
 from django.conf import settings
+
+# Try to import Celery, fall back to mock if not available
+try:
+    from celery import shared_task
+except ImportError:
+    from celery_mock import shared_task
 from .models import NetCDFDataset, NetCDFValue, NetCDFEmbedding, create_vector_tables
 
 logger = logging.getLogger(__name__)
