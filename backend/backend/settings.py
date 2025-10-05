@@ -201,7 +201,7 @@ plt.ioff()  # Turn off interactive mode
 # Force use of existing font cache without rebuild
 import matplotlib.font_manager
 matplotlib.font_manager.fontManager.findfont('DejaVu Sans', rebuild_if_missing=False)
-logger.info("✅ Matplotlib configured with fast font loading (no rebuild)")
+print("✅ Matplotlib configured with fast font loading (no rebuild)")
 
 AUTH_USER_MODEL = "auth_app.CustomUser"
 
