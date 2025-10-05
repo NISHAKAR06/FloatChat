@@ -14,14 +14,14 @@ gunicorn==20.1.0
 psycopg2cffi==2.9.0  # Pure Python PostgreSQL adapter (works with Python 3.13)
 dj-database-url==2.1.0  # For PostgreSQL connection URLs
 
-# ARGO Chat Dependencies - Required for chat functionality
-numpy==1.26.4
-pandas==2.1.4
-xarray==2024.1.1
-netCDF4==1.6.5
-matplotlib==3.8.2
-plotly==5.18.0
-kaleido==0.2.1
+# ARGO Chat Dependencies - Required for chat functionality (Python 3.13 compatible)
+numpy>=1.26.0,<2.0.0
+pandas>=2.2.0
+xarray>=2024.1.0
+netCDF4>=1.7.0
+matplotlib>=3.9.0
+plotly>=5.18.0
+kaleido>=0.2.1
 
 # FastAPI service (for RAG pipeline)
 fastapi==0.104.1
