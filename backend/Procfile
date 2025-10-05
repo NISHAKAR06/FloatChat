@@ -1,1 +1,1 @@
-web: python -B -u -m gunicorn backend.wsgi --timeout 120 --workers 2 --threads 4 --log-level info
+web: python -B -u -m gunicorn backend.wsgi --timeout 300 --graceful-timeout 300 --workers 2 --threads 4 --log-level info --worker-class sync

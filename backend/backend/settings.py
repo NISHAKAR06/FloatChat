@@ -187,6 +187,12 @@ if not DEBUG:
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
+# Pre-build matplotlib font cache to prevent worker timeout
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend
+import matplotlib.pyplot as plt
+plt.ioff()  # Turn off interactive mode
+
 AUTH_USER_MODEL = "auth_app.CustomUser"
 
 REST_FRAMEWORK = {
@@ -200,7 +206,7 @@ REST_FRAMEWORK = {
 
 # CORS settings - configurable via environment variables
 CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in os.environ.get(
+    origin.strip().rstrip('/') for origin in os.environ.get(
         "CORS_ALLOWED_ORIGINS",
         "https://float-chat-vyuga.vercel.app,https://floatchat-backend-z6ws.onrender.com,http://localhost:3000,http://localhost:5173"
     ).split(",")
