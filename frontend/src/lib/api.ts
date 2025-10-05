@@ -56,6 +56,9 @@ class ApiClient {
     this.refreshToken = null;
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   }
 
   private async makeRequest<T>(
@@ -163,11 +166,16 @@ class ApiClient {
     const data = await response.json();
 
     if (response.ok) {
-      // Store tokens
+      // Store tokens and user info
       this.accessToken = data.access;
       this.refreshToken = data.refresh;
       localStorage.setItem('access_token', data.access);
       localStorage.setItem('refresh_token', data.refresh);
+      
+      // Store user role for route protection
+      if (data.user && data.user.role) {
+        localStorage.setItem('user_role', data.user.role);
+      }
     }
 
     return {

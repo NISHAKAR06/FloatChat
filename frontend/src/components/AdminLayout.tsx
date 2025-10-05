@@ -1,4 +1,5 @@
 import React from 'react';
+import { clearAuthData } from '@/lib/auth';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -120,10 +121,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                 <DropdownMenuContent>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => {
-                    // Clear any stored authentication data
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    sessionStorage.clear();
+                    // Clear all authentication data
+                    clearAuthData();
 
                     // Redirect to login page
                     navigate('/login');

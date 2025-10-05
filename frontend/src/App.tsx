@@ -8,6 +8,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Layout from "@/components/Layout";
 import UserDashboardLayout from "@/components/UserDashboardLayout";
 import AdminLayout from "@/components/AdminLayout";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PublicRoute from "@/components/PublicRoute";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -40,26 +42,27 @@ const App = () => (
             <Routes>
               {/* Landing page without layout */}
               <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+              <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
 
-              {/* User Dashboard Pages with sidebar */}
-              <Route path="/dashboard" element={<UserDashboardLayout><UserDashboard /></UserDashboardLayout>} />
-              <Route path="/chatbot" element={<UserDashboardLayout><Chatbot /></UserDashboardLayout>} />
-              <Route path="/data-visualization" element={<UserDashboardLayout><DataVisualization /></UserDashboardLayout>} />
-              <Route path="/filters-search" element={<UserDashboardLayout><FiltersSearch /></UserDashboardLayout>} />
-              <Route path="/export-options" element={<UserDashboardLayout><ExportOptions /></UserDashboardLayout>} />
-              <Route path="/saved-favorites" element={<UserDashboardLayout><SavedFavorites /></UserDashboardLayout>} />
+              {/* User Dashboard Pages with sidebar - Protected */}
+              <Route path="/dashboard" element={<ProtectedRoute><UserDashboardLayout><UserDashboard /></UserDashboardLayout></ProtectedRoute>} />
+              <Route path="/chatbot" element={<ProtectedRoute><UserDashboardLayout><Chatbot /></UserDashboardLayout></ProtectedRoute>} />
+              <Route path="/data-visualization" element={<ProtectedRoute><UserDashboardLayout><DataVisualization /></UserDashboardLayout></ProtectedRoute>} />
+              <Route path="/filters-search" element={<ProtectedRoute><UserDashboardLayout><FiltersSearch /></UserDashboardLayout></ProtectedRoute>} />
+              <Route path="/export-options" element={<ProtectedRoute><UserDashboardLayout><ExportOptions /></UserDashboardLayout></ProtectedRoute>} />
+              <Route path="/saved-favorites" element={<ProtectedRoute><UserDashboardLayout><SavedFavorites /></UserDashboardLayout></ProtectedRoute>} />
 
-              {/* Admin Pages with admin sidebar */}
-              <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
-              <Route path="/user-management" element={<AdminLayout><UserManagement /></AdminLayout>} />
-              <Route path="/data-management" element={<AdminLayout><DataManagement /></AdminLayout>} />
-              <Route path="/query-monitoring" element={<AdminLayout><QueryMonitoring /></AdminLayout>} />
-
-              <Route path="/analytics" element={<AdminLayout><Analytics /></AdminLayout>} />
-              <Route path="/system-config" element={<AdminLayout><SystemConfig /></AdminLayout>} />
-              <Route path="/settings" element={<UserDashboardLayout><Settings /></UserDashboardLayout>} />
+              {/* Admin Pages with admin sidebar - Protected + Admin Only */}
+              <Route path="/admin" element={<ProtectedRoute requireAdmin={true}><AdminLayout><AdminDashboard /></AdminLayout></ProtectedRoute>} />
+              <Route path="/user-management" element={<ProtectedRoute requireAdmin={true}><AdminLayout><UserManagement /></AdminLayout></ProtectedRoute>} />
+              <Route path="/data-management" element={<ProtectedRoute requireAdmin={true}><AdminLayout><DataManagement /></AdminLayout></ProtectedRoute>} />
+              <Route path="/query-monitoring" element={<ProtectedRoute requireAdmin={true}><AdminLayout><QueryMonitoring /></AdminLayout></ProtectedRoute>} />
+              <Route path="/analytics" element={<ProtectedRoute requireAdmin={true}><AdminLayout><Analytics /></AdminLayout></ProtectedRoute>} />
+              <Route path="/system-config" element={<ProtectedRoute requireAdmin={true}><AdminLayout><SystemConfig /></AdminLayout></ProtectedRoute>} />
+              
+              {/* Settings accessible to all authenticated users */}
+              <Route path="/settings" element={<ProtectedRoute><UserDashboardLayout><Settings /></UserDashboardLayout></ProtectedRoute>} />
               <Route path="/help" element={<Layout><Help /></Layout>} />
               
               {/* Catch-all route */}

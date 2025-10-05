@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { clearAuthData } from '@/lib/auth';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import {
@@ -184,10 +185,8 @@ const UserDashboardLayout: React.FC<UserDashboardLayoutProps> = ({ children }) =
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => {
-                    // Clear any stored authentication data
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    sessionStorage.clear();
+                    // Clear all authentication data
+                    clearAuthData();
 
                     // Redirect to login page
                     navigate('/login');
