@@ -25,7 +25,7 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login/refresh/`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login/refresh/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +149,7 @@ class ApiClient {
 
   // Manual login method
   async login(email: string, password: string): Promise<ApiResponse<any>> {
-    const response = await fetch(`${API_BASE_URL}/auth/login/`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ export const api = {
   isAuthenticated: () => apiClient.isAuthenticated(),
   register: async (email: string, password: string) => {
     const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || '/api';
-    const response = await fetch(`${API_BASE_URL}/auth/register/`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
