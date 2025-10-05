@@ -216,6 +216,12 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = os.environ.get("CORS_ALLOW_ALL_ORIGINS", "False").lower() == "true"
 
+# Emergency CORS fix - Allow Vercel origins with pattern matching
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+    r"^https://float-chat-vyuga\.vercel\.app$",
+]
+
 # Additional CORS settings for preflight requests
 CORS_ALLOW_HEADERS = [
     'accept',
