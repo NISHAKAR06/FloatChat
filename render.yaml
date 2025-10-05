@@ -3,14 +3,23 @@ services:
     name: floatchat-backend
     env: python
     plan: free
+    branch: production-branch  # Deploy from production-branch
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn backend.wsgi
+    startCommand: python -B -u -m gunicorn backend.wsgi --timeout 600 --graceful-timeout 600 --workers 1 --threads 8 --log-level info --worker-class sync --preload --bind 0.0.0.0:$PORT
     envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: backend.settings
       - key: DJANGO_SECRET_KEY
         sync: false
       - key: DJANGO_DEBUG
         value: "False"
       - key: DATABASE_URL
+        sync: false  # PostgreSQL connection for Argo Float data
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: GROQ_API_KEY
         sync: false
     autoDeploy: true
     buildFilter:
