@@ -16,14 +16,15 @@ dj-database-url==2.1.0  # For PostgreSQL connection URLs
 sqlalchemy==2.0.32  # Required for FastAPI database operations
 
 # ARGO Chat Dependencies - Required for chat functionality (Python 3.13 compatible)
-numpy==2.1.0  # Python 3.13 compatible
-pandas==2.2.2  # Python 3.13 compatible with pre-built wheels
-xarray==2024.6.0
-netCDF4==1.7.1
-scipy==1.14.0  # Required by xarray/matplotlib
-matplotlib==3.9.1
-plotly==5.23.0
-kaleido==0.2.1
+# Using versions with guaranteed pre-built wheels for Python 3.13
+numpy>=2.0.0,<3.0.0  # Python 3.13 compatible with pre-built wheels
+pandas>=2.2.0  # Will use latest with pre-built wheels
+xarray>=2024.0.0
+netCDF4>=1.6.0  # More flexible version
+scipy>=1.13.0  # Required by xarray/matplotlib
+matplotlib>=3.8.0
+plotly>=5.18.0
+kaleido>=0.2.0
 
 # FastAPI service (for RAG pipeline) - Python 3.13 compatible
 fastapi==0.109.0
