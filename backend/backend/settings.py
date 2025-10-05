@@ -214,7 +214,8 @@ CORS_ALLOWED_ORIGINS = [
 
 # CORS configuration for different environments
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = os.environ.get("CORS_ALLOW_ALL_ORIGINS", "False").lower() == "true"
+# EMERGENCY: Temporarily allow all origins for hackathon
+CORS_ALLOW_ALL_ORIGINS = True  # TODO: Revert after hackathon
 
 # Emergency CORS fix - Allow Vercel origins with pattern matching
 CORS_ALLOWED_ORIGIN_REGEXES = [
