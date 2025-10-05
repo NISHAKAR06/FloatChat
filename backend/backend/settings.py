@@ -223,6 +223,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # CORS configuration for different environments
+print("🔥🔥🔥 CORS_ALLOW_ALL_ORIGINS = True 🔥🔥🔥")  # VISIBLE IN LOGS
 CORS_ALLOW_CREDENTIALS = True
 # EMERGENCY: Temporarily allow all origins for hackathon
 CORS_ALLOW_ALL_ORIGINS = True  # TODO: Revert after hackathon
