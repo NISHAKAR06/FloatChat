@@ -11,8 +11,8 @@ logger = logging.getLogger(__name__)
 def create_fallback_config() -> Config:
     """Create configuration with fallback database settings"""
 
-    # Try to use environment database first
-    db_uri = os.getenv("DATABASE_URI")
+    # Try to use environment database first (check both DATABASE_URI and DATABASE_URL)
+    db_uri = os.getenv("DATABASE_URI") or os.getenv("DATABASE_URL")
 
     if db_uri:
         try:

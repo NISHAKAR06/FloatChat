@@ -21,9 +21,10 @@ class DatabaseManager:
     '''Database manager for ARGO profiles with vector operations - using raw SQL'''
 
     def __init__(self, database_uri: Optional[str] = None):
-        self.database_uri = database_uri or os.getenv("DATABASE_URI")
+        # Check both DATABASE_URI and DATABASE_URL (Render uses DATABASE_URL)
+        self.database_uri = database_uri or os.getenv("DATABASE_URI") or os.getenv("DATABASE_URL")
         if not self.database_uri:
-            raise ValueError("DATABASE_URI not found in environment variables")
+            raise ValueError("DATABASE_URI or DATABASE_URL not found in environment variables")
 
         self.engine = create_engine(self.database_uri)
         logger.info("Database connection established")
