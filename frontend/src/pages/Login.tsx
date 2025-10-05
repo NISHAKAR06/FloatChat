@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Waves, Eye, EyeOff } from 'lucide-react';
+import { Waves, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 
@@ -17,6 +17,7 @@ const Login = () => {
   
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -25,6 +26,7 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       if (isLogin) {
@@ -86,6 +88,8 @@ const Login = () => {
         description: "Network error. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -178,8 +182,16 @@ const Login = () => {
                 type="submit" 
                 className="w-full bg-gradient-ocean hover:opacity-90 transition-opacity"
                 size="lg"
+                disabled={isLoading}
               >
-                {isLogin ? t('auth.login') : t('auth.signup')}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isLogin ? 'Logging in...' : 'Creating account...'}
+                  </>
+                ) : (
+                  isLogin ? t('auth.login') : t('auth.signup')
+                )}
               </Button>
             </form>
             
