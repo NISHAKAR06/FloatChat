@@ -115,6 +115,7 @@ def setup_psycopg2_compat():
                 """Mock ConnectionInfo object for psycopg2cffi compatibility"""
                 def __init__(self, connection):
                     self._connection = connection
+                    self._params = {}
                 
                 @property
                 def server_version(self):
@@ -137,6 +138,24 @@ def setup_psycopg2_compat():
                         return 130000  # Default to PostgreSQL 13.0
                     except:
                         return 130000  # Default to PostgreSQL 13.0
+                
+                def parameter_status(self, param_name):
+                    """Get connection parameter status (like TimeZone, client_encoding, etc.)"""
+                    try:
+                        cursor = self._connection.cursor()
+                        cursor.execute(f"SHOW {param_name}")
+                        result = cursor.fetchone()[0]
+                        cursor.close()
+                        return result
+                    except:
+                        # Return sensible defaults
+                        defaults = {
+                            'TimeZone': 'UTC',
+                            'client_encoding': 'UTF8',
+                            'server_encoding': 'UTF8',
+                            'server_version': '13.0',
+                        }
+                        return defaults.get(param_name, '')
             
             # Store original __init__
             original_init = Connection.__init__
