@@ -211,10 +211,12 @@ const Login = () => {
             
             {/* Demo credentials hint */}
             {isLogin && (
-              <div className="mt-6 p-3 bg-muted/50 rounded-lg border">
-                <p className="text-xs text-muted-foreground text-center">
-                  Demo: Use any email/password to register, or login as admin@oceanic.ai / admin123
-                </p>
+              <div className="mt-6 p-3 bg-muted/50 rounded-lg border space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground">Demo Accounts:</p>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>👤 <strong>Admin:</strong> admin@oceanic.ai / admin123</p>
+                  <p>👤 <strong>User:</strong> user@oceanic.ai / user123</p>
+                </div>
               </div>
             )}
           </CardContent>

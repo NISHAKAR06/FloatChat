@@ -219,9 +219,9 @@ export const api = {
   },
 
   // Datasets
-  getDatasets: () => apiClient.get('/datasets/datasets/'),
+  getDatasets: () => apiClient.get('/api/datasets/datasets/'),
   uploadNetCDF: (formData: FormData) => {
-    return fetch(`${API_BASE_URL}/datasets/upload-netcdf/`, {
+    return fetch(`${API_BASE_URL}/api/datasets/upload-netcdf/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -229,6 +229,6 @@ export const api = {
       body: formData,
     }).then(res => res.json());
   },
-  getDatasetStatus: (id: string) => apiClient.get(`/datasets/dataset-status/${id}/`),
-  getDatasetMetadata: (id: string) => apiClient.get(`/datasets/dataset-metadata/${id}/`),
+  getDatasetStatus: (id: string) => apiClient.get(`/api/datasets/dataset-status/${id}/`),
+  getDatasetMetadata: (id: string) => apiClient.get(`/api/datasets/dataset-metadata/${id}/`),
 };

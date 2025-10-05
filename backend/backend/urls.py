@@ -48,10 +48,45 @@ def create_admin_user(request):
             'message': str(e)
         }, status=500)
 
+def create_demo_user(request):
+    """Create default demo user - ONE TIME SETUP ONLY"""
+    from auth_app.models import CustomUser
+    try:
+        # Check if demo user already exists
+        if CustomUser.objects.filter(email='user@oceanic.ai').exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Demo user already exists'
+            }, status=400)
+        
+        demo_user = CustomUser.objects.create_user(
+            username='demo_user',
+            email='user@oceanic.ai',
+            password='user123'
+        )
+        demo_user.role = 'user'
+        demo_user.save()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Demo user created successfully',
+            'credentials': {
+                'username': 'demo_user',
+                'email': 'user@oceanic.ai',
+                'password': 'user123'
+            }
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health_check),
     path("setup-admin/", create_admin_user),  # ONE-TIME setup endpoint
+    path("setup-user/", create_demo_user),     # ONE-TIME demo user setup
     path("api/auth/", include("auth_app.urls")),
     path("api/admin/", include("admin_app.urls")),
     path("api/datasets/", include("dataset_app.urls")),
