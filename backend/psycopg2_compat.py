@@ -106,6 +106,49 @@ def setup_psycopg2_compat():
             psycopg2.ProgrammingError = ProgrammingError
             psycopg2.NotSupportedError = NotSupportedError
         
+        # Patch Connection class to add 'info' attribute
+        # Django's PostgreSQL backend expects connection.info.server_version
+        from psycopg2cffi._impl.connection import Connection
+        
+        if not hasattr(Connection, 'info'):
+            class ConnectionInfo:
+                """Mock ConnectionInfo object for psycopg2cffi compatibility"""
+                def __init__(self, connection):
+                    self._connection = connection
+                
+                @property
+                def server_version(self):
+                    """Get PostgreSQL server version"""
+                    try:
+                        # Get version from the connection
+                        cursor = self._connection.cursor()
+                        cursor.execute("SELECT version()")
+                        version_string = cursor.fetchone()[0]
+                        cursor.close()
+                        
+                        # Parse version number from string like "PostgreSQL 13.2..."
+                        import re
+                        match = re.search(r'PostgreSQL (\d+)\.(\d+)', version_string)
+                        if match:
+                            major = int(match.group(1))
+                            minor = int(match.group(2))
+                            # Return as integer: major * 10000 + minor * 100
+                            return major * 10000 + minor * 100
+                        return 130000  # Default to PostgreSQL 13.0
+                    except:
+                        return 130000  # Default to PostgreSQL 13.0
+            
+            # Store original __init__
+            original_init = Connection.__init__
+            
+            def patched_init(self, *args, **kwargs):
+                """Patched __init__ to add info attribute"""
+                original_init(self, *args, **kwargs)
+                self.info = ConnectionInfo(self)
+            
+            # Apply patch
+            Connection.__init__ = patched_init
+        
         return True
         
     except ImportError as e:
