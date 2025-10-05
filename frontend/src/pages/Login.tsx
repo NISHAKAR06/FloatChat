@@ -34,8 +34,9 @@ const Login = () => {
         const result = await api.login(formData.email, formData.password);
 
         if (result.status === 200 && result.data) {
-          // Check if user is admin
-          const isAdmin = formData.email === 'admin@oceanic.ai' || result.data.is_admin;
+          // Check if user is admin from the response
+          const userRole = result.data.user?.role || 'user';
+          const isAdmin = userRole === 'admin';
 
           toast({
             title: "Success",
