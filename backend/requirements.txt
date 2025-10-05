@@ -13,6 +13,7 @@ gunicorn==20.1.0
 # PostgreSQL
 psycopg2cffi==2.9.0  # Pure Python PostgreSQL adapter (works with Python 3.13)
 dj-database-url==2.1.0  # For PostgreSQL connection URLs
+sqlalchemy==2.0.32  # Required for FastAPI database operations
 
 # ARGO Chat Dependencies - Required for chat functionality (Python 3.13 compatible)
 numpy>=1.26.0,<2.0.0
