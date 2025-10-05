@@ -9,8 +9,7 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
 
 # Register psycopg2cffi as psycopg2 before any Django imports
 try:
-    from psycopg2cffi import compat
-    compat.register()
+    import psycopg2_compat
 except ImportError:
     pass
 
