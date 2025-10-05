@@ -187,11 +187,21 @@ if not DEBUG:
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-# Pre-build matplotlib font cache to prevent worker timeout
+# CRITICAL: Speed up matplotlib by skipping font cache rebuild
+os.environ['MPLCONFIGDIR'] = '/tmp/matplotlib'  # Use temp directory
+os.environ['MPLBACKEND'] = 'Agg'  # Non-interactive backend
+# Skip font cache completely - use default fonts only
 import matplotlib
-matplotlib.use('Agg')  # Non-interactive backend
+matplotlib.use('Agg', force=True)
+matplotlib.rcParams['font.family'] = 'DejaVu Sans'  # Use default font only
+matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans']  # Single font
+matplotlib.rcParams['axes.unicode_minus'] = False  # Skip special chars
 import matplotlib.pyplot as plt
 plt.ioff()  # Turn off interactive mode
+# Force use of existing font cache without rebuild
+import matplotlib.font_manager
+matplotlib.font_manager.fontManager.findfont('DejaVu Sans', rebuild_if_missing=False)
+logger.info("✅ Matplotlib configured with fast font loading (no rebuild)")
 
 AUTH_USER_MODEL = "auth_app.CustomUser"
 
