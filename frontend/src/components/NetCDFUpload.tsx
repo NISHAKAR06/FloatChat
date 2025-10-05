@@ -86,7 +86,8 @@ const NetCDFUpload: React.FC = () => {
       formData.append('file', selectedFile);
 
       // Upload file
-      const response = await fetch('/api/datasets/upload-netcdf/', {
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || '';
+      const response = await fetch(`${API_BASE_URL}/api/datasets/upload-netcdf/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,

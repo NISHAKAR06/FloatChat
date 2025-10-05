@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 import {
   MessageSquare,
   Send,
@@ -24,7 +28,15 @@ import {
   Menu,
   ArrowLeft,
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Rectangle } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ResponsiveContainer,
+  Rectangle,
+} from "recharts";
 import { useIsMobile, useIsTablet, useDeviceType } from "@/hooks/use-mobile";
 
 interface Message {
@@ -202,12 +214,12 @@ const Chatbot = () => {
     chatId?: string
   ): Promise<void> => {
     try {
-      console.log(
-        "🔗 Making HTTP request to Django endpoint:",
-        "/api/chat/argo/query/"
-      );
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
+      const endpoint = `${API_BASE_URL}/api/chat/argo/query/`;
 
-      const response = await fetch("/api/chat/argo/query/", {
+      console.log("🔗 Making HTTP request to Django endpoint:", endpoint);
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -487,9 +499,9 @@ const Chatbot = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-3 mb-4">
-                      <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
-                          <MessageSquare className="h-8 w-8 text-white" />
-                        </div>
+            <div className="p-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-lg">
+              <MessageSquare className="h-8 w-8 text-white" />
+            </div>
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-3">
             AI Ocean Analyst
@@ -591,9 +603,9 @@ const Chatbot = () => {
                 }}
               >
                 <div className="flex items-start gap-3">
-                              <div className="p-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-300">
-                                <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                              </div>
+                  <div className="p-2 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-lg group-hover:from-blue-500/20 group-hover:to-purple-500/20 transition-all duration-300">
+                    <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100 leading-relaxed">
                     {prompt}
                   </span>
@@ -628,8 +640,12 @@ const Chatbot = () => {
       {/* Sidebar */}
       <div
         className={`bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-slate-200/50 dark:border-slate-700/50 transition-all duration-300 shadow-xl ${
-          sidebarCollapsed ? (isMobile ? "-translate-x-full" : "w-0 overflow-hidden") : "w-80"
-        } ${isMobile ? 'fixed left-0 top-0 h-full z-40' : ''}`}
+          sidebarCollapsed
+            ? isMobile
+              ? "-translate-x-full"
+              : "w-0 overflow-hidden"
+            : "w-80"
+        } ${isMobile ? "fixed left-0 top-0 h-full z-40" : ""}`}
       >
         <div className="h-full flex flex-col">
           {/* Sidebar Header */}
@@ -727,13 +743,12 @@ const Chatbot = () => {
               <ChevronRight className="h-4 w-4" />
             </Button>
             <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                 <MessageSquare className="h-5 w-5 text-white" />
               </div>
               <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">
                 ARGO Float Data Chatbot
               </CardTitle>
-
             </div>
             <div className="w-10"></div> {/* Spacer for centering */}
           </div>
@@ -743,7 +758,7 @@ const Chatbot = () => {
         {!sidebarCollapsed && (
           <div className="border-b border-slate-200/50 dark:border-slate-700/50 p-4 bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm">
             <div className="flex items-center justify-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
                 <MessageSquare className="h-5 w-5 text-white" />
               </div>
               <CardTitle className="text-xl font-bold text-slate-800 dark:text-slate-100">
@@ -1024,22 +1039,58 @@ const Chatbot = () => {
                                               }}
                                               className="h-full w-full"
                                             >
-                                              <ResponsiveContainer width="100%" height="100%">
+                                              <ResponsiveContainer
+                                                width="100%"
+                                                height="100%"
+                                              >
                                                 <BarChart
-                                                  data={[{ name: "Total Profiles", value: msg.statistics.total_profiles }]}
-                                                  margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+                                                  data={[
+                                                    {
+                                                      name: "Total Profiles",
+                                                      value:
+                                                        msg.statistics
+                                                          .total_profiles,
+                                                    },
+                                                  ]}
+                                                  margin={{
+                                                    top: 10,
+                                                    right: 10,
+                                                    left: 10,
+                                                    bottom: 10,
+                                                  }}
                                                 >
                                                   <defs>
-                                                    <linearGradient id="profileGradient" x1="0" y1="0" x2="0" y2="1">
-                                                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9}/>
-                                                      <stop offset="50%" stopColor="#6366f1" stopOpacity={0.7}/>
-                                                      <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.5}/>
+                                                    <linearGradient
+                                                      id="profileGradient"
+                                                      x1="0"
+                                                      y1="0"
+                                                      x2="0"
+                                                      y2="1"
+                                                    >
+                                                      <stop
+                                                        offset="0%"
+                                                        stopColor="#3b82f6"
+                                                        stopOpacity={0.9}
+                                                      />
+                                                      <stop
+                                                        offset="50%"
+                                                        stopColor="#6366f1"
+                                                        stopOpacity={0.7}
+                                                      />
+                                                      <stop
+                                                        offset="100%"
+                                                        stopColor="#8b5cf6"
+                                                        stopOpacity={0.5}
+                                                      />
                                                     </linearGradient>
                                                     <filter id="glow">
-                                                      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                                                      <feGaussianBlur
+                                                        stdDeviation="3"
+                                                        result="coloredBlur"
+                                                      />
                                                       <feMerge>
-                                                        <feMergeNode in="coloredBlur"/>
-                                                        <feMergeNode in="SourceGraphic"/>
+                                                        <feMergeNode in="coloredBlur" />
+                                                        <feMergeNode in="SourceGraphic" />
                                                       </feMerge>
                                                     </filter>
                                                   </defs>
@@ -1054,8 +1105,8 @@ const Chatbot = () => {
                                                     tickLine={false}
                                                     tick={{
                                                       fontSize: 11,
-                                                      fill: 'rgb(100, 116, 139)',
-                                                      fontWeight: 500
+                                                      fill: "rgb(100, 116, 139)",
+                                                      fontWeight: 500,
                                                     }}
                                                     dy={10}
                                                   />
@@ -1064,13 +1115,17 @@ const Chatbot = () => {
                                                     tickLine={false}
                                                     tick={{
                                                       fontSize: 10,
-                                                      fill: 'rgb(100, 116, 139)'
+                                                      fill: "rgb(100, 116, 139)",
                                                     }}
                                                     dx={-5}
                                                   />
                                                   <ChartTooltip
-                                                    content={<ChartTooltipContent />}
-                                                    cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+                                                    content={
+                                                      <ChartTooltipContent />
+                                                    }
+                                                    cursor={{
+                                                      fill: "rgba(59, 130, 246, 0.1)",
+                                                    }}
                                                   />
                                                   <Bar
                                                     dataKey="value"
@@ -1107,13 +1162,33 @@ const Chatbot = () => {
                                           <div className="relative h-36 bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/50 dark:from-slate-800 dark:via-slate-700/50 dark:to-slate-600/30 rounded-xl border border-slate-200/60 dark:border-slate-600/60 overflow-hidden shadow-inner">
                                             {/* Enhanced World Map Background */}
                                             <div className="absolute inset-0 opacity-20">
-                                              <svg viewBox="0 0 800 400" className="w-full h-full">
+                                              <svg
+                                                viewBox="0 0 800 400"
+                                                className="w-full h-full"
+                                              >
                                                 <defs>
-                                                  <pattern id="worldPattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                                                    <circle cx="20" cy="20" r="1" fill="currentColor" opacity="0.3"/>
+                                                  <pattern
+                                                    id="worldPattern"
+                                                    x="0"
+                                                    y="0"
+                                                    width="40"
+                                                    height="40"
+                                                    patternUnits="userSpaceOnUse"
+                                                  >
+                                                    <circle
+                                                      cx="20"
+                                                      cy="20"
+                                                      r="1"
+                                                      fill="currentColor"
+                                                      opacity="0.3"
+                                                    />
                                                   </pattern>
                                                 </defs>
-                                                <rect width="100%" height="100%" fill="url(#worldPattern)"/>
+                                                <rect
+                                                  width="100%"
+                                                  height="100%"
+                                                  fill="url(#worldPattern)"
+                                                />
                                               </svg>
                                             </div>
 
@@ -1122,28 +1197,68 @@ const Chatbot = () => {
 
                                             {/* Coverage Area with Enhanced Styling */}
                                             {(() => {
-                                              const coverage = msg.statistics.geographic_coverage;
-                                              if (coverage && coverage.lat_range && coverage.lon_range) {
-                                                const [minLat, maxLat] = coverage.lat_range;
-                                                const [minLon, maxLon] = coverage.lon_range;
+                                              const coverage =
+                                                msg.statistics
+                                                  .geographic_coverage;
+                                              if (
+                                                coverage &&
+                                                coverage.lat_range &&
+                                                coverage.lon_range
+                                              ) {
+                                                const [minLat, maxLat] =
+                                                  coverage.lat_range;
+                                                const [minLon, maxLon] =
+                                                  coverage.lon_range;
 
                                                 // Enhanced positioning for better visualization
-                                                const centerLat = (minLat + maxLat) / 2;
-                                                const centerLon = (minLon + maxLon) / 2;
-                                                const latRange = maxLat - minLat;
-                                                const lonRange = maxLon - minLon;
+                                                const centerLat =
+                                                  (minLat + maxLat) / 2;
+                                                const centerLon =
+                                                  (minLon + maxLon) / 2;
+                                                const latRange =
+                                                  maxLat - minLat;
+                                                const lonRange =
+                                                  maxLon - minLon;
 
                                                 return (
                                                   <div className="absolute animate-pulse">
                                                     <div
                                                       className="absolute bg-gradient-to-br from-emerald-400/70 via-teal-400/60 to-cyan-400/50 border-2 border-emerald-300/80 rounded-lg shadow-2xl backdrop-blur-sm"
                                                       style={{
-                                                        left: `${25 + (centerLon + 180) * 50 / 360}%`,
-                                                        top: `${25 + (90 - centerLat) * 50 / 180}%`,
-                                                        width: `${Math.max(Math.min(lonRange * 50 / 360 * 100, 50), 15)}%`,
-                                                        height: `${Math.max(Math.min(latRange * 50 / 180 * 100, 50), 15)}%`,
-                                                        transform: 'translate(-50%, -50%)',
-                                                        boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)'
+                                                        left: `${
+                                                          25 +
+                                                          ((centerLon + 180) *
+                                                            50) /
+                                                            360
+                                                        }%`,
+                                                        top: `${
+                                                          25 +
+                                                          ((90 - centerLat) *
+                                                            50) /
+                                                            180
+                                                        }%`,
+                                                        width: `${Math.max(
+                                                          Math.min(
+                                                            ((lonRange * 50) /
+                                                              360) *
+                                                              100,
+                                                            50
+                                                          ),
+                                                          15
+                                                        )}%`,
+                                                        height: `${Math.max(
+                                                          Math.min(
+                                                            ((latRange * 50) /
+                                                              180) *
+                                                              100,
+                                                            50
+                                                          ),
+                                                          15
+                                                        )}%`,
+                                                        transform:
+                                                          "translate(-50%, -50%)",
+                                                        boxShadow:
+                                                          "0 0 20px rgba(16, 185, 129, 0.3)",
                                                       }}
                                                     >
                                                       {/* Inner glow effect */}
@@ -1152,9 +1267,24 @@ const Chatbot = () => {
 
                                                     {/* Coverage indicators */}
                                                     <div className="absolute top-0 left-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"></div>
-                                                    <div className="absolute top-0 right-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50" style={{animationDelay: '0.5s'}}></div>
-                                                    <div className="absolute bottom-0 left-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50" style={{animationDelay: '1s'}}></div>
-                                                    <div className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50" style={{animationDelay: '1.5s'}}></div>
+                                                    <div
+                                                      className="absolute top-0 right-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"
+                                                      style={{
+                                                        animationDelay: "0.5s",
+                                                      }}
+                                                    ></div>
+                                                    <div
+                                                      className="absolute bottom-0 left-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"
+                                                      style={{
+                                                        animationDelay: "1s",
+                                                      }}
+                                                    ></div>
+                                                    <div
+                                                      className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"
+                                                      style={{
+                                                        animationDelay: "1.5s",
+                                                      }}
+                                                    ></div>
                                                   </div>
                                                 );
                                               }
@@ -1169,10 +1299,22 @@ const Chatbot = () => {
                                                 </div>
                                                 <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
                                                   <span>
-                                                    Lat: {msg.statistics.geographic_coverage?.lat_range?.map((n: number) => n.toFixed(1)).join('° - ')}°
+                                                    Lat:{" "}
+                                                    {msg.statistics.geographic_coverage?.lat_range
+                                                      ?.map((n: number) =>
+                                                        n.toFixed(1)
+                                                      )
+                                                      .join("° - ")}
+                                                    °
                                                   </span>
                                                   <span>
-                                                    Lon: {msg.statistics.geographic_coverage?.lon_range?.map((n: number) => n.toFixed(1)).join('° - ')}°
+                                                    Lon:{" "}
+                                                    {msg.statistics.geographic_coverage?.lon_range
+                                                      ?.map((n: number) =>
+                                                        n.toFixed(1)
+                                                      )
+                                                      .join("° - ")}
+                                                    °
                                                   </span>
                                                 </div>
                                               </div>
@@ -1183,44 +1325,65 @@ const Chatbot = () => {
                                     )}
 
                                     {/* Additional Statistics - Professional Cards */}
-                                    {Object.entries(msg.statistics).filter(([key]) =>
-                                      key !== 'total_profiles' && key !== 'geographic_coverage'
-                                    ).map(([key, value]: [string, any], index: number) => (
-                                      <div
-                                        key={key}
-                                        className="group lg:col-span-2"
-                                      >
-                                        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl p-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
-                                          <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                              <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${
-                                                index % 3 === 0 ? 'from-orange-400 to-red-400' :
-                                                index % 3 === 1 ? 'from-pink-400 to-purple-400' :
-                                                'from-cyan-400 to-blue-400'
-                                              } shadow-sm`}></div>
-                                              <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm capitalize">
-                                                {key.replace(/_/g, " ")}
-                                              </span>
-                                            </div>
-                                            <div className={`px-3 py-1 rounded-full border ${
-                                              index % 3 === 0 ? 'bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700' :
-                                              index % 3 === 1 ? 'bg-pink-50 border-pink-200 dark:bg-pink-900/20 dark:border-pink-700' :
-                                              'bg-cyan-50 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-700'
-                                            }`}>
-                                              <span className={`text-sm font-bold ${
-                                                index % 3 === 0 ? 'text-orange-700 dark:text-orange-300' :
-                                                index % 3 === 1 ? 'text-pink-700 dark:text-pink-300' :
-                                                'text-cyan-700 dark:text-cyan-300'
-                                              }`}>
-                                                {typeof value === "object"
-                                                  ? JSON.stringify(value)
-                                                  : value}
-                                              </span>
+                                    {Object.entries(msg.statistics)
+                                      .filter(
+                                        ([key]) =>
+                                          key !== "total_profiles" &&
+                                          key !== "geographic_coverage"
+                                      )
+                                      .map(
+                                        (
+                                          [key, value]: [string, any],
+                                          index: number
+                                        ) => (
+                                          <div
+                                            key={key}
+                                            className="group lg:col-span-2"
+                                          >
+                                            <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl p-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.01]">
+                                              <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                  <div
+                                                    className={`w-3 h-3 rounded-full bg-gradient-to-r ${
+                                                      index % 3 === 0
+                                                        ? "from-orange-400 to-red-400"
+                                                        : index % 3 === 1
+                                                        ? "from-pink-400 to-purple-400"
+                                                        : "from-cyan-400 to-blue-400"
+                                                    } shadow-sm`}
+                                                  ></div>
+                                                  <span className="font-semibold text-slate-800 dark:text-slate-100 text-sm capitalize">
+                                                    {key.replace(/_/g, " ")}
+                                                  </span>
+                                                </div>
+                                                <div
+                                                  className={`px-3 py-1 rounded-full border ${
+                                                    index % 3 === 0
+                                                      ? "bg-orange-50 border-orange-200 dark:bg-orange-900/20 dark:border-orange-700"
+                                                      : index % 3 === 1
+                                                      ? "bg-pink-50 border-pink-200 dark:bg-pink-900/20 dark:border-pink-700"
+                                                      : "bg-cyan-50 border-cyan-200 dark:bg-cyan-900/20 dark:border-cyan-700"
+                                                  }`}
+                                                >
+                                                  <span
+                                                    className={`text-sm font-bold ${
+                                                      index % 3 === 0
+                                                        ? "text-orange-700 dark:text-orange-300"
+                                                        : index % 3 === 1
+                                                        ? "text-pink-700 dark:text-pink-300"
+                                                        : "text-cyan-700 dark:text-cyan-300"
+                                                    }`}
+                                                  >
+                                                    {typeof value === "object"
+                                                      ? JSON.stringify(value)
+                                                      : value}
+                                                  </span>
+                                                </div>
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
-                                      </div>
-                                    ))}
+                                        )
+                                      )}
                                   </div>
                                 </div>
                               )}
@@ -1328,16 +1491,26 @@ const Chatbot = () => {
         </div>
 
         {/* Input Area */}
-        <div className={`border-t border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm ${
-          isMobile ? 'p-4' : 'p-6'
-        }`}>
-          <div className={`mx-auto ${isMobile ? 'max-w-full' : 'max-w-4xl'}`}>
-            <div className={`flex gap-4 items-end ${isMobile ? 'flex-col space-y-3' : ''}`}>
+        <div
+          className={`border-t border-slate-200/50 dark:border-slate-700/50 bg-white/30 dark:bg-slate-800/30 backdrop-blur-sm ${
+            isMobile ? "p-4" : "p-6"
+          }`}
+        >
+          <div className={`mx-auto ${isMobile ? "max-w-full" : "max-w-4xl"}`}>
+            <div
+              className={`flex gap-4 items-end ${
+                isMobile ? "flex-col space-y-3" : ""
+              }`}
+            >
               <div className="flex-1 relative w-full">
                 <Input
                   id="chatbot-message-input"
                   name="chatbot-message-input"
-                  placeholder={isMobile ? "Ask about ocean data..." : "Ask anything about ARGO ocean data..."}
+                  placeholder={
+                    isMobile
+                      ? "Ask about ocean data..."
+                      : "Ask anything about ARGO ocean data..."
+                  }
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyPress={(e) =>
@@ -1347,8 +1520,8 @@ const Chatbot = () => {
                   onBlur={() => setIsInputFocused(false)}
                   className={`bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 rounded-xl px-4 text-sm focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 ${
                     isMobile
-                      ? 'py-4 pr-12 text-base min-h-[48px]' // Larger touch targets for mobile
-                      : 'py-3 pr-12'
+                      ? "py-4 pr-12 text-base min-h-[48px]" // Larger touch targets for mobile
+                      : "py-3 pr-12"
                   }`}
                 />
                 {!isMobile && (
@@ -1362,8 +1535,8 @@ const Chatbot = () => {
                 disabled={!message.trim()}
                 className={`bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
                   isMobile
-                    ? 'w-full py-4 text-base min-h-[48px] rounded-xl' // Full width and larger on mobile
-                    : 'px-6 py-3 rounded-xl'
+                    ? "w-full py-4 text-base min-h-[48px] rounded-xl" // Full width and larger on mobile
+                    : "px-6 py-3 rounded-xl"
                 }`}
               >
                 <Send className="h-4 w-4 mr-2" />

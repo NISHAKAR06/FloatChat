@@ -67,7 +67,8 @@ const AdminDashboard = () => {
   const fetchRecentUploads = async () => {
     setLoadingUploads(true);
     try {
-      const response = await fetch("/api/datasets/datasets/", {
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
+      const response = await fetch(`${API_BASE_URL}/api/datasets/datasets/`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           "Content-Type": "application/json",
