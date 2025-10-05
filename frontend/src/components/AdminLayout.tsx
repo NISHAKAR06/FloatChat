@@ -1,27 +1,19 @@
-import React from 'react';
-import { clearAuthData } from '@/lib/auth';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { clearAuthData } from "@/lib/auth";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  LogOut,
-  User,
-  Globe,
-  Monitor,
-  Moon,
-  Sun,
-  Waves
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import AdminSidebar from './AdminSidebar';
+} from "@/components/ui/dropdown-menu";
+import { LogOut, User, Globe, Monitor, Moon, Sun, Waves } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import AdminSidebar from "./AdminSidebar";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -33,16 +25,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
 
   const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'hi', name: 'हिंदी' },
-    { code: 'ta', name: 'தமிழ்' },
+    { code: "en", name: "English" },
+    { code: "hi", name: "हिंदी" },
+    { code: "ta", name: "தமிழ்" },
   ];
 
   const getThemeIcon = () => {
     switch (theme) {
-      case 'dark':
+      case "dark":
         return <Moon className="h-4 w-4" />;
-      case 'light':
+      case "light":
         return <Sun className="h-4 w-4" />;
       default:
         return <Monitor className="h-4 w-4" />;
@@ -70,9 +62,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* Language Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300"
+                  >
                     <Globe className="h-4 w-4" />
-                    <span className="ml-2 hidden md:inline">{language.toUpperCase()}</span>
+                    <span className="ml-2 hidden md:inline">
+                      {language.toUpperCase()}
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -80,7 +78,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                     <DropdownMenuItem
                       key={lang.code}
                       onClick={() => setLanguage(lang.code as any)}
-                      className={`${language === lang.code ? 'bg-primary/20 text-primary-foreground' : 'text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300'}`}
+                      className={`${
+                        language === lang.code
+                          ? "bg-primary/20 text-primary-foreground"
+                          : "text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300"
+                      }`}
                     >
                       {lang.name}
                     </DropdownMenuItem>
@@ -91,22 +93,35 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* Theme Selector */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300"
+                  >
                     {getThemeIcon()}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setTheme('light')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
+                  <DropdownMenuItem
+                    onClick={() => setTheme("light")}
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300"
+                  >
                     <Sun className="h-4 w-4 mr-2" />
-                    {t('settings.light')}
+                    {t("settings.light")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('dark')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
+                  <DropdownMenuItem
+                    onClick={() => setTheme("dark")}
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300"
+                  >
                     <Moon className="h-4 w-4 mr-2" />
-                    {t('settings.dark')}
+                    {t("settings.dark")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setTheme('system')} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
+                  <DropdownMenuItem
+                    onClick={() => setTheme("system")}
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300"
+                  >
                     <Monitor className="h-4 w-4 mr-2" />
-                    {t('settings.system')}
+                    {t("settings.system")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -114,30 +129,35 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               {/* User Actions */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 hover:shadow-md transition-all duration-300"
+                  >
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => {
-                    // Clear all authentication data
-                    clearAuthData();
+                  <DropdownMenuItem
+                    onClick={() => {
+                      // Clear all authentication data
+                      clearAuthData();
 
-                    // Redirect to login page
-                    navigate('/login');
-                  }} className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300">
+                      // Redirect to login page
+                      navigate("/login");
+                    }}
+                    className="text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300"
+                  >
                     <LogOut className="h-4 w-4 mr-2" />
-                    {t('navigation.logout')}
+                    {t("navigation.logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </header>
           <div className="flex-1 overflow-auto">
-            <div className="h-full p-4">
-              {children}
-            </div>
+            <div className="h-full p-4">{children}</div>
           </div>
         </SidebarInset>
       </SidebarProvider>
