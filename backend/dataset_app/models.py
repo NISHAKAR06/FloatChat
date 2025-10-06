@@ -85,11 +85,12 @@ def create_vector_tables():
                     CREATE TABLE IF NOT EXISTS datasets (
                         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                         filename TEXT NOT NULL,
+                        file_path TEXT,
                         upload_time TIMESTAMP DEFAULT now(),
                         status TEXT DEFAULT 'uploaded',
                         variables TEXT[],
                         dimensions JSONB,
-                        uploaded_by UUID REFERENCES auth_app_customuser(id) ON DELETE CASCADE
+                        uploaded_by_id UUID REFERENCES auth_app_customuser(id) ON DELETE CASCADE
                     );
                 """)
 

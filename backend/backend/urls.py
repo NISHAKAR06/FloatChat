@@ -1,4 +1,6 @@
-from django.contrib import admin
+from django.contrib    try:
+        # Check if admin already exists
+        if CustomUser.objects.filter(email='admin@floatchat.in').exists():port admin
 from django.urls import path, include
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import (
@@ -19,7 +21,7 @@ def create_admin_user(request):
     from auth_app.models import CustomUser
     try:
         # Check if any admin already exists
-        if CustomUser.objects.filter(email='admin@oceanic.ai').exists():
+        if CustomUser.objects.filter(email='admin@floatchat.in').exists():
             return JsonResponse({
                 'status': 'error',
                 'message': 'Admin user already exists'
@@ -27,7 +29,7 @@ def create_admin_user(request):
         
         admin_user = CustomUser.objects.create_superuser(
             username='admin',
-            email='admin@oceanic.ai',
+            email='admin@floatchat.in',
             password='admin123'
         )
         admin_user.role = 'admin'
@@ -38,7 +40,7 @@ def create_admin_user(request):
             'message': 'Admin user created successfully',
             'credentials': {
                 'username': 'admin',
-                'email': 'admin@oceanic.ai',
+                'email': 'admin@floatchat.in',
                 'password': 'admin123'
             }
         })
@@ -53,7 +55,7 @@ def create_demo_user(request):
     from auth_app.models import CustomUser
     try:
         # Check if demo user already exists
-        if CustomUser.objects.filter(email='user@oceanic.ai').exists():
+        if CustomUser.objects.filter(email='user@floatchat.in').exists():
             return JsonResponse({
                 'status': 'error',
                 'message': 'Demo user already exists'
@@ -61,7 +63,7 @@ def create_demo_user(request):
         
         demo_user = CustomUser.objects.create_user(
             username='demo_user',
-            email='user@oceanic.ai',
+            email='user@floatchat.in',
             password='user123'
         )
         demo_user.role = 'user'
@@ -72,7 +74,7 @@ def create_demo_user(request):
             'message': 'Demo user created successfully',
             'credentials': {
                 'username': 'demo_user',
-                'email': 'user@oceanic.ai',
+                'email': 'user@floatchat.in',
                 'password': 'user123'
             }
         })

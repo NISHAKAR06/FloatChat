@@ -1,27 +1,33 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { useNavigate, Link } from 'react-router-dom';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { Waves, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { api } from '@/lib/api';
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { useNavigate, Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Waves, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { api } from "@/lib/api";
 
 const Login = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { toast } = useToast();
-  
+
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
+    email: "",
+    password: "",
+    confirmPassword: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,19 +41,19 @@ const Login = () => {
 
         if (result.status === 200 && result.data) {
           // Check if user is admin from the response
-          const userRole = result.data.user?.role || 'user';
-          const isAdmin = userRole === 'admin';
+          const userRole = result.data.user?.role || "user";
+          const isAdmin = userRole === "admin";
 
           toast({
             title: "Success",
-            description: `Logged in successfully${isAdmin ? ' as Admin' : ''}`,
+            description: `Logged in successfully${isAdmin ? " as Admin" : ""}`,
           });
 
           // Navigate based on user role
           if (isAdmin) {
-            navigate('/admin');
+            navigate("/admin");
           } else {
-            navigate('/dashboard');
+            navigate("/dashboard");
           }
         } else {
           toast({
@@ -74,7 +80,7 @@ const Login = () => {
             title: "Success",
             description: "Account created successfully",
           });
-          navigate('/dashboard');
+          navigate("/dashboard");
         } else {
           toast({
             title: "Error",
@@ -95,9 +101,9 @@ const Login = () => {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -110,39 +116,36 @@ const Login = () => {
               <Waves className="h-10 w-10 text-primary" />
             </div>
             <CardTitle className="text-2xl font-bold">
-              {isLogin ? t('auth.login') : t('auth.signup')}
+              {isLogin ? t("auth.login") : t("auth.signup")}
             </CardTitle>
             <CardDescription>
-              {isLogin
-                ? t('auth.welcomeBack')
-                : t('auth.createAccount')
-              }
+              {isLogin ? t("auth.welcomeBack") : t("auth.createAccount")}
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">{t('auth.email')}</Label>
+                <Label htmlFor="email">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  placeholder={t('auth.emailPlaceholder')}
+                  placeholder={t("auth.emailPlaceholder")}
                   required
                   className="bg-background/50 backdrop-blur-sm"
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="password">{t('auth.password')}</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleInputChange}
                     required
@@ -163,14 +166,16 @@ const Login = () => {
                   </Button>
                 </div>
               </div>
-              
+
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
+                  <Label htmlFor="confirmPassword">
+                    {t("auth.confirmPassword")}
+                  </Label>
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     required
@@ -178,9 +183,9 @@ const Login = () => {
                   />
                 </div>
               )}
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full bg-gradient-ocean hover:opacity-90 transition-opacity"
                 size="lg"
                 disabled={isLoading}
@@ -188,47 +193,55 @@ const Login = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {isLogin ? 'Logging in...' : 'Creating account...'}
+                    {isLogin ? "Logging in..." : "Creating account..."}
                   </>
+                ) : isLogin ? (
+                  t("auth.login")
                 ) : (
-                  isLogin ? t('auth.login') : t('auth.signup')
+                  t("auth.signup")
                 )}
               </Button>
             </form>
-            
+
             {isLogin && (
               <div className="mt-4 text-center">
-                <Link 
-                  to="/forgot-password" 
+                <Link
+                  to="/forgot-password"
                   className="text-sm text-primary hover:underline"
                 >
-                  {t('auth.forgotPassword')}
+                  {t("auth.forgotPassword")}
                 </Link>
               </div>
             )}
-            
+
             <Separator className="my-6" />
-            
+
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
-                {isLogin ? t('auth.noAccount') : t('auth.hasAccount')}
+                {isLogin ? t("auth.noAccount") : t("auth.hasAccount")}
               </p>
               <Button
                 variant="link"
                 onClick={() => setIsLogin(!isLogin)}
                 className="mt-1"
               >
-                {isLogin ? t('auth.signup') : t('auth.login')}
+                {isLogin ? t("auth.signup") : t("auth.login")}
               </Button>
             </div>
-            
+
             {/* Demo credentials hint */}
             {isLogin && (
               <div className="mt-6 p-3 bg-muted/50 rounded-lg border space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground">Demo Accounts:</p>
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Demo Accounts:
+                </p>
                 <div className="text-xs text-muted-foreground space-y-1">
-                  <p>👤 <strong>Admin:</strong> admin@oceanic.ai / admin123</p>
-                  <p>👤 <strong>User:</strong> user@oceanic.ai / user123</p>
+                  <p>
+                    👤 <strong>Admin:</strong> admin@floatchat.in / admin123
+                  </p>
+                  <p>
+                    👤 <strong>User:</strong> user@floatchat.in / user123
+                  </p>
                 </div>
               </div>
             )}
