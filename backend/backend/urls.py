@@ -52,12 +52,8 @@ def create_demo_user(request):
     """Create default demo user - ONE TIME SETUP ONLY"""
     from auth_app.models import CustomUser
     try:
-        # Check if demo user already exists
-        if CustomUser.objects.filter(email='user@floatchat.in').exists():
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Demo user already exists'
-            }, status=400)
+        # Delete existing user with this email if exists
+        CustomUser.objects.filter(email='user@floatchat.in').delete()
         
         demo_user = CustomUser.objects.create_user(
             username='demo_user',
@@ -82,11 +78,27 @@ def create_demo_user(request):
             'message': str(e)
         }, status=500)
 
+def list_users(request):
+    """List all users - DEBUGGING ONLY"""
+    from auth_app.models import CustomUser
+    users = CustomUser.objects.all()
+    users_data = [{
+        'username': u.username,
+        'email': u.email,
+        'role': u.role,
+        'is_active': u.is_active
+    } for u in users]
+    return JsonResponse({
+        'total': users.count(),
+        'users': users_data
+    })
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health_check),
     path("setup-admin/", create_admin_user),
     path("setup-user/", create_demo_user),
+    path("list-users/", list_users),  # Debug endpoint
     path("api/auth/", include("auth_app.urls")),
     path("api/admin/", include("admin_app.urls")),
     path("api/chat/", include("chat_app.urls")),
