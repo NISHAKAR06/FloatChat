@@ -237,10 +237,13 @@ const Login = () => {
                 </p>
                 <div className="text-xs text-muted-foreground space-y-1">
                   <p>
-                    👤 <strong>Admin:</strong> admin@floatchat.in / admin123
+                    👤 <strong>Admin:</strong> admin@oceanic.ai / admin123
                   </p>
                   <p>
-                    👤 <strong>User:</strong> user@floatchat.in / user123
+                    👤 <strong>User:</strong> user@oceanic.ai / user123
+                  </p>
+                  <p className="text-yellow-600 mt-2">
+                    ⚠️ Email migration in progress - use @oceanic.ai for now
                   </p>
                 </div>
               </div>
