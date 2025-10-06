@@ -93,12 +93,52 @@ def list_users(request):
         'users': users_data
     })
 
+def update_user_emails(request):
+    """Update user emails from @oceanic.ai to @floatchat.in"""
+    from auth_app.models import CustomUser
+    updated = []
+    
+    # Update admin
+    try:
+        admin_users = CustomUser.objects.filter(email='admin@oceanic.ai')
+        for admin in admin_users:
+            admin.email = 'admin@floatchat.in'
+            admin.save()
+            updated.append(f'Updated admin: {admin.username} -> {admin.email}')
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    # Update demo user
+    try:
+        demo_users = CustomUser.objects.filter(email='user@oceanic.ai')
+        for demo in demo_users:
+            demo.email = 'user@floatchat.in'
+            demo.save()
+            updated.append(f'Updated user: {demo.username} -> {demo.email}')
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    
+    # Get current users
+    users = CustomUser.objects.all()
+    users_data = [{
+        'username': u.username,
+        'email': u.email,
+        'role': u.role
+    } for u in users]
+    
+    return JsonResponse({
+        'status': 'success',
+        'updated': updated,
+        'current_users': users_data
+    })
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("health/", health_check),
     path("setup-admin/", create_admin_user),
     path("setup-user/", create_demo_user),
     path("list-users/", list_users),  # Debug endpoint
+    path("update-emails/", update_user_emails),  # Update emails endpoint
     path("api/auth/", include("auth_app.urls")),
     path("api/admin/", include("admin_app.urls")),
     path("api/chat/", include("chat_app.urls")),
