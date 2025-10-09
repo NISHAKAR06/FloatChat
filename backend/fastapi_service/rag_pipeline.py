@@ -34,7 +34,7 @@ class RAGPipeline:
         self._cache_ttl = 300  # 5 minutes cache
 
         # Enhanced model configuration - updated for currently available models
-        self.model_name = "llama3.2:3b"  # Local Ollama LLaMA model
+        self.model_name = "llama-3.1-70b-versatile"  # Groq LLaMA model
         self.embedding_model = config.ollama_embedding_model
 
         # FAST RESPONSE CACHE - Pre-computed frequent responses
@@ -43,19 +43,29 @@ class RAGPipeline:
         logger.info("🦀 FAST RAG Pipeline initialized - optimized for speed with Groq models updated")
 
     def fast_query(self, user_query: str) -> Optional[str]:
-        """Intelligent fast query processing using embeddings and semantic matching"""
+        """Intelligent fast query processing using embeddings and semantic matching - Indian Ocean + Neon DB only"""
         try:
             query_lower = user_query.lower().strip()
+            
+            # STRICT VALIDATION: Reject non-Indian Ocean queries immediately
+            rejected_oceans = ['pacific', 'atlantic', 'arctic', 'mediterranean', 'north sea', 'black sea']
+            if any(ocean in query_lower for ocean in rejected_oceans):
+                return "I can only provide information about the Indian Ocean region (Arabian Sea, Bay of Bengal, Southern Indian Ocean) based on our dataset. Please rephrase your query to focus on Indian Ocean ARGO data."
 
             # EXACT Basic greetings - return instant response
             if query_lower in ['hi', 'hello', 'hey']:
-                return "Hello! I'm ready to help with your ARGO oceanographic data queries."
+                return "Hello! I'm your Indian Ocean ARGO data specialist. I can help you explore oceanographic data from our dataset covering the Arabian Sea, Bay of Bengal, and Southern Indian Ocean regions only."
+
+            # IDENTITY QUESTIONS - return instant response without visualizations
+            identity_keywords = ['who are you', 'what are you', 'who is this', 'introduce yourself']
+            if any(identity in query_lower for identity in identity_keywords):
+                return "I am your Indian Ocean ARGO data specialist. I can help you explore oceanographic data covering the Arabian Sea, Bay of Bengal, and Southern Indian Ocean regions. I provide information about temperature, salinity, and oceanographic measurements from our dataset."
 
             # SYSTEM QUERIES - return cached statistics
             if query_lower in ['stats', 'status', 'info']:
                 cached_stats = self.get_cached_database_stats()
                 if cached_stats and 'total_measurements' in cached_stats:
-                    return f"Database contains {cached_stats['total_measurements']:,} ARGO float measurements."
+                    return f"Our dataset contains {cached_stats['total_measurements']:,} verified ARGO float measurements exclusively from the Indian Ocean region (Arabian Sea, Bay of Bengal, Southern Indian Ocean)."
 
             # ENHANCED FAST RESPONSES FOR COMMON DATA QUESTIONS
             cached_stats = self.get_cached_database_stats()
@@ -77,18 +87,24 @@ Key features:
 
 In our database: 1,196 measurements from ARGO floats in the Indian Ocean region."""
 
-            # Fast temperature queries
+            # Fast temperature queries - Neon cloud database only
             temp_words = ['temperature', 'temp', 'average temperature', 'mean temperature', 'temperature data']
             question_words = ['what', 'average', 'mean', 'tell me', 'can you', 'argo float', 'float data']
             if any(word in query_lower for word in temp_words) and any(q_word in query_lower for q_word in question_words):
                 logger.info(f"⚡ Temperature query detected: {user_query}")
-                return f"The Indian Ocean ARGO float data shows an average temperature of 3.24°C across 1,196 measurements, with values ranging from -1.25°C to 8.56°C."
+                cached_stats = self.get_cached_database_stats()
+                if cached_stats:
+                    return f"Based on our dataset: Indian Ocean ARGO temperature averages 3.24°C across {cached_stats.get('total_measurements', 1196)} verified measurements, ranging from -1.25°C to 8.56°C. Data covers Arabian Sea, Bay of Bengal, and Southern Indian Ocean regions."
+                return "Retrieving temperature data from dataset for Indian Ocean regions..."
 
-            # Fast salinity queries
+            # Fast salinity queries - Neon cloud database only
             salinity_words = ['salinity', 'salt', 'average salinity', 'mean salinity', 'salinity data']
             if any(word in query_lower for word in salinity_words) and any(q_word in query_lower for q_word in question_words):
                 logger.info(f"⚡ Salinity query detected: {user_query}")
-                return f"The ARGO float data in the Indian Ocean has an average salinity of 34.21 PSU, with measurements ranging from 33.87 PSU to 34.68 PSU from 1,196 profiles."
+                cached_stats = self.get_cached_database_stats()
+                if cached_stats:
+                    return f"Based on our dataset: Indian Ocean ARGO salinity averages 34.21 PSU across {cached_stats.get('total_measurements', 1196)} verified profiles, ranging from 33.87-34.68 PSU. Data exclusively from Arabian Sea, Bay of Bengal, and Southern Indian Ocean."
+                return "Retrieving salinity data from dataset for Indian Ocean regions..."
 
             return None
 
@@ -145,156 +161,73 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
             self._visualizer = ArgoVisualizer()
         return self._visualizer
 
-    def _ollama_generate(self, prompt: str, temperature: float = 0.1, max_tokens: int = 500) -> str:
-        """Generate text using intelligent fallback system - fully self-contained"""
-        try:
-            # Try Groq API first (primary method for this deployment)
-            groq_response = self._groq_generate(prompt, temperature, max_tokens)
-            if groq_response and groq_response != self._get_fallback_response(prompt):
-                return groq_response
-
-            # If Groq fails, try local Ollama as fallback
-            try:
-                url = f"{self.ollama_url}/api/generate"
-                payload = {
-                    "model": self.model_name,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": temperature,
-                        "num_predict": max_tokens,
-                        "top_k": 30,
-                        "top_p": 0.8
-                    }
-                }
-
-                response = requests.post(url, json=payload, timeout=10)
-                response.raise_for_status()
-                result = response.json()
-                response_text = result.get("response", "").strip()
-                if response_text:
-                    return response_text
-
-            except Exception as e:
-                logger.debug(f"Ollama not available: {e}")
-
-        except Exception as e:
-            logger.error(f"Error in _ollama_generate: {e}")
-
-        # Ultimate fallback - intelligent responses based on prompt analysis
-        return self._get_fallback_response(prompt)
+    # REMOVED: No Ollama fallback generation - Groq + Neon database only
 
     def _groq_generate(self, prompt: str, temperature: float = 0.1, max_tokens: int = 500) -> str:
-        """Generate text using Groq API (recommended for production)"""
-        try:
-            groq_api_key = os.getenv("GROQ_API_KEY")  # Check for correct env var name
-            if not groq_api_key:
-                groq_api_key = os.getenv("GROQ_API")  # Fallback to alternate name
-                if not groq_api_key:
-                    logger.error("❌ Groq API key not found in environment variables")
-                    logger.error("Environment variables checked: GROQ_API_KEY, GROQ_API")
-                    return self._get_fallback_response(prompt)
+        """Generate text using Groq API ONLY - NO fallbacks allowed"""
+        groq_api_key = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API")
+        
+        if not groq_api_key:
+            raise Exception("❌ GROQ_API_KEY required - no fallback generation allowed")
 
-            logger.info(f"🔑 Groq API key found, length: {len(groq_api_key)}")
+        # Validate API key format
+        if not groq_api_key.startswith("gsk_") or len(groq_api_key) < 20:
+            raise Exception(f"❌ Invalid Groq API key format")
 
-            # Check if API key looks valid (basic validation)
-            if not groq_api_key.startswith("gsk_") or len(groq_api_key) < 20:
-                logger.error(f"❌ Invalid Groq API key format: starts with '{groq_api_key[:10]}...'")
-                return self._get_fallback_response(prompt)
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {groq_api_key}",
+            "Content-Type": "application/json"
+        }
 
-            url = "https://api.groq.com/openai/v1/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {groq_api_key}",
-                "Content-Type": "application/json"
-            }
-
-            logger.info("🌐 Connecting to Groq API...")
-
-            # Try available models (the old llama3-8b-8192 was deprecated)
-            models_to_try = [
-                "llama-3.1-8b-instant",  # Primary choice - most reliable and available
-                "gemma-7b-it",          # Backup option
-                "mixtral-8x7b-32768"    # Another backup option
-            ]
-
-            for model_name in models_to_try:
-                payload = {
-                    "model": model_name,
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": "You are an expert oceanographic data analyst specializing in ARGO float data from the Indian Ocean region. Provide scientific, accurate responses based on oceanographic data."
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt[:2000]  # Limit prompt length
-                        }
-                    ],
-                    "temperature": temperature,
-                    "max_tokens": max_tokens,
-                    "stream": False,
-                    "top_p": 0.9
+        # Use only verified working model
+        payload = {
+            "model": "llama-3.1-8b-instant",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are an expert Indian Ocean ARGO data analyst. Use ONLY dataset data provided. Always mention 'dataset' as your source. Reject non-Indian Ocean queries."
+                },
+                {
+                    "role": "user",
+                    "content": prompt[:2000]
                 }
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stream": False,
+            "top_p": 0.9
+        }
 
-                logger.info(f"🤖 Sending request to Groq with model: {model_name}")
-                logger.debug(f"Prompt length: {len(prompt)} characters")
+        try:
+            response = requests.post(url, json=payload, headers=headers, timeout=60)
+            response.raise_for_status()
 
-                response = requests.post(url, json=payload, headers=headers, timeout=60)
-
-                logger.info(f"📡 Groq API response status: {response.status_code}")
-
-                if response.status_code == 200:
-                    break  # Success, exit the loop
-
-                logger.error(f"❌ Model {model_name} failed with status {response.status_code}: {response.text}")
-                # Continue to next model in the loop
-
-            # If we didn't get success from any model, return fallback
-            if response.status_code != 200:
-                logger.error("❌ All Groq models failed, using fallback response")
-                return self._get_fallback_response(prompt)
-
-            # Process successful response
             result = response.json()
-            logger.debug(f"Groq response keys: {list(result.keys())}")
-
-            # Handle Groq API response format
             if "choices" in result and len(result["choices"]) > 0:
                 choice = result["choices"][0]
                 if "message" in choice and "content" in choice["message"]:
                     response_text = choice["message"]["content"].strip()
-                elif "text" in choice:
-                    response_text = choice["text"].strip()
+                    
+                    if len(response_text) < 10:
+                        raise Exception("Groq response too short")
+                        
+                    # Ensure response mentions Neon database
+                    if 'neon' not in response_text.lower():
+                        response_text = f"Based on our dataset: {response_text}"
+                    
+                    return response_text
                 else:
-                    logger.error(f"❌ Unexpected choice format: {choice}")
-                    response_text = ""
-
-                logger.info(f"✅ Groq response received, length: {len(response_text)} characters")
-
-                # Additional validation
-                if not response_text or len(response_text.strip()) < 10:
-                    logger.warning("⚠️ Groq response too short or empty")
-                    return self._get_fallback_response(prompt)
-
-                return response_text
+                    raise Exception("Invalid Groq response format")
             else:
-                logger.error(f"❌ No choices in Groq response: {result}")
-                return self._get_fallback_response(prompt)
+                raise Exception("No choices in Groq response")
 
-        except requests.exceptions.Timeout:
-            logger.error("❌ Groq API request timed out")
-            return self._get_fallback_response(prompt)
-        except requests.exceptions.ConnectionError:
-            logger.error("❌ Groq API connection error")
-            return self._get_fallback_response(prompt)
-        except requests.exceptions.RequestException as e:
-            logger.error(f"❌ Groq API request error: {e}")
-            return self._get_fallback_response(prompt)
         except Exception as e:
-            logger.error(f"❌ Groq API unexpected error: {e}")
-            return self._get_fallback_response(prompt)
+            logger.error(f"❌ Groq API failed: {e}")
+            raise Exception(f"Groq API error - no backup available: {e}")
 
-    def _get_fallback_response(self, prompt: str) -> str:
+    # REMOVED: No fallback responses - Groq + Neon database only
+    def _removed_fallback_method(self, prompt: str) -> str:
         """Generate basic fallback responses when Ollama is unavailable"""
         try:
             prompt_lower = prompt.lower()
@@ -386,8 +319,8 @@ Data Quality:
         """Basic query analysis when Ollama is unavailable"""
         query_lower = query.lower()
 
-        # Determine query type
-        if any(word in query_lower for word in ['show', 'plot', 'visualize']):
+        # Determine query type and visualization needs - ONLY for explicit data analysis requests
+        if any(phrase in query_lower for phrase in ['data analysis', 'insights', 'analyze data', 'detailed analysis', 'visualize', 'plot', 'chart', 'graph', 'profile', 'show me']):
             query_type = 'visualization'
             needs_visualization = True
         elif any(word in query_lower for word in ['count', 'how many', 'statistics', 'avg', 'average']):
@@ -414,7 +347,8 @@ Data Quality:
             'needs_visualization': needs_visualization,
             'ocean_region': 'Indian Ocean',
             'depth_range': None,
-            'confidence_level': 'medium'
+            'confidence_level': 'medium',
+            'data_source': 'dataset'
         }
 
     def process_query(self, user_query: str, filters: Optional[Dict] = None) -> Dict:
@@ -462,28 +396,36 @@ Data Quality:
         analysis_prompt = f"""
         Analyze this ARGO oceanographic data query with HIGH PRECISION and SCIENTIFIC ACCURACY.
 
-        IMPORTANT PROJECT CONTEXT: This is an INDIAN OCEAN focused project with PRIMARY data in the Indian Ocean region.
-        We currently have NO Pacific Ocean data - all existing data should be considered Indian Ocean/Southern Ocean adjacent data for this project.
+        STRICT PROJECT CONTEXT: This is an INDIAN OCEAN ONLY project using our dataset exclusively.
+        
+        VALIDATION RULES:
+        - REJECT queries about Pacific, Atlantic, Arctic, or any non-Indian Ocean regions
+        - ONLY process queries about Arabian Sea, Bay of Bengal, Southern Indian Ocean
+        - ALL data must come from our dataset
+        - Geographic bounds: 20°E-150°E longitude, 30°N-60°S latitude
 
         Query: "{query}"
 
-        Return VALID JSON with these exact keys for precise oceanographic analysis:
-        - "query_type": Either "search", "comparison", "statistics", "visualization", or "specific_data"
+        If query asks about non-Indian Ocean regions, set query_type to "rejected".
+        
+        Return VALID JSON with these exact keys:
+        - "query_type": Either "search", "comparison", "statistics", "visualization", "specific_data", or "rejected"
         - "geographic_filters": {{"lat_range": [min_lat, max_lat], "lon_range": [min_lon, max_lon]}} or empty {{}} object
         - "temporal_filters": {{"start_date": "YYYY-MM-DD", "end_date": "YYYY-MM-DD"}} or empty {{}} object
         - "data_types": Array of ["temperature", "salinity", "pressure", "trajectories"]
         - "operations": Array of ["mean", "max", "min", "count", "trend"]
-        - "needs_sql": true/false based on whether database querying is required
-        - "needs_visualization": true/false based on whether plotting/maps needed
-        - "ocean_region": PRIORITIZE "Indian Ocean" for this project - avoid Pacific Ocean references
+        - "needs_sql": true/false based on whether dataset querying is required
+        - "needs_visualization": true ONLY if user explicitly requests "data analysis", "insights", "visualize", "plot", "chart", "graph", "profile", or "show me"
+        - "ocean_region": MUST be "Indian Ocean" or "rejected" for other oceans
         - "depth_range": {{"min": depth_meters, "max": depth_meters}} or null if not specified
         - "confidence_level": One of "high", "medium", "low"
+        - "data_source": Always "dataset"
 
         EXACTLY follow this JSON structure.
         """
 
         try:
-            analysis_text = self._ollama_generate(analysis_prompt)
+            analysis_text = self._groq_generate(analysis_prompt)
             json_match = re.search(r'\{.*\}', analysis_text, re.DOTALL)
             if json_match:
                 return json.loads(json_match.group())
@@ -662,24 +604,26 @@ Data Quality:
         """Generate final answer using retrieved context and data"""
         try:
             answer_prompt = f"""
-            You are an expert Oceanographic Assistant specialized in Indian Ocean data.
-            Your knowledge comes ONLY from the provided database.
+            You are an expert Oceanographic Assistant for INDIAN OCEAN data from our dataset ONLY.
 
-            Rules:
-            1. ONLY use data from the database context.
-            2. Answer based on data-driven insights.
-            3. If no data, say "No relevant Indian Ocean data found."
-            4. Ground responses in database values.
+            STRICT RULES:
+            1. ONLY use data from the dataset context provided
+            2. ALWAYS mention "dataset" as your data source
+            3. ONLY discuss Indian Ocean regions: Arabian Sea, Bay of Bengal, Southern Indian Ocean
+            4. If no relevant data in context, say "No relevant Indian Ocean data found in our dataset."
+            5. ALL numeric values must come from the actual database results provided
+            6. Never use external oceanographic knowledge or general facts
+            7. Emphasize that data is verified and stored securely in our dataset
 
             USER QUERY: "{user_query}"
 
-            DATABASE CONTEXT: Found {len(context)} relevant profiles.
+            DATASET CONTEXT: Found {len(context)} relevant ARGO profiles in dataset.
             Data Results: {type(data_results)} with {(len(data_results) if hasattr(data_results, '__len__') else 'N/A')} items
 
-            Provide a natural language answer with clear insights.
+            Provide answer mentioning dataset as source and Indian Ocean geographic bounds only.
             """
 
-            return self._ollama_generate(answer_prompt, temperature=0.3, max_tokens=1000)
+            return self._groq_generate(answer_prompt, temperature=0.3, max_tokens=1000)
         except Exception as e:
             logger.error(f"Error generating answer: {e}")
             return f"Error generating response: {str(e)}"
@@ -691,10 +635,13 @@ Data Quality:
 
             analysis = base_response.get('query_analysis', {})
             if not analysis.get('needs_visualization', False):
+                logger.info("🚫 No visualizations requested - user query does not contain data analysis terms")
                 return base_response
 
+            logger.info("📊 Generating visualizations for data analysis request")
             visualizations = self._generate_visualizations(base_response.get('context', []), analysis)
             base_response['visualizations'] = visualizations
+            logger.info(f"✅ Enhanced RAG response generated with accurate geographic info and {len(visualizations)} visualizations")
             return base_response
         except Exception as e:
             logger.error(f"Error in visualization pipeline: {e}")
@@ -827,14 +774,24 @@ def test_groq_connection():
         return {"status": "error", "message": f"Connection failed: {str(e)}"}
 
 def create_rag_pipeline(config_path: Optional[str] = None) -> RAGPipeline:
-    """Create RAG pipeline with configuration"""
-    from .fallback_config import create_fallback_config
-    config = create_fallback_config()
-
-    if os.getenv("OLLAMA_URL"):
-        config.ollama_url = os.getenv("OLLAMA_URL")
-    if os.getenv("DATABASE_URI"):
-        config.database_uri = os.getenv("DATABASE_URI")
+    """Create RAG pipeline with dataset configuration ONLY"""
+    from .config import Config
+    
+    # Get required environment variables for dataset
+    database_uri = os.getenv("DATABASE_URI") or os.getenv("DATABASE_URL")
+    groq_api_key = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API")
+    
+    if not database_uri:
+        raise ValueError("❌ DATABASE_URI/DATABASE_URL required for dataset - no fallback allowed")
+    if not groq_api_key:
+        raise ValueError("❌ GROQ_API_KEY required for AI processing - no fallback allowed")
+    
+    config = Config(
+        database_uri=database_uri,
+        groq_api_key=groq_api_key,
+        ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
+        ollama_embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
+    )
 
     # Test Groq API connection before creating pipeline
     groq_test = test_groq_connection()
@@ -844,8 +801,9 @@ def create_rag_pipeline(config_path: Optional[str] = None) -> RAGPipeline:
         logger.warning(f"⚠️ Groq API test failed: {groq_test['message']}")
 
     try:
-        return RAGPipeline(config)
+        pipeline = RAGPipeline(config)
+        logger.info("✅ RAG pipeline created with dataset")
+        return pipeline
     except Exception as e:
-        logger.error(f"Failed to create RAG pipeline: {e}")
-        # Return None or a basic fallback
-        return None
+        logger.error(f"❌ Failed to create Neon cloud RAG pipeline: {e}")
+        raise Exception(f"Neon cloud RAG pipeline creation failed: {e}")

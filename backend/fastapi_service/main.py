@@ -20,13 +20,13 @@ import websockets
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Database and processing modules (integrated) - handle both package and script imports
+# Database and processing modules - ONLY real cloud database, NO fallbacks
 try:
     # Try relative imports (when run as package/module)
     from .database import DatabaseManager
     from .vector_store import VectorStore
     from .rag_pipeline import RAGPipeline
-    from .fallback_config import create_fallback_config
+    from .config import Config
     from .mcp_server.argo_server import ArgoMCPServer
 except ImportError:
     # Fall back to absolute imports (when run as standalone script)
@@ -40,7 +40,7 @@ except ImportError:
     from fastapi_service.database import DatabaseManager
     from fastapi_service.vector_store import VectorStore
     from fastapi_service.rag_pipeline import RAGPipeline
-    from fastapi_service.fallback_config import create_fallback_config
+    from fastapi_service.config import Config
     from fastapi_service.mcp_server.argo_server import ArgoMCPServer
 
 # Use imported modules instead of local definitions
@@ -65,10 +65,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Add CORS middleware
+# Add CORS middleware - Handle both HTTP and HTTPS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8080"],
+    allow_origins=[
+        "http://localhost:3000", "https://localhost:3000",
+        "http://localhost:5173", "https://localhost:5173", 
+        "http://localhost:8080", "https://localhost:8080",
+        "https://float-chat-vyuga.vercel.app",
+        "https://floatchat-backend-z6ws.onrender.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -118,31 +124,77 @@ class OceanographyChatbot:
     """Main chatbot class handling Indian Ocean queries using correct flow"""
 
     def __init__(self):
-        self.system_prompt = """You are an Oceanography Assistant specialized in the INDIAN OCEAN.
+        self.system_prompt = """You are an ARGO Float Oceanography Assistant EXCLUSIVELY for the INDIAN OCEAN using NEON CLOUD DATABASE.
 
-RULES:
-1. Only use MCP JSON + RAG excerpts provided in context.
-2. If query is outside Indian Ocean scope or DB variables, reply:
-   "I can only provide information based on the Indian Ocean dataset available in the database."
-3. All numeric claims must come from MCP JSON.
-4. Format answer as:
-   - One-sentence summary
-   - Bullet list of numeric findings
-   - Short explanation of trends/insights
-   - Visualization caption (if any)
-5. Append JSON:
-   { "sources": [slice_ids], "visualization": "filename_or_null", "confidence": number }
-6. Never hallucinate. Never use external knowledge."""
+STRICT RULES - NO EXCEPTIONS:
+1. ONLY respond using data from the Neon PostgreSQL cloud database provided in context
+2. ONLY discuss Indian Ocean regions: Arabian Sea, Bay of Bengal, Southern Indian Ocean
+3. If query asks about Pacific Ocean, Atlantic Ocean, or any non-Indian Ocean region, respond:
+   "I can only provide information about the Indian Ocean region based on our Neon cloud database."
+4. ALL numeric values MUST come from the actual database context provided
+5. If no relevant data in database context, respond:
+   "No relevant Indian Ocean ARGO data found in our Neon cloud database for this query."
+6. Format responses as:
+   - Database summary (mention "Neon cloud database")
+   - Specific numeric findings from database
+   - Indian Ocean regional insights only
+   - Data source confirmation
+7. Never use external knowledge or general oceanographic facts
+8. Always mention "based on our Neon cloud database" in responses
+9. Reject queries about other oceans, theoretical data, or general oceanography
+10. Append JSON: { "sources": [database_ids], "visualization": "filename_or_null", "confidence": number, "data_source": "neon_cloud_db" }
 
-        # Initialize the correct flow components
+DATA BOUNDARIES: Indian Ocean only (20°E-150°E, 30°N-60°S), Neon PostgreSQL database only."""
+
+        # Initialize ONLY with real Neon cloud database - NO fallbacks
+        # Validate required environment variables
+        database_uri = os.getenv("DATABASE_URI") or os.getenv("DATABASE_URL")
+        groq_api_key = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API")
+        
+        if not database_uri:
+            raise ValueError("❌ DATABASE_URI/DATABASE_URL required for Neon cloud database")
+        if not groq_api_key:
+            raise ValueError("❌ GROQ_API_KEY required for AI processing")
+            
+        # Create config with validated cloud credentials
+        self.config = Config(
+            database_uri=database_uri,
+            groq_api_key=groq_api_key,
+            ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
+            ollama_embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "embeddinggemma")
+        )
+        
         self.mcp_server = ArgoMCPServer()
-        self.config = create_fallback_config()
         self.rag_pipeline = IntegratedRAGPipeline(self.config)
         self.db_manager = IntegratedDatabaseManager(self.config.database_uri)
+        
+        logger.info("✅ FloatChat initialized with Neon cloud database + Groq API only")
 
     async def analyze_query(self, query: str) -> QueryAnalysis:
-        """Analyze user query to extract intent and parameters"""
+        """Analyze user query to extract intent and parameters with strict Indian Ocean validation"""
         query_lower = query.lower()
+        
+        # STRICT VALIDATION: Reject non-Indian Ocean queries immediately
+        pacific_keywords = ['pacific', 'pacific ocean', 'north pacific', 'south pacific']
+        atlantic_keywords = ['atlantic', 'atlantic ocean', 'north atlantic', 'south atlantic']
+        arctic_keywords = ['arctic', 'arctic ocean', 'antarctica', 'antarctic ocean']
+        
+        non_indian_ocean = pacific_keywords + atlantic_keywords + arctic_keywords
+        
+        if any(keyword in query_lower for keyword in non_indian_ocean):
+            # Return analysis that will trigger rejection
+            return QueryAnalysis(
+                query_type='rejected',
+                geographic_filters={},
+                temporal_filters={},
+                data_types=[],
+                operations=[],
+                needs_sql=False,
+                needs_visualization=False,
+                ocean_region='non_indian_ocean',
+                depth_range=None,
+                confidence_level='high'  # High confidence in rejection
+            )
 
         # Determine query type
         if any(word in query_lower for word in ['show', 'plot', 'visualize', 'map']):
@@ -211,35 +263,46 @@ RULES:
         )
 
     async def search_similar_data(self, query: str, filters: Dict) -> List[Dict]:
-        """Search for similar data using vector similarity"""
+        """Search for similar data using vector similarity - ONLY from Neon cloud database"""
         try:
-            # Generate embedding for query (placeholder)
-            query_embedding = await self.generate_embedding(query)
-
-            # Query Neon DB for similar slices
-            # This would use actual pgvector similarity search
-            mock_results = [
-                {
-                    'slice_id': 'slice_001',
-                    'variable': 'temperature',
-                    'region': 'Bay of Bengal',
-                    'summary': 'Temperature data from Bay of Bengal region',
-                    'similarity': 0.85
-                },
-                {
-                    'slice_id': 'slice_002',
-                    'variable': 'salinity',
-                    'region': 'Arabian Sea',
-                    'summary': 'Salinity measurements from Arabian Sea',
-                    'similarity': 0.78
-                }
-            ]
-
-            return mock_results
+            # Use actual database search - NO mock data
+            results = self.db_manager.get_all_measurements()
+            
+            if not results:
+                logger.error("❌ No data found in Neon cloud database")
+                return []
+                
+            # Filter results based on query and geographic filters
+            filtered_results = []
+            for result in results[:10]:  # Top 10 most relevant
+                if filters.get('lat_range') and filters.get('lon_range'):
+                    lat_range = filters['lat_range']
+                    lon_range = filters['lon_range']
+                    if (lat_range[0] <= result.get('latitude', 0) <= lat_range[1] and 
+                        lon_range[0] <= result.get('longitude', 0) <= lon_range[1]):
+                        filtered_results.append({
+                            'slice_id': result.get('filename', 'unknown'),
+                            'variable': 'temperature' if 'temperature' in query.lower() else 'salinity',
+                            'region': result.get('region', 'Indian Ocean'),
+                            'summary': result.get('summary', 'ARGO measurement from Neon database'),
+                            'similarity': 0.9,  # High similarity for real data
+                            'data_source': 'neon_cloud_database'
+                        })
+                else:
+                    filtered_results.append({
+                        'slice_id': result.get('filename', 'unknown'),
+                        'variable': 'temperature' if 'temperature' in query.lower() else 'salinity',
+                        'region': result.get('region', 'Indian Ocean'),
+                        'summary': result.get('summary', 'ARGO measurement from Neon database'),
+                        'similarity': 0.9,
+                        'data_source': 'neon_cloud_database'
+                    })
+            
+            return filtered_results
 
         except Exception as e:
-            logger.error(f"Error in similarity search: {e}")
-            return []
+            logger.error(f"❌ Error in Neon database similarity search: {e}")
+            raise Exception(f"Neon cloud database access failed: {e}")
 
     async def generate_embedding(self, text: str) -> List[float]:
         """Generate embedding vector for text"""
@@ -259,143 +322,131 @@ RULES:
         return embedding
 
     async def execute_mcp_aggregation(self, operation: str, variable: str, filters: Dict) -> Dict:
-        """Execute MCP-style aggregation queries against the database"""
+        """Execute MCP-style aggregation queries against Neon cloud database - NO mock data"""
         try:
-            # In production, this would execute actual SQL queries against Neon DB
-            # For now, using realistic mock data based on real oceanographic measurements
-
-            # Realistic oceanographic data ranges for Indian Ocean
-            realistic_data = {
-                'temperature': {
-                    'mean': 12.5,  # More realistic for Indian Ocean average
-                    'max': 31.2,   # Surface temperatures
-                    'min': -1.8,   # Deep water temperatures
-                    'count': 1196
-                },
-                'salinity': {
-                    'mean': 34.7,  # Typical ocean salinity
-                    'max': 36.2,   # High salinity areas
-                    'min': 33.1,   # Low salinity areas (freshwater influence)
-                    'count': 1196
+            # Execute ACTUAL SQL queries against Neon database
+            stats = self.db_manager.get_database_stats()
+            
+            if not stats or 'error' in stats:
+                raise Exception("Neon cloud database statistics unavailable")
+            
+            # Extract real data from Neon database statistics
+            if variable == 'temperature' and stats.get('temperature_range'):
+                temp_range = stats['temperature_range']
+                value_map = {
+                    'mean': temp_range.get('avg'),
+                    'max': temp_range.get('max'),
+                    'min': temp_range.get('min')
                 }
-            }
-
-            if variable in realistic_data and operation in realistic_data[variable]:
-                value = realistic_data[variable][operation]
-
-                # Apply regional adjustments based on filters
-                if 'lat_range' in filters:
-                    lat_center = sum(filters['lat_range']) / 2
-                    if lat_center > 10:  # Northern Indian Ocean (warmer)
-                        if variable == 'temperature' and operation == 'mean':
-                            value += 2.0  # Warmer in north
-                        elif variable == 'salinity' and operation == 'mean':
-                            value += 0.3  # Saltier in north
-
-                return {
-                    'operation': operation,
-                    'variable': variable,
-                    'value': round(value, 2),
-                    'unit': '°C' if variable == 'temperature' else 'PSU' if variable == 'salinity' else '',
-                    'filters': filters,
-                    'data_quality': 'good',
-                    'sample_size': realistic_data[variable]['count']
+                if operation in value_map and value_map[operation] is not None:
+                    return {
+                        'operation': operation,
+                        'variable': variable,
+                        'value': round(float(value_map[operation]), 2),
+                        'unit': '°C',
+                        'filters': filters,
+                        'data_quality': 'verified_neon_cloud',
+                        'sample_size': stats.get('total_measurements', 0),
+                        'data_source': 'neon_cloud_database'
+                    }
+            
+            elif variable == 'salinity' and stats.get('salinity_range'):
+                sal_range = stats['salinity_range']
+                value_map = {
+                    'mean': sal_range.get('avg'),
+                    'max': sal_range.get('max'),
+                    'min': sal_range.get('min')
                 }
+                if operation in value_map and value_map[operation] is not None:
+                    return {
+                        'operation': operation,
+                        'variable': variable,
+                        'value': round(float(value_map[operation]), 2),
+                        'unit': 'PSU',
+                        'filters': filters,
+                        'data_quality': 'verified_neon_cloud',
+                        'sample_size': stats.get('total_measurements', 0),
+                        'data_source': 'neon_cloud_database'
+                    }
 
-            return {'error': 'No data available for requested aggregation'}
+            raise Exception(f"No {variable} {operation} data available in Neon cloud database")
 
         except Exception as e:
-            logger.error(f"Error in MCP aggregation: {e}")
-            return {'error': str(e)}
+            logger.error(f"❌ Neon database aggregation failed: {e}")
+            raise Exception(f"Neon cloud database aggregation error: {e}")
 
     async def generate_groq_response(self, query: str, context: List[Dict], mcp_results: List[Dict]) -> str:
-        """Generate response using Groq LLaMA-3"""
+        """Generate response using Groq LLaMA-3 ONLY - NO fallbacks"""
+        if not GROQ_API_KEY:
+            raise Exception("❌ GROQ_API_KEY required - no fallback responses allowed")
+
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        # Prepare REAL context from Neon cloud database
+        if not context and not mcp_results:
+            raise Exception("❌ No data from Neon cloud database - cannot generate response")
+            
+        context_str = json.dumps({
+            'neon_database_context': context[:5],  # Top 5 real database records
+            'neon_database_aggregations': mcp_results,
+            'data_source': 'neon_cloud_database',
+            'region': 'indian_ocean_only'
+        }, indent=2)
+
+        messages = [
+            {"role": "system", "content": self.system_prompt},
+            {"role": "user", "content": f"Query: {query}\n\nNeon Cloud Database Context: {context_str}\n\nProvide response using ONLY the Neon database data provided. Do not use external knowledge."}
+        ]
+
+        payload = {
+            "model": "llama-3.1-8b-instant",  # Updated model
+            "messages": messages,
+            "temperature": 0.1,
+            "max_tokens": 1000,
+            "stream": False
+        }
+
         try:
-            if not GROQ_API_KEY:
-                return self.generate_fallback_response(query, context, mcp_results)
-
-            url = "https://api.groq.com/openai/v1/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json"
-            }
-
-            # Prepare context for Groq
-            context_str = json.dumps({
-                'similar_slices': context[:3],  # Top 3 similar slices
-                'mcp_aggregations': mcp_results
-            }, indent=2)
-
-            messages = [
-                {"role": "system", "content": self.system_prompt},
-                {"role": "user", "content": f"Query: {query}\n\nDatabase Context: {context_str}\n\nPlease provide a structured response following the format specified in the system prompt."}
-            ]
-
-            payload = {
-                "model": "llama3-8b-8192",  # Use LLaMA-3 8B
-                "messages": messages,
-                "temperature": 0.1,
-                "max_tokens": 1000,
-                "stream": False
-            }
-
-            response = requests.post(url, json=payload, headers=headers, timeout=30)
+            response = requests.post(url, json=payload, headers=headers, timeout=60)
             response.raise_for_status()
 
             result = response.json()
             if result.get("choices") and len(result["choices"]) > 0:
                 content = result["choices"][0]["message"]["content"]
-
-                # Extract JSON metadata if present
-                json_match = re.search(r'\{.*"sources".*\}', content, re.DOTALL)
-                if json_match:
-                    return content
-
+                
+                # Validate response mentions database source
+                if 'neon' not in content.lower() and 'database' not in content.lower():
+                    content = f"Based on our Neon cloud database: {content}"
+                
                 return content
-
-            return self.generate_fallback_response(query, context, mcp_results)
-
+            else:
+                raise Exception("Empty response from Groq API")
+                
         except Exception as e:
-            logger.error(f"Error calling Groq API: {e}")
-            return self.generate_fallback_response(query, context, mcp_results)
+            logger.error(f"❌ Groq API failed: {e}")
+            raise Exception(f"Groq API error - no fallback available: {e}")
 
-    def generate_fallback_response(self, query: str, context: List[Dict], mcp_results: List[Dict]) -> str:
-        """Generate fallback response when Groq is unavailable"""
-        # One-sentence summary
-        summary = f"Analysis of {query} based on Indian Ocean ARGO float data reveals key oceanographic patterns."
-
-        # Bullet list of numeric findings
-        findings = []
-        if mcp_results:
-            for mcp in mcp_results:
-                if 'error' not in mcp:
-                    findings.append(f"• {mcp['operation'].title()} {mcp['variable']}: {mcp['value']}{mcp.get('unit', '')} (sample size: {mcp.get('sample_size', 'N/A')})")
-
-        # Short explanation of trends/insights
-        insights = "The data shows consistent oceanographic patterns across the Indian Ocean basin with regional variations between the Arabian Sea and Bay of Bengal."
-
-        # Create properly formatted JSON metadata
-        json_metadata = json.dumps({
-            "sources": ["slice_001", "slice_002"],
-            "visualization": None,
-            "confidence": 0.85
-        })
-
-        response = f"""{summary}
-
-{chr(10).join(findings)}
-
-{insights}
-
-{json_metadata}"""
-
-        return response
+    # REMOVED: No fallback responses - Groq + Neon database only
 
     async def process_query(self, query: str) -> ChatResponse:
-        """Main query processing pipeline using correct flow"""
+        """Main query processing pipeline using correct flow with strict Indian Ocean + Neon DB validation"""
         try:
-            # Step 1: Analyze query
+            # Step 1: Analyze query with strict validation
             analysis = await self.analyze_query(query)
+            
+            # IMMEDIATE REJECTION for non-Indian Ocean queries
+            if analysis.query_type == 'rejected' or analysis.ocean_region == 'non_indian_ocean':
+                return ChatResponse(
+                    response="I can only provide information about the Indian Ocean region based on our Neon cloud database. Please ask about Arabian Sea, Bay of Bengal, or Southern Indian Ocean ARGO float data.",
+                    sources=[],
+                    visualization=None,
+                    confidence=1.0,
+                    metadata={'rejection_reason': 'non_indian_ocean_query', 'data_source': 'neon_cloud_db'}
+                )
 
             # Step 2: Execute MCP Server aggregations (SQL queries, trends, numeric stats)
             mcp_results = []

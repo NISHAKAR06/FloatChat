@@ -87,19 +87,39 @@ const NetCDFUpload: React.FC = () => {
 
       // Upload file
       const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || '';
-      const response = await fetch(`${API_BASE_URL}/api/datasets/upload-netcdf/`, {
+      
+      // Try public endpoint first (for development), fallback to authenticated endpoint
+      let uploadUrl = `${API_BASE_URL}/datasets/upload-netcdf-public/`;
+      let headers: HeadersInit = {};
+      
+      // If we have a token, use the authenticated endpoint
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        uploadUrl = `${API_BASE_URL}/datasets/upload-netcdf/`;
+        headers = {
+          'Authorization': `Bearer ${token}`,
+        };
+      }
+      
+      console.log('Uploading to:', uploadUrl);
+      console.log('File:', selectedFile.name, 'Size:', selectedFile.size);
+      
+      const response = await fetch(uploadUrl, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
+        headers: headers,
         body: formData,
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Upload failed');
+        console.error('Upload error:', result);
+        const errorMsg = result.error || result.detail || 'Upload failed';
+        const hint = result.hint ? `\n${result.hint}` : '';
+        throw new Error(errorMsg + hint);
       }
+
+      console.log('Upload success:', result);
 
       // Validate that the uploaded file has required structure
       if (!result.variables || !result.dimensions) {
@@ -132,7 +152,7 @@ const NetCDFUpload: React.FC = () => {
   const pollStatus = async (datasetId: string) => {
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`/api/datasets/dataset-status/${datasetId}/`, {
+        const response = await fetch(`/datasets/dataset-status/${datasetId}/`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           },

@@ -150,7 +150,9 @@ def create_vector_tables():
                 """)
             else:
                 # SQLite fallback - simplified table structure
-                print("Using SQLite - skipping pgvector extensions")
+                logger.warning("⚠️ Using SQLite - pgvector extensions not available")
+                logger.warning("⚠️ Data will be stored LOCALLY, not in cloud!")
+                logger.warning("💡 Set DATABASE_URL in .env to use Neon PostgreSQL cloud database")
 
                 # Note: Tables are created via Django migrations, so we just ensure
                 # they're set up correctly. No need for raw SQL here since Django

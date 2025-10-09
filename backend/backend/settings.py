@@ -103,29 +103,53 @@ WSGI_APPLICATION = "backend.wsgi.application"
 
 
 # Database Configuration - PostgreSQL Cloud Database (for Argo Float Data)
-if os.environ.get('DATABASE_URL'):
+# Priority: DATABASE_URL > DATABASE_URI > SQLite fallback
+database_url = os.environ.get('DATABASE_URL') or os.environ.get('DATABASE_URI')
+
+if database_url:
     try:
         import dj_database_url
         DATABASES = {
-            'default': dj_database_url.parse(os.environ['DATABASE_URL'])
+            'default': dj_database_url.parse(database_url, conn_max_age=600)
         }
-        print("✓ Using PostgreSQL database from DATABASE_URL (for Argo Float data)")
+        # Neon pooled connections don't support search_path option
+        # Remove any OPTIONS that might have been set
+        if 'OPTIONS' in DATABASES['default']:
+            del DATABASES['default']['OPTIONS']
+        
+        db_name = DATABASES['default'].get('NAME', 'unknown')
+        db_host = DATABASES['default'].get('HOST', 'unknown')
+        print(f"✅ Using PostgreSQL Cloud Database: {db_name} on {db_host}")
+        print(f"   📊 All data (datasets, values, embeddings) will be stored in cloud")
     except ImportError:
-        print("⚠️ dj-database-url not available, falling back to SQLite")
+        print("❌ ERROR: dj-database-url not installed! Install with: pip install dj-database-url")
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': BASE_DIR / 'db.sqlite3',
             }
         }
+        print("⚠️ Falling back to SQLite (LOCAL ONLY - NOT CLOUD)")
+    except Exception as e:
+        print(f"❌ ERROR parsing database URL: {e}")
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
+        print("⚠️ Falling back to SQLite (LOCAL ONLY - NOT CLOUD)")
 else:
-    # Local development - SQLite
+    # No cloud database configured - use local SQLite
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    print("⚠️ No DATABASE_URL or DATABASE_URI found in environment")
+    print("⚠️ Using SQLite (LOCAL ONLY - NOT CLOUD)")
+    print("💡 To use cloud database, set DATABASE_URL in .env file")
 
 # NetCDF processing settings
 NETCDF_SETTINGS = {
@@ -214,19 +238,23 @@ REST_FRAMEWORK = {
     )
 }
 
-# CORS settings - configurable via environment variables
+# CORS settings - Handle both HTTP and HTTPS properly
 CORS_ALLOWED_ORIGINS = [
     origin.strip().rstrip('/') for origin in os.environ.get(
         "CORS_ALLOWED_ORIGINS",
-        "https://float-chat-vyuga.vercel.app,https://floatchat-backend-z6ws.onrender.com,http://localhost:3000,http://localhost:5173"
+        "https://float-chat-vyuga.vercel.app,https://floatchat-backend-z6ws.onrender.com,http://localhost:3000,http://localhost:5173,https://localhost:3000,https://localhost:5173"
     ).split(",")
 ]
 
-# CORS configuration for different environments
-print("🔥🔥🔥 CORS_ALLOW_ALL_ORIGINS = True 🔥🔥🔥")  # VISIBLE IN LOGS
+# CORS configuration for development and production
 CORS_ALLOW_CREDENTIALS = True
-# EMERGENCY: Temporarily allow all origins for hackathon
-CORS_ALLOW_ALL_ORIGINS = True  # TODO: Revert after hackathon
+# Allow all origins for development - restrict in production
+CORS_ALLOW_ALL_ORIGINS = True
+
+# HTTPS/HTTP Security Settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_TLS = os.environ.get('USE_TLS', 'False') == 'True'
+SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', 'False') == 'True'
 
 # Emergency CORS fix - Allow Vercel origins with pattern matching
 CORS_ALLOWED_ORIGIN_REGEXES = [

@@ -20,6 +20,7 @@ class MockSharedTask:
         """
         Decorator that makes the function execute synchronously.
         The original function signature is preserved.
+        Adds .delay() and .apply_async() methods for compatibility.
         """
         if self.bind:
             # If bind=True, the first argument is 'self' (the task instance)
@@ -27,9 +28,15 @@ class MockSharedTask:
             def wrapper(*args, **kwargs):
                 # Call with None as the first 'self' argument
                 return func(None, *args, **kwargs)
+            
+            # Add Celery-compatible methods
+            wrapper.delay = wrapper  # .delay() just calls the function
+            wrapper.apply_async = lambda args=(), kwargs={}: wrapper(*args, **kwargs)
             return wrapper
         else:
-            # Normal function - just return it as-is
+            # Normal function - just return it as-is with Celery methods
+            func.delay = func  # .delay() just calls the function
+            func.apply_async = lambda args=(), kwargs={}: func(*args, **kwargs)
             return func
 
 

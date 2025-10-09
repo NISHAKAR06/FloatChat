@@ -30,12 +30,23 @@ class DatabaseManager:
         logger.info("Database connection established")
     
     def get_all_measurements(self) -> List[Dict]:
-        '''Get all ARGO measurements from cloud database'''
+        '''Get all ARGO measurements from Neon cloud database - dataset_values table ONLY'''
         with self.engine.connect() as connection:
             try:
+                # Query dataset_values table with JOIN to datasets table
                 result = connection.execute(text("""
-                    SELECT filename, latitude, longitude, time, depth, temperature, salinity
-                    FROM argo_measurements
+                    SELECT 
+                        d.filename,
+                        v.latitude,
+                        v.longitude,
+                        v.time,
+                        v.depth,
+                        v.value as temperature,
+                        v.variable
+                    FROM dataset_values v
+                    INNER JOIN datasets d ON v.dataset_id = d.id
+                    WHERE v.latitude BETWEEN -60 AND 30
+                      AND v.longitude BETWEEN 20 AND 150
                     LIMIT 1000
                 """))
 
@@ -43,20 +54,20 @@ class DatabaseManager:
                 for row in result.fetchall():
                     results.append({
                         'filename': row[0],
-                        'latitude': row[1],
-                        'longitude': row[2],
+                        'latitude': float(row[1]) if row[1] else 0,
+                        'longitude': float(row[2]) if row[2] else 0,
                         'time': row[3],
-                        'depth': row[4],
-                        'temperature': row[5],
-                        'salinity': row[6],
-                        'summary': f"ARGO measurement: {row[5]}°C temp, {row[6]} PSU salinity at depth {row[4]}m"
+                        'depth': float(row[4]) if row[4] else 0,
+                        'temperature': float(row[5]) if row[5] else 0,
+                        'variable': row[6],
+                        'summary': f"ARGO {row[6]}: {row[5]} at depth {row[4]}m (Indian Ocean only)"
                     })
 
-                logger.info(f"Retrieved {len(results)} measurements")
+                logger.info(f"✅ Retrieved {len(results)} measurements from Neon cloud database (dataset_values)")
                 return results
 
             except Exception as e:
-                logger.error(f"Error retrieving measurements: {e}")
+                logger.error(f"❌ Error retrieving measurements from Neon database: {e}")
                 return []
 
     def _fix_group_by_clause(self, sql_query: str) -> str:
@@ -140,72 +151,101 @@ class DatabaseManager:
             return sql_query  # Return original if fix fails
 
     def search_similar_measurements(self, query_embedding: List[float], limit: int = 5) -> List[Dict]:
-        '''Search for similar ARGO measurements using vector similarity'''
-        # For now, return some basic results since vector search doesn't work without embeddings
-        # This prevents the error we saw earlier
+        '''Search for similar ARGO measurements using vector similarity from Neon database ONLY'''
         try:
+            # Use real database search - NO fallbacks
             measurements = self.get_all_measurements()
-            return measurements[:limit]  # Return first N measurements as fallback
+            if not measurements:
+                raise Exception("❌ No measurements found in Neon cloud database")
+            
+            # Filter to Indian Ocean only and return top results
+            indian_ocean_measurements = []
+            for measurement in measurements:
+                lat, lon = measurement.get('latitude', 0), measurement.get('longitude', 0)
+                if (20 <= lon <= 150 and -60 <= lat <= 30):  # Indian Ocean bounds
+                    indian_ocean_measurements.append(measurement)
+                    if len(indian_ocean_measurements) >= limit:
+                        break
+            
+            if not indian_ocean_measurements:
+                raise Exception("❌ No Indian Ocean measurements found in Neon database")
+                
+            return indian_ocean_measurements
         except Exception as e:
-            logger.error(f"Error in similarity search: {e}")
-            return []
+            logger.error(f"❌ Neon database similarity search failed: {e}")
+            raise Exception(f"Neon cloud database access error: {e}")
 
     def get_database_stats(self) -> Dict:
-        '''Get database statistics'''
+        '''Get database statistics from Neon cloud database (dataset_values table ONLY)'''
         with self.engine.connect() as connection:
             try:
-                # Count total measurements
-                total_result = connection.execute(text("SELECT COUNT(*) FROM argo_measurements"))
+                # Count total measurements from dataset_values (Indian Ocean only)
+                total_result = connection.execute(text("""
+                    SELECT COUNT(*) 
+                    FROM dataset_values 
+                    WHERE latitude BETWEEN -60 AND 30
+                      AND longitude BETWEEN 20 AND 150
+                """))
                 total_measurements = total_result.fetchone()[0]
 
-                # Temperature stats
+                # Temperature stats from dataset_values
                 temp_result = connection.execute(text("""
                     SELECT
-                        MIN(temperature) as min_temp,
-                        MAX(temperature) as max_temp,
-                        AVG(temperature) as avg_temp
-                    FROM argo_measurements
-                    WHERE temperature IS NOT NULL
+                        MIN(value) as min_temp,
+                        MAX(value) as max_temp,
+                        AVG(value) as avg_temp
+                    FROM dataset_values
+                    WHERE variable = 'temperature'
+                      AND latitude BETWEEN -60 AND 30
+                      AND longitude BETWEEN 20 AND 150
                 """))
-                temp_stats = temp_result.fetchone()
+                temp_row = temp_result.fetchone()
 
-                # Salinity stats
+                # Salinity stats from dataset_values  
                 salinity_result = connection.execute(text("""
                     SELECT
-                        MIN(salinity) as min_sal,
-                        MAX(salinity) as max_sal,
-                        AVG(salinity) as avg_sal
-                    FROM argo_measurements
-                    WHERE salinity IS NOT NULL
+                        MIN(value) as min_salinity,
+                        MAX(value) as max_salinity,
+                        AVG(value) as avg_salinity
+                    FROM dataset_values
+                    WHERE variable = 'salinity'
+                      AND latitude BETWEEN -60 AND 30
+                      AND longitude BETWEEN 20 AND 150
                 """))
-                salinity_stats = salinity_result.fetchone()
+                salinity_row = salinity_result.fetchone()
 
-                # Unique files
-                files_result = connection.execute(text("""
-                    SELECT COUNT(DISTINCT filename)
-                    FROM argo_measurements
-                    WHERE filename IS NOT NULL
+                # Count unique datasets
+                datasets_result = connection.execute(text("""
+                    SELECT COUNT(DISTINCT id) FROM datasets
                 """))
-                unique_files = files_result.fetchone()[0]
+                unique_datasets = datasets_result.fetchone()[0]
+
+                # Count embeddings
+                embeddings_result = connection.execute(text("""
+                    SELECT COUNT(*) FROM dataset_embeddings
+                """))
+                total_embeddings = embeddings_result.fetchone()[0]
+
+                logger.info(f"✅ Stats from Neon cloud database: {total_measurements} measurements, {total_embeddings} embeddings")
 
                 return {
                     'total_measurements': total_measurements,
-                    'measurements_with_vectors': 0,  # No vectors yet
-                    'unique_files': unique_files,
+                    'measurements_with_vectors': total_embeddings,
+                    'unique_files': unique_datasets,
                     'temperature_range': {
-                        'min': temp_stats[0],
-                        'max': temp_stats[1],
-                        'avg': temp_stats[2]
+                        'min': float(temp_row[0]) if temp_row[0] else None,
+                        'max': float(temp_row[1]) if temp_row[1] else None,
+                        'avg': float(temp_row[2]) if temp_row[2] else None
                     },
                     'salinity_range': {
-                        'min': salinity_stats[0],
-                        'max': salinity_stats[1],
-                        'avg': salinity_stats[2]
+                        'min': float(salinity_row[0]) if salinity_row[0] else None,
+                        'max': float(salinity_row[1]) if salinity_row[1] else None,
+                        'avg': float(salinity_row[2]) if salinity_row[2] else None
                     }
                 }
 
             except Exception as e:
-                logger.error(f"Error getting database stats: {e}")
+                logger.error(f"❌ Error getting Neon database stats: {e}")
                 return {'error': str(e)}
 
     def execute_sql_query(self, sql_query: str) -> List[Dict]:

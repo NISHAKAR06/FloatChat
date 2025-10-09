@@ -108,34 +108,50 @@ class ArgoMCPServer:
         self._register_handlers()
 
     def _initialize_components_fallback(self):
-        """Initialize components with fallback configuration"""
+        """Initialize components with Neon cloud database configuration ONLY"""
         try:
-            # Use fallback config
-            from ..fallback_config import create_fallback_config
-            self.config = create_fallback_config()
-            logger.info("✅ Fallback configuration loaded")
+            # Use ONLY Neon cloud database configuration - no fallbacks
+            import os
+            from ..config import Config
+            
+            database_uri = os.getenv("DATABASE_URI") or os.getenv("DATABASE_URL")
+            groq_api_key = os.getenv("GROQ_API_KEY") or os.getenv("GROQ_API")
+            
+            if not database_uri:
+                raise ValueError("❌ DATABASE_URI required for Neon cloud database")
+            if not groq_api_key:
+                raise ValueError("❌ GROQ_API_KEY required for AI processing")
+                
+            self.config = Config(
+                database_uri=database_uri,
+                groq_api_key=groq_api_key,
+                ollama_url=os.getenv("OLLAMA_URL", "http://localhost:11434"),
+                ollama_embedding_model=os.getenv("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
+            )
+            logger.info("✅ Neon cloud database configuration loaded")
 
-            # Database with fallback config
+            # Database with Neon cloud configuration ONLY
             if DatabaseManager:
                 try:
                     self.db_manager = DatabaseManager(self.config.database_uri)
-                    logger.info("✅ ARGO database connection established (fallback)")
+                    logger.info("✅ Neon cloud database connection established")
                 except Exception as e:
-                    logger.warning(f"⚠️ Database connection failed with fallback: {e}")
-                    self.db_manager = None
+                    logger.error(f"❌ Neon cloud database connection failed: {e}")
+                    raise Exception(f"Neon database connection required: {e}")
             else:
-                logger.warning("⚠️ Database manager not available")
+                logger.error("❌ Database manager not available")
+                raise Exception("Database manager required for Neon cloud access")
 
-            # RAG Pipeline with fallback config
+            # RAG Pipeline with Neon cloud database ONLY
             if RAGPipeline and self.config:
                 try:
                     self.rag_pipeline = RAGPipeline(self.config)
-                    logger.info("✅ RAG pipeline initialized (fallback)")
+                    logger.info("✅ RAG pipeline initialized with Neon cloud database")
                 except Exception as e:
-                    logger.warning(f"⚠️ RAG pipeline failed to initialize: {e}")
-                    self.rag_pipeline = None
+                    logger.error(f"❌ RAG pipeline failed to initialize with Neon database: {e}")
+                    raise Exception(f"RAG pipeline requires Neon cloud database: {e}")
 
-            # Data processors with fallback config
+            # Data processors with Neon cloud database config
             if EnhancedArgoDataProcessor and self.config:
                 try:
                     self.enhanced_processor = EnhancedArgoDataProcessor(self.config)

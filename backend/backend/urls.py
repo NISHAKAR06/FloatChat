@@ -139,9 +139,9 @@ urlpatterns = [
     path("setup-user/", create_demo_user),
     path("list-users/", list_users),  # Debug endpoint
     path("update-emails/", update_user_emails),  # Update emails endpoint
-    path("api/auth/", include("auth_app.urls")),
-    path("api/admin/", include("admin_app.urls")),
-    path("api/chat/", include("chat_app.urls")),
-    path("api/datasets/", include("dataset_app.urls")),
+    path("auth/", include("auth_app.urls")),
+    path("admin/", include("admin_app.urls")),
+    path("chat/", include("chat_app.urls")),
+    path("datasets/", include("dataset_app.urls")),
     # path("api/jobs/", include("jobs_app.urls")),  # Commented out - Job model not implemented
 ]

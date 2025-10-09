@@ -84,9 +84,18 @@ class NetCDFDatasetViewSet(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated, IsAdminUser])
 def upload_netcdf_file(request):
     """Upload and validate NetCDF file (Admin only)"""
+    logger.info(f"Upload request received - User: {request.user}, Is Admin: {request.user.is_staff if request.user.is_authenticated else False}")
+    logger.info(f"Files in request: {list(request.FILES.keys())}")
+    logger.info(f"Content type: {request.content_type}")
+    
     if 'file' not in request.FILES:
+        logger.error("No 'file' field in request.FILES")
         return Response(
-            {'error': 'No file provided'},
+            {
+                'error': 'No file provided',
+                'detail': 'Expected a file with field name "file"',
+                'received_fields': list(request.FILES.keys())
+            },
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -125,7 +134,9 @@ def upload_netcdf_file(request):
             )
 
         try:
-            with nc.Dataset(file_path, 'r') as dataset:
+            # IMPORTANT: Use a context manager and ensure file is fully closed before processing
+            dataset = nc.Dataset(file_path, 'r')
+            try:
                 # Extract basic metadata
                 variables = list(dataset.variables.keys())
                 dimensions = {}
@@ -141,20 +152,31 @@ def upload_netcdf_file(request):
                 has_lat = any(var in ['lat', 'latitude', 'LAT', 'LATITUDE'] for var in dataset.variables.keys())
                 has_lon = any(var in ['lon', 'longitude', 'LON', 'LONGITUDE'] for var in dataset.variables.keys())
 
-                if not (has_time and has_lat and has_lon):
+                if not (has_lat and has_lon):
                     # Clean up invalid file
+                    dataset.close()  # Ensure file is closed before deletion
                     if os.path.exists(file_path):
                         os.remove(file_path)
                     return Response(
-                        {'error': 'NetCDF file must contain time, latitude, and longitude variables'},
+                        {'error': 'NetCDF file must contain latitude and longitude variables'},
                         status=status.HTTP_400_BAD_REQUEST
                     )
+            finally:
+                # CRITICAL: Always close the dataset to release file handle
+                dataset.close()
+                
+            # Add a small delay to ensure Windows releases the file handle
+            import time
+            time.sleep(0.1)
 
         except Exception as e:
             logger.error(f"Error validating NetCDF file: {e}")
             # Clean up invalid file
             if os.path.exists(file_path):
-                os.remove(file_path)
+                try:
+                    os.remove(file_path)
+                except Exception as remove_error:
+                    logger.warning(f"Could not remove invalid file: {remove_error}")
             return Response(
                 {'error': f'Invalid NetCDF file: {str(e)}'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -169,16 +191,33 @@ def upload_netcdf_file(request):
             dimensions=dimensions,
             uploaded_by=request.user
         )
+        logger.info(f"✅ Dataset record created: {dataset_obj.id}")
+        logger.info(f"   Filename: {file_obj.name}")
+        logger.info(f"   File path: {file_path}")
+        logger.info(f"   Variables: {len(variables)}")
 
         # Trigger async processing
-        process_netcdf_file_task.delay(dataset_obj.id, file_path)
+        logger.info(f"🚀 Triggering background processing task...")
+        try:
+            result = process_netcdf_file_task.delay(dataset_obj.id, file_path)
+            logger.info(f"✅ Task dispatched successfully")
+        except Exception as task_error:
+            logger.error(f"❌ Error dispatching task: {task_error}")
+            logger.info(f"🔄 Attempting synchronous processing as fallback...")
+            try:
+                # Fallback to synchronous processing
+                process_netcdf_file_task(dataset_obj.id, file_path)
+                logger.info(f"✅ Synchronous processing completed")
+            except Exception as sync_error:
+                logger.error(f"❌ Synchronous processing failed: {sync_error}", exc_info=True)
 
         return Response({
             'message': 'File uploaded successfully',
             'dataset_id': dataset_obj.id,
             'status': 'uploaded',
             'variables': variables,
-            'dimensions': dimensions
+            'dimensions': dimensions,
+            'note': 'Processing started in background'
         })
 
     except Exception as e:
@@ -337,3 +376,174 @@ def initialize_database():
     except Exception as e:
         print(f"❌ Database initialization failed: {e}")
         return False
+
+
+@api_view(['POST'])
+def upload_netcdf_file_public(request):
+    """
+    Upload NetCDF file without authentication (Development only)
+    For production, use upload_netcdf_file with admin authentication
+    """
+    logger.info(f"Public upload request received")
+    logger.info(f"Files in request: {list(request.FILES.keys())}")
+    logger.info(f"Content type: {request.content_type}")
+    
+    if 'file' not in request.FILES:
+        logger.error("No 'file' field in request.FILES")
+        return Response(
+            {
+                'error': 'No file provided',
+                'detail': 'Please upload a file with field name "file"',
+                'received_fields': list(request.FILES.keys()),
+                'hint': 'Use form-data with key "file" and select a .nc file'
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    file_obj = request.FILES['file']
+    logger.info(f"Processing file: {file_obj.name}, size: {file_obj.size} bytes")
+
+    # Validate file extension
+    if not file_obj.name.endswith('.nc'):
+        return Response(
+            {'error': f'Only NetCDF (.nc) files are supported. Received: {file_obj.name}'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Create unique filename to avoid conflicts
+    file_extension = os.path.splitext(file_obj.name)[1]
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+
+    # Save file to media/netcdf directory
+    netcdf_dir = os.path.join(settings.MEDIA_ROOT, 'netcdf')
+    os.makedirs(netcdf_dir, exist_ok=True)
+    file_path = os.path.join(netcdf_dir, unique_filename)
+
+    try:
+        # Save the uploaded file
+        logger.info(f"Saving file to: {file_path}")
+        with open(file_path, 'wb+') as destination:
+            for chunk in file_obj.chunks():
+                destination.write(chunk)
+        logger.info(f"File saved successfully: {file_path}")
+
+        # Validate and extract metadata from NetCDF file
+        if not NETCDF4_AVAILABLE:
+            logger.error("netCDF4 library not available")
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            return Response(
+                {'error': 'NetCDF processing libraries are not available on this server'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        try:
+            with nc.Dataset(file_path, 'r') as dataset:
+                # Extract basic metadata
+                variables = list(dataset.variables.keys())
+                dimensions = {}
+
+                for dim_name, dim in dataset.dimensions.items():
+                    dimensions[dim_name] = {
+                        'size': len(dim),
+                        'unlimited': dim.isunlimited()
+                    }
+
+                logger.info(f"NetCDF variables: {variables}")
+                logger.info(f"NetCDF dimensions: {dimensions}")
+
+                # Validate that file has required variables (more flexible check)
+                var_lower = [v.lower() for v in dataset.variables.keys()]
+                has_lat = any(lat_name in var_lower for lat_name in ['lat', 'latitude'])
+                has_lon = any(lon_name in var_lower for lon_name in ['lon', 'longitude'])
+
+                if not (has_lat and has_lon):
+                    logger.error(f"Missing required variables. Has lat: {has_lat}, Has lon: {has_lon}")
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                    return Response(
+                        {
+                            'error': 'NetCDF file must contain latitude and longitude variables',
+                            'found_variables': variables
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+        except Exception as e:
+            logger.error(f"Error validating NetCDF file: {e}", exc_info=True)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+            return Response(
+                {'error': f'Invalid NetCDF file: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get or create a default user for public uploads
+        from auth_app.models import CustomUser
+        try:
+            default_user = CustomUser.objects.filter(is_staff=True).first()
+            if not default_user:
+                default_user = CustomUser.objects.create_user(
+                    username='admin',
+                    email='admin@floatchat.local',
+                    password='admin123',
+                    is_staff=True,
+                    is_superuser=True
+                )
+                logger.info("Created default admin user")
+        except Exception as e:
+            logger.error(f"Error getting default user: {e}")
+            default_user = None
+
+        if not default_user:
+            return Response(
+                {'error': 'Could not create dataset record - no admin user available'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # Create dataset record
+        dataset_obj = NetCDFDataset.objects.create(
+            filename=file_obj.name,
+            file_path=file_path,
+            status='uploaded',
+            variables=variables,
+            dimensions=dimensions,
+            uploaded_by=default_user
+        )
+
+        logger.info(f"Dataset created: {dataset_obj.id}")
+
+        # Trigger async processing
+        try:
+            process_netcdf_file_task.delay(dataset_obj.id, file_path)
+            logger.info(f"Processing task queued for dataset {dataset_obj.id}")
+        except Exception as e:
+            logger.warning(f"Could not queue async task (Celery may not be running): {e}")
+            logger.info("Processing will happen synchronously")
+            # Process synchronously if Celery is not available
+            try:
+                from .tasks import process_netcdf_file_task
+                process_netcdf_file_task(dataset_obj.id, file_path)
+            except Exception as sync_error:
+                logger.error(f"Synchronous processing failed: {sync_error}")
+
+        return Response({
+            'message': 'File uploaded successfully',
+            'dataset_id': str(dataset_obj.id),
+            'status': 'uploaded',
+            'filename': file_obj.name,
+            'variables': variables,
+            'dimensions': dimensions,
+            'file_size': file_obj.size,
+            'note': 'Processing started in background'
+        }, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        logger.error(f"Error processing uploaded file: {e}", exc_info=True)
+        # Clean up file if it was saved
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        return Response(
+            {'error': f'Error processing file: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

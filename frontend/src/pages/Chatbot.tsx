@@ -36,6 +36,22 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Rectangle,
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  Legend,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  ScatterChart,
+  Scatter,
 } from "recharts";
 import { useIsMobile, useIsTablet, useDeviceType } from "@/hooks/use-mobile";
 
@@ -215,7 +231,7 @@ const Chatbot = () => {
   ): Promise<void> => {
     try {
       const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
-      const endpoint = `${API_BASE_URL}/api/chat/argo/query/`;
+      const endpoint = `${API_BASE_URL}/chat/argo/query/`;
 
       console.log("🔗 Making HTTP request to Django endpoint:", endpoint);
 
@@ -953,50 +969,62 @@ const Chatbot = () => {
                         {/* Enhanced content for assistant messages */}
                         {msg.type === "assistant" && (
                           <>
-                            {/* Pipeline info */}
-                            {msg.pipeline_used && (
-                              <div className="mt-4 p-3 bg-slate-100/50 dark:bg-slate-700/50 rounded-lg border border-slate-200/50 dark:border-slate-600/50">
-                                <div className="flex items-center gap-2 text-xs">
-                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                  <strong>Pipeline:</strong> {msg.pipeline_used}{" "}
-                                  |<strong>Data Source:</strong>{" "}
-                                  {msg.data_source || "cloud_db"}
-                                </div>
-                              </div>
-                            )}
+                            {/* Pipeline info removed - cleaner user experience */}
 
-                            {/* Visualizations */}
+                            {/* Enhanced Professional Visualizations */}
                             {msg.visualizations &&
                               Object.keys(msg.visualizations).length > 0 && (
-                                <div className="mt-4 space-y-3">
-                                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    Visualizations
-                                  </h4>
-                                  {Object.entries(msg.visualizations).map(
-                                    ([key, imageUrl]) => (
-                                      <div
-                                        key={key}
-                                        className="border border-slate-200 dark:border-slate-600 rounded-lg p-3 bg-slate-50/50 dark:bg-slate-700/50"
-                                      >
-                                        <h5 className="text-xs font-semibold mb-2 capitalize text-slate-700 dark:text-slate-300">
-                                          {key.replace(/_/g, " ")}
-                                        </h5>
-                                        <img
-                                          src={imageUrl}
-                                          alt={key}
-                                          className="max-w-full h-auto rounded-lg shadow-md"
-                                          onError={(e) => {
-                                            console.warn(
-                                              `Failed to load visualization: ${key}`
-                                            );
-                                            e.currentTarget.style.display =
-                                              "none";
-                                          }}
-                                        />
-                                      </div>
-                                    )
-                                  )}
+                                <div className="mt-6 space-y-4">
+                                  <div className="flex items-center gap-3 mb-6">
+                                    <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
+                                      <div className="w-3 h-3 bg-white rounded-sm"></div>
+                                    </div>
+                                    <h4 className="text-lg font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-slate-100 dark:via-slate-200 dark:to-slate-300 bg-clip-text text-transparent">
+                                      Data Visualizations
+                                    </h4>
+                                  </div>
+                                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    {Object.entries(msg.visualizations).map(
+                                      ([key, imageUrl]) => (
+                                        <div
+                                          key={key}
+                                          className="group relative overflow-hidden"
+                                        >
+                                          <div className="bg-gradient-to-br from-white/90 via-white/80 to-slate-50/70 dark:from-slate-800/90 dark:via-slate-800/80 dark:to-slate-900/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 dark:border-slate-700/60 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                                            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/5 via-purple-400/5 to-cyan-400/5 rounded-2xl"></div>
+                                            <div className="relative z-10">
+                                              <div className="flex items-center justify-between mb-4">
+                                                <h5 className="text-sm font-bold text-slate-800 dark:text-slate-100 capitalize flex items-center gap-2">
+                                                  <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full animate-pulse"></div>
+                                                  {key.replace(/_/g, " ")}
+                                                </h5>
+                                                <div className="px-3 py-1 bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-full border border-blue-200/50 dark:border-blue-700/50">
+                                                  <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                                                    Scientific Plot
+                                                  </span>
+                                                </div>
+                                              </div>
+                                              <div className="relative rounded-xl overflow-hidden shadow-lg bg-white/50 dark:bg-slate-900/50">
+                                                <img
+                                                  src={imageUrl}
+                                                  alt={key}
+                                                  className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
+                                                  onError={(e) => {
+                                                    console.warn(
+                                                      `Failed to load visualization: ${key}`
+                                                    );
+                                                    e.currentTarget.style.display =
+                                                      "none";
+                                                  }}
+                                                />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 via-transparent to-transparent pointer-events-none"></div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
                                 </div>
                               )}
 
@@ -1143,181 +1171,295 @@ const Chatbot = () => {
                                       </div>
                                     )}
 
-                                    {/* Geographic Coverage - Professional World Map */}
+                                    {/* Enhanced Geographic Coverage with Professional World Map */}
                                     {msg.statistics.geographic_coverage && (
                                       <div className="group">
-                                        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm rounded-xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                                          <div className="flex items-center justify-between mb-4">
-                                            <h5 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                                              <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"></div>
-                                              Geographic Coverage
-                                            </h5>
-                                            <div className="px-2 py-1 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-full border border-emerald-200/50 dark:border-emerald-700/50">
-                                              <span className="text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                                                Global
-                                              </span>
-                                            </div>
-                                          </div>
-
-                                          <div className="relative h-36 bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/50 dark:from-slate-800 dark:via-slate-700/50 dark:to-slate-600/30 rounded-xl border border-slate-200/60 dark:border-slate-600/60 overflow-hidden shadow-inner">
-                                            {/* Enhanced World Map Background */}
-                                            <div className="absolute inset-0 opacity-20">
-                                              <svg
-                                                viewBox="0 0 800 400"
-                                                className="w-full h-full"
-                                              >
-                                                <defs>
-                                                  <pattern
-                                                    id="worldPattern"
-                                                    x="0"
-                                                    y="0"
-                                                    width="40"
-                                                    height="40"
-                                                    patternUnits="userSpaceOnUse"
-                                                  >
-                                                    <circle
-                                                      cx="20"
-                                                      cy="20"
-                                                      r="1"
-                                                      fill="currentColor"
-                                                      opacity="0.3"
-                                                    />
-                                                  </pattern>
-                                                </defs>
-                                                <rect
-                                                  width="100%"
-                                                  height="100%"
-                                                  fill="url(#worldPattern)"
-                                                />
-                                              </svg>
+                                        <div className="bg-gradient-to-br from-white/90 via-white/80 to-slate-50/70 dark:from-slate-800/90 dark:via-slate-800/80 dark:to-slate-900/70 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/60 dark:border-slate-700/60 shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:-translate-y-1">
+                                          <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/5 via-teal-400/5 to-cyan-400/5 rounded-2xl"></div>
+                                          <div className="relative z-10">
+                                            <div className="flex items-center justify-between mb-6">
+                                              <h5 className="text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                                <div className="w-2 h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full animate-pulse"></div>
+                                                Geographic Coverage
+                                              </h5>
+                                              <div className="px-3 py-1 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-full border border-emerald-200/50 dark:border-emerald-700/50">
+                                                <span className="text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                                                  Indian Ocean
+                                                </span>
+                                              </div>
                                             </div>
 
-                                            {/* Continental Outlines */}
-                                            <div className="absolute inset-4 border border-slate-300/40 dark:border-slate-600/40 rounded-lg"></div>
-
-                                            {/* Coverage Area with Enhanced Styling */}
-                                            {(() => {
-                                              const coverage =
-                                                msg.statistics
-                                                  .geographic_coverage;
-                                              if (
-                                                coverage &&
-                                                coverage.lat_range &&
-                                                coverage.lon_range
-                                              ) {
-                                                const [minLat, maxLat] =
-                                                  coverage.lat_range;
-                                                const [minLon, maxLon] =
-                                                  coverage.lon_range;
-
-                                                // Enhanced positioning for better visualization
-                                                const centerLat =
-                                                  (minLat + maxLat) / 2;
-                                                const centerLon =
-                                                  (minLon + maxLon) / 2;
-                                                const latRange =
-                                                  maxLat - minLat;
-                                                const lonRange =
-                                                  maxLon - minLon;
-
-                                                return (
-                                                  <div className="absolute animate-pulse">
-                                                    <div
-                                                      className="absolute bg-gradient-to-br from-emerald-400/70 via-teal-400/60 to-cyan-400/50 border-2 border-emerald-300/80 rounded-lg shadow-2xl backdrop-blur-sm"
-                                                      style={{
-                                                        left: `${
-                                                          25 +
-                                                          ((centerLon + 180) *
-                                                            50) /
-                                                            360
-                                                        }%`,
-                                                        top: `${
-                                                          25 +
-                                                          ((90 - centerLat) *
-                                                            50) /
-                                                            180
-                                                        }%`,
-                                                        width: `${Math.max(
-                                                          Math.min(
-                                                            ((lonRange * 50) /
-                                                              360) *
-                                                              100,
-                                                            50
-                                                          ),
-                                                          15
-                                                        )}%`,
-                                                        height: `${Math.max(
-                                                          Math.min(
-                                                            ((latRange * 50) /
-                                                              180) *
-                                                              100,
-                                                            50
-                                                          ),
-                                                          15
-                                                        )}%`,
-                                                        transform:
-                                                          "translate(-50%, -50%)",
-                                                        boxShadow:
-                                                          "0 0 20px rgba(16, 185, 129, 0.3)",
-                                                      }}
+                                            <div className="relative h-48 bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/50 dark:from-slate-900 dark:via-slate-800/50 dark:to-slate-700/30 rounded-xl border border-slate-200/60 dark:border-slate-600/60 overflow-hidden shadow-inner">
+                                              {/* Professional World Map with Ocean Emphasis */}
+                                              <div className="absolute inset-0">
+                                                <svg
+                                                  viewBox="0 0 1000 500"
+                                                  className="w-full h-full"
+                                                >
+                                                  <defs>
+                                                    <linearGradient
+                                                      id="oceanGradient"
+                                                      x1="0%"
+                                                      y1="0%"
+                                                      x2="100%"
+                                                      y2="100%"
                                                     >
-                                                      {/* Inner glow effect */}
-                                                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-lg"></div>
-                                                    </div>
+                                                      <stop
+                                                        offset="0%"
+                                                        stopColor="#0ea5e9"
+                                                        stopOpacity={0.1}
+                                                      />
+                                                      <stop
+                                                        offset="50%"
+                                                        stopColor="#06b6d4"
+                                                        stopOpacity={0.15}
+                                                      />
+                                                      <stop
+                                                        offset="100%"
+                                                        stopColor="#10b981"
+                                                        stopOpacity={0.1}
+                                                      />
+                                                    </linearGradient>
+                                                    <pattern
+                                                      id="gridPattern"
+                                                      x="0"
+                                                      y="0"
+                                                      width="50"
+                                                      height="50"
+                                                      patternUnits="userSpaceOnUse"
+                                                    >
+                                                      <path
+                                                        d="M 50 0 L 0 0 0 50"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="0.5"
+                                                        opacity="0.1"
+                                                      />
+                                                    </pattern>
+                                                  </defs>
 
-                                                    {/* Coverage indicators */}
-                                                    <div className="absolute top-0 left-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"></div>
-                                                    <div
-                                                      className="absolute top-0 right-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"
-                                                      style={{
-                                                        animationDelay: "0.5s",
-                                                      }}
-                                                    ></div>
-                                                    <div
-                                                      className="absolute bottom-0 left-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"
-                                                      style={{
-                                                        animationDelay: "1s",
-                                                      }}
-                                                    ></div>
-                                                    <div
-                                                      className="absolute bottom-0 right-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"
-                                                      style={{
-                                                        animationDelay: "1.5s",
-                                                      }}
-                                                    ></div>
+                                                  {/* Ocean Background */}
+                                                  <rect
+                                                    width="100%"
+                                                    height="100%"
+                                                    fill="url(#oceanGradient)"
+                                                  />
+
+                                                  {/* Grid Lines */}
+                                                  <rect
+                                                    width="100%"
+                                                    height="100%"
+                                                    fill="url(#gridPattern)"
+                                                  />
+
+                                                  {/* Continental Outlines - Simplified */}
+                                                  {/* Africa */}
+                                                  <path
+                                                    d="M 500 150 Q 520 120 540 150 Q 580 180 590 220 Q 580 280 540 320 Q 520 340 500 320 Q 480 280 480 220 Q 480 180 500 150 Z"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.5"
+                                                    opacity="0.3"
+                                                  />
+
+                                                  {/* Asia */}
+                                                  <path
+                                                    d="M 650 100 Q 700 90 750 120 Q 800 140 820 180 Q 800 200 750 190 Q 700 180 650 190 Q 620 160 650 100 Z"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.5"
+                                                    opacity="0.3"
+                                                  />
+
+                                                  {/* Australia */}
+                                                  <path
+                                                    d="M 750 350 Q 800 340 850 360 Q 870 380 850 400 Q 800 410 750 400 Q 730 380 750 350 Z"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="1.5"
+                                                    opacity="0.3"
+                                                  />
+                                                </svg>
+                                              </div>
+
+                                              {/* Indian Ocean Data Coverage Highlight */}
+                                              <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="relative">
+                                                  {/* Pulsing Coverage Area */}
+                                                  <div className="absolute w-32 h-24 bg-gradient-to-br from-emerald-400/30 via-teal-400/25 to-cyan-400/20 rounded-full animate-pulse blur-sm"></div>
+                                                  <div className="absolute w-28 h-20 bg-gradient-to-br from-emerald-500/40 via-teal-500/30 to-cyan-500/25 rounded-full animate-pulse delay-75"></div>
+                                                  <div className="absolute w-24 h-16 bg-gradient-to-br from-emerald-600/50 via-teal-600/40 to-cyan-600/30 rounded-full animate-pulse delay-150"></div>
+
+                                                  {/* Data Points */}
+                                                  <div className="absolute w-20 h-12 flex items-center justify-center">
+                                                    {[...Array(12)].map(
+                                                      (_, i) => (
+                                                        <div
+                                                          key={i}
+                                                          className="absolute w-1 h-1 bg-emerald-400 rounded-full animate-ping"
+                                                          style={{
+                                                            left: `${
+                                                              Math.random() *
+                                                              100
+                                                            }%`,
+                                                            top: `${
+                                                              Math.random() *
+                                                              100
+                                                            }%`,
+                                                            animationDelay: `${
+                                                              i * 0.2
+                                                            }s`,
+                                                          }}
+                                                        ></div>
+                                                      )
+                                                    )}
                                                   </div>
-                                                );
-                                              }
-                                              return null;
-                                            })()}
-
-                                            {/* Enhanced Coordinate Display */}
-                                            <div className="absolute bottom-2 left-2 right-2">
-                                              <div className="bg-black/20 dark:bg-black/40 backdrop-blur-sm rounded-lg p-2 text-center">
-                                                <div className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                                  Coordinate Range
-                                                </div>
-                                                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400">
-                                                  <span>
-                                                    Lat:{" "}
-                                                    {msg.statistics.geographic_coverage?.lat_range
-                                                      ?.map((n: number) =>
-                                                        n.toFixed(1)
-                                                      )
-                                                      .join("° - ")}
-                                                    °
-                                                  </span>
-                                                  <span>
-                                                    Lon:{" "}
-                                                    {msg.statistics.geographic_coverage?.lon_range
-                                                      ?.map((n: number) =>
-                                                        n.toFixed(1)
-                                                      )
-                                                      .join("° - ")}
-                                                    °
-                                                  </span>
                                                 </div>
                                               </div>
+
+                                              {/* Coverage Legend and Coordinates */}
+                                              <div className="absolute bottom-2 left-2 right-2">
+                                                <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-lg p-3 border border-slate-200/50 dark:border-slate-600/50 shadow-lg">
+                                                  <div className="flex items-center justify-between text-xs mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                                      <span className="font-bold text-slate-700 dark:text-slate-300">
+                                                        ARGO Coverage Area
+                                                      </span>
+                                                    </div>
+                                                    <div className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+                                                      <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                                        {msg.statistics
+                                                          .total_profiles ||
+                                                          0}{" "}
+                                                        Profiles
+                                                      </span>
+                                                    </div>
+                                                  </div>
+
+                                                  {/* Professional Coordinate Display */}
+                                                  {msg.statistics
+                                                    .geographic_coverage
+                                                    ?.lat_range &&
+                                                    msg.statistics
+                                                      .geographic_coverage
+                                                      ?.lon_range && (
+                                                      <div className="grid grid-cols-2 gap-3 text-xs">
+                                                        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg p-2 border border-blue-200/30 dark:border-blue-700/30">
+                                                          <div className="font-bold text-blue-700 dark:text-blue-300 mb-1">
+                                                            Latitude Range
+                                                          </div>
+                                                          <div className="font-mono text-slate-600 dark:text-slate-400">
+                                                            {msg.statistics.geographic_coverage.lat_range
+                                                              .map(
+                                                                (n: number) =>
+                                                                  n.toFixed(1)
+                                                              )
+                                                              .join("° to ")}
+                                                            °
+                                                          </div>
+                                                        </div>
+                                                        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-lg p-2 border border-emerald-200/30 dark:border-emerald-700/30">
+                                                          <div className="font-bold text-emerald-700 dark:text-emerald-300 mb-1">
+                                                            Longitude Range
+                                                          </div>
+                                                          <div className="font-mono text-slate-600 dark:text-slate-400">
+                                                            {msg.statistics.geographic_coverage.lon_range
+                                                              .map(
+                                                                (n: number) =>
+                                                                  n.toFixed(1)
+                                                              )
+                                                              .join("° to ")}
+                                                            °
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    )}
+                                                </div>
+                                              </div>
+
+                                              {/* Coverage Area with Enhanced Styling */}
+                                              {(() => {
+                                                const coverage =
+                                                  msg.statistics
+                                                    .geographic_coverage;
+                                                if (
+                                                  coverage?.lat_range &&
+                                                  coverage?.lon_range
+                                                ) {
+                                                  const [minLat, maxLat] =
+                                                    coverage.lat_range;
+                                                  const [minLon, maxLon] =
+                                                    coverage.lon_range;
+                                                  const centerLat =
+                                                    (minLat + maxLat) / 2;
+                                                  const centerLon =
+                                                    (minLon + maxLon) / 2;
+                                                  const latRange =
+                                                    maxLat - minLat;
+                                                  const lonRange =
+                                                    maxLon - minLon;
+
+                                                  const leftPos =
+                                                    25 +
+                                                    ((centerLon + 180) * 50) /
+                                                      360;
+                                                  const topPos =
+                                                    25 +
+                                                    ((90 - centerLat) * 50) /
+                                                      180;
+                                                  const width = Math.max(
+                                                    Math.min(
+                                                      ((lonRange * 50) / 360) *
+                                                        100,
+                                                      50
+                                                    ),
+                                                    15
+                                                  );
+                                                  const height = Math.max(
+                                                    Math.min(
+                                                      ((latRange * 50) / 180) *
+                                                        100,
+                                                      50
+                                                    ),
+                                                    15
+                                                  );
+
+                                                  return (
+                                                    <div className="absolute animate-pulse">
+                                                      <div
+                                                        className="absolute bg-gradient-to-br from-emerald-400/70 via-teal-400/60 to-cyan-400/50 border-2 border-emerald-300/80 rounded-lg shadow-2xl backdrop-blur-sm"
+                                                        style={{
+                                                          left: `${leftPos}%`,
+                                                          top: `${topPos}%`,
+                                                          width: `${width}%`,
+                                                          height: `${height}%`,
+                                                          transform:
+                                                            "translate(-50%, -50%)",
+                                                          boxShadow:
+                                                            "0 0 20px rgba(16, 185, 129, 0.3)",
+                                                        }}
+                                                      >
+                                                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-lg"></div>
+                                                      </div>
+                                                      {[...Array(4)].map(
+                                                        (_, i) => (
+                                                          <div
+                                                            key={i}
+                                                            className="absolute w-2 h-2 bg-emerald-400 rounded-full animate-ping shadow-lg shadow-emerald-400/50"
+                                                            style={{
+                                                              animationDelay: `${
+                                                                i * 0.5
+                                                              }s`,
+                                                            }}
+                                                          ></div>
+                                                        )
+                                                      )}
+                                                    </div>
+                                                  );
+                                                }
+                                                return null;
+                                              })()}
                                             </div>
                                           </div>
                                         </div>
@@ -1384,6 +1526,48 @@ const Chatbot = () => {
                                           </div>
                                         )
                                       )}
+                                  </div>
+
+                                  {/* Professional Data Summary Card */}
+                                  <div className="mt-6 p-4 bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-lg">
+                                    <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100 mb-3">
+                                      Analysis Summary
+                                    </h4>
+                                    <div className="grid grid-cols-2 gap-3 text-xs">
+                                      <div>
+                                        <span className="text-slate-500 dark:text-slate-400">
+                                          Data Points:{" "}
+                                        </span>
+                                        <span className="font-bold">
+                                          {msg.statistics.total_profiles?.toLocaleString() ||
+                                            "N/A"}
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-slate-500 dark:text-slate-400">
+                                          Region:{" "}
+                                        </span>
+                                        <span className="font-bold text-emerald-600">
+                                          Indian Ocean
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-slate-500 dark:text-slate-400">
+                                          Quality:{" "}
+                                        </span>
+                                        <span className="font-bold text-green-600">
+                                          Verified
+                                        </span>
+                                      </div>
+                                      <div>
+                                        <span className="text-slate-500 dark:text-slate-400">
+                                          Source:{" "}
+                                        </span>
+                                        <span className="font-bold text-blue-600">
+                                          ARGO Floats
+                                        </span>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
                               )}

@@ -11,7 +11,8 @@ export default defineConfig(({ mode }) => ({
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
-        secure: false
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '')  // Remove /api prefix
       }
       // Removed WebSocket proxy - frontend connects directly
     }

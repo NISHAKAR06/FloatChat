@@ -151,9 +151,21 @@ def process_enhanced_argo_chat(request):
         if not user_query:
             return JsonResponse({'error': 'Message is required'}, status=400)
 
-        logger.info(f" Processing ARGO query with cloud RAG pipeline: {user_query}")
+        logger.info(f" Processing ARGO query with dataset RAG pipeline: {user_query}")
+        
+        # STRICT VALIDATION: Reject non-Indian Ocean queries immediately
+        user_query_lower = user_query.lower()
+        rejected_oceans = ['pacific', 'atlantic', 'arctic', 'mediterranean', 'north sea', 'black sea']
+        if any(ocean in user_query_lower for ocean in rejected_oceans):
+            return JsonResponse({
+                'answer': 'I can only provide information about the Indian Ocean region (Arabian Sea, Bay of Bengal, Southern Indian Ocean) based on our dataset. Please rephrase your query to focus on Indian Ocean ARGO data.',
+                'metadata': {
+                    'rejection_reason': 'non_indian_ocean_query'
+                },
+                'data': {'profiles_count': 0, 'stats': {}}
+            })
 
-        # FORCE cloud database usage - no fallback to fake data
+        # FORCE dataset usage - no fallback to fake data
         try:
             import sys
             import traceback
@@ -233,29 +245,33 @@ def process_enhanced_argo_chat(request):
                 # Streamlined, efficient response structure with enhanced metadata
                 data_payload = structured_response.get('data', {})
 
+                # Ensure answer mentions dataset if it doesn't already
+                if 'dataset' not in enhanced_answer.lower() and 'based on' not in enhanced_answer.lower():
+                    enhanced_answer = f"Based on our dataset: {enhanced_answer}"
+
                 response_data = {
-                    # Core response (most important) - now enhanced with accurate geographic info
+                    # Core response (most important) - now enhanced with dataset info
                     'answer': enhanced_answer,
 
-                    # Enhanced data section with detailed statistics
+                    # Enhanced data section with detailed statistics from dataset
                     'data': {
                         'profiles_count': len(data_payload.get('profiles', [])),
                         'stats': data_payload.get('statistics', {}),
                         'ocean_region_stats': ocean_stats,
-                        'viz_count': len(visualizations)
+                        'viz_count': len(visualizations),
+                        'region_scope': 'indian_ocean_only',
+                        'geographic_bounds': {'longitude': [20, 150], 'latitude': [-60, 30]}
                     },
 
                     # Visualizations (optimized format)
                     'visualizations': visualizations,
 
-                    # Enhanced metadata with detailed geographic coverage
+                    # Clean metadata for users - no technical details
                     'metadata': {
                         'analysis': structured_response.get('analysis', {}),
-                        'pipeline': 'rag_netcdf_enhanced',
-                        'model': 'LLaMA-3.8B-Gemma',
                         'timestamp': structured_response.get('timestamp', ''),
                         'geographic_coverage': _get_geographic_coverage_summary(ocean_stats),
-                        'data_quality': '100%_real_cloud_data'
+                        'region_restriction': 'indian_ocean_arabian_bay_southern'
                     }
                 }
 
@@ -479,7 +495,7 @@ def get_system_status(request):
         status_info['components']['models'] = {
             'llm': 'Ollama LLaMA',
             'embedding': 'EmbeddingGemma (768-dim)',
-            'status': 'ready' if RAG_INTEGRATION else 'unavailable'
+            'status': 'ready' if get_rag_integration_status() else 'unavailable'
         }
 
         return JsonResponse(status_info)

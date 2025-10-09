@@ -25,7 +25,7 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login/refresh/`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login/refresh/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,7 +152,7 @@ class ApiClient {
 
   // Manual login method
   async login(email: string, password: string): Promise<ApiResponse<any>> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login/`, {
+    const response = await fetch(`${API_BASE_URL}/auth/login/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -207,7 +207,7 @@ export const api = {
   isAuthenticated: () => apiClient.isAuthenticated(),
   register: async (email: string, password: string) => {
     const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || '/api';
-    const response = await fetch(`${API_BASE_URL}/api/auth/register/`, {
+    const response = await fetch(`${API_BASE_URL}/auth/register/`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -227,9 +227,9 @@ export const api = {
   },
 
   // Datasets
-  getDatasets: () => apiClient.get('/api/datasets/datasets/'),
+  getDatasets: () => apiClient.get('/datasets/datasets/'),
   uploadNetCDF: (formData: FormData) => {
-    return fetch(`${API_BASE_URL}/api/datasets/upload-netcdf/`, {
+    return fetch(`${API_BASE_URL}/datasets/upload-netcdf/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -237,6 +237,6 @@ export const api = {
       body: formData,
     }).then(res => res.json());
   },
-  getDatasetStatus: (id: string) => apiClient.get(`/api/datasets/dataset-status/${id}/`),
-  getDatasetMetadata: (id: string) => apiClient.get(`/api/datasets/dataset-metadata/${id}/`),
+  getDatasetStatus: (id: string) => apiClient.get(`/datasets/dataset-status/${id}/`),
+  getDatasetMetadata: (id: string) => apiClient.get(`/datasets/dataset-metadata/${id}/`),
 };
