@@ -36,6 +36,7 @@ import {
 
 const AdminDashboard = () => {
   const { t } = useLanguage();
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   // Mock admin data
   const systemStats = [
@@ -107,6 +108,14 @@ const AdminDashboard = () => {
     { user: "marine.scientist@gov.org", queries: 32, lastActive: "15 min ago" },
     { user: "oceanographer@lab.com", queries: 28, lastActive: "1 hr ago" },
   ];
+
+  // Handle upload complete - refresh recent uploads
+  const handleUploadComplete = async () => {
+    console.log("Upload completed, refreshing recent uploads...");
+    await fetchRecentUploads();
+    // Optional: close dialog after successful upload
+    // setUploadDialogOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-surface">
@@ -226,7 +235,10 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               )}
-              <Dialog>
+              <Dialog
+                open={uploadDialogOpen}
+                onOpenChange={setUploadDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <Button className="w-full mt-4" variant="outline">
                     <Upload className="h-4 w-4 mr-2" />
@@ -241,7 +253,7 @@ const AdminDashboard = () => {
                       database
                     </DialogDescription>
                   </DialogHeader>
-                  <NetCDFUpload />
+                  <NetCDFUpload onUploadComplete={handleUploadComplete} />
                 </DialogContent>
               </Dialog>
             </CardContent>

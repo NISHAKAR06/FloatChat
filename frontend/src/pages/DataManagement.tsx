@@ -52,6 +52,7 @@ const DataManagement = () => {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   // Fetch datasets from backend
   const fetchDatasets = async () => {
@@ -82,6 +83,14 @@ const DataManagement = () => {
     setRefreshing(true);
     await fetchDatasets();
     setRefreshing(false);
+  };
+
+  // Handle upload complete - refresh datasets and close dialog
+  const handleUploadComplete = async () => {
+    console.log("Upload completed, refreshing dataset list...");
+    await refreshDatasets();
+    // Optional: close dialog after successful upload
+    // setUploadDialogOpen(false);
   };
 
   // Only fetch datasets when explicitly requested
@@ -156,21 +165,21 @@ const DataManagement = () => {
             />
             Refresh
           </Button>
-          <Dialog>
+          <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="flex items-center gap-2">
+              <Button className="gap-2">
                 <Upload className="h-4 w-4" />
                 Upload NetCDF File
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-3xl">
               <DialogHeader>
                 <DialogTitle>Upload NetCDF Data</DialogTitle>
                 <DialogDescription>
                   Upload and process NetCDF files for the oceanographic database
                 </DialogDescription>
               </DialogHeader>
-              <NetCDFUpload />
+              <NetCDFUpload onUploadComplete={handleUploadComplete} />
             </DialogContent>
           </Dialog>
         </div>

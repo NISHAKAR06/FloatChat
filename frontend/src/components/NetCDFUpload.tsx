@@ -1,9 +1,16 @@
-import React, { useState, useRef } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import React, { useState, useRef } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
 import {
   Upload,
   File,
@@ -12,13 +19,13 @@ import {
   Loader2,
   Database,
   Clock,
-  HardDrive
-} from 'lucide-react';
+  HardDrive,
+} from "lucide-react";
 
 interface UploadProgress {
   dataset_id: string;
   filename: string;
-  status: 'uploading' | 'processing' | 'completed' | 'failed';
+  status: "uploading" | "processing" | "completed" | "failed";
   progress: number;
   message?: string;
   metadata?: {
@@ -29,13 +36,20 @@ interface UploadProgress {
   };
 }
 
-const NetCDFUpload: React.FC = () => {
+interface NetCDFUploadProps {
+  onUploadComplete?: () => void;
+}
+
+const NetCDFUpload: React.FC<NetCDFUploadProps> = ({ onUploadComplete }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
-  const [error, setError] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(
+    null
+  );
+  const [error, setError] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -52,24 +66,24 @@ const NetCDFUpload: React.FC = () => {
     setIsDragOver(false);
 
     const files = Array.from(e.dataTransfer.files);
-    const netcdfFile = files.find(file => file.name.endsWith('.nc'));
+    const netcdfFile = files.find((file) => file.name.endsWith(".nc"));
 
     if (netcdfFile) {
       setSelectedFile(netcdfFile);
-      setError('');
+      setError("");
     } else {
-      setError('Please select a valid NetCDF (.nc) file');
+      setError("Please select a valid NetCDF (.nc) file");
     }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.name.endsWith('.nc')) {
+      if (file.name.endsWith(".nc")) {
         setSelectedFile(file);
-        setError('');
+        setError("");
       } else {
-        setError('Please select a valid NetCDF (.nc) file');
+        setError("Please select a valid NetCDF (.nc) file");
       }
     }
   };
@@ -78,34 +92,34 @@ const NetCDFUpload: React.FC = () => {
     if (!selectedFile) return;
 
     setIsUploading(true);
-    setError('');
+    setError("");
 
     try {
       // Create form data
       const formData = new FormData();
-      formData.append('file', selectedFile);
+      formData.append("file", selectedFile);
 
       // Upload file
-      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || '';
-      
+      const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
+
       // Try public endpoint first (for development), fallback to authenticated endpoint
       let uploadUrl = `${API_BASE_URL}/datasets/upload-netcdf-public/`;
       let headers: HeadersInit = {};
-      
+
       // If we have a token, use the authenticated endpoint
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem("access_token");
       if (token) {
         uploadUrl = `${API_BASE_URL}/datasets/upload-netcdf/`;
         headers = {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         };
       }
-      
-      console.log('Uploading to:', uploadUrl);
-      console.log('File:', selectedFile.name, 'Size:', selectedFile.size);
-      
+
+      console.log("Uploading to:", uploadUrl);
+      console.log("File:", selectedFile.name, "Size:", selectedFile.size);
+
       const response = await fetch(uploadUrl, {
-        method: 'POST',
+        method: "POST",
         headers: headers,
         body: formData,
       });
@@ -113,98 +127,129 @@ const NetCDFUpload: React.FC = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        console.error('Upload error:', result);
-        const errorMsg = result.error || result.detail || 'Upload failed';
-        const hint = result.hint ? `\n${result.hint}` : '';
+        console.error("Upload error:", result);
+        const errorMsg = result.error || result.detail || "Upload failed";
+        const hint = result.hint ? `\n${result.hint}` : "";
         throw new Error(errorMsg + hint);
       }
 
-      console.log('Upload success:', result);
+      console.log("Upload success:", result);
 
       // Validate that the uploaded file has required structure
       if (!result.variables || !result.dimensions) {
-        throw new Error('Invalid NetCDF file structure');
+        throw new Error("Invalid NetCDF file structure");
       }
 
       // Set initial upload progress
       setUploadProgress({
         dataset_id: result.dataset_id,
         filename: selectedFile.name,
-        status: 'processing',
+        status: "processing",
         progress: 0,
-        message: 'Processing NetCDF file...',
+        message: "Processing NetCDF file...",
         metadata: {
           variables: result.variables,
           dimensions: result.dimensions,
-        }
+        },
       });
 
       // Start polling for status updates
       pollStatus(result.dataset_id);
-
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      setError(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setIsUploading(false);
     }
   };
 
   const pollStatus = async (datasetId: string) => {
+    const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
     const pollInterval = setInterval(async () => {
       try {
-        const response = await fetch(`/datasets/dataset-status/${datasetId}/`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          },
-        });
+        const response = await fetch(
+          `${API_BASE_URL}/datasets/dataset-status/${datasetId}/`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+          }
+        );
 
         const status = await response.json();
 
-        if (status.status === 'completed') {
+        if (status.status === "completed") {
           setUploadProgress({
             dataset_id: status.id,
             filename: status.filename,
-            status: 'completed',
+            status: "completed",
             progress: 100,
-            message: 'Upload completed successfully!',
+            message: "Upload completed successfully!",
             metadata: {
               variables: status.variables,
               value_count: status.value_count,
               embedding_count: status.embedding_count,
-            }
+            },
           });
           clearInterval(pollInterval);
-        } else if (status.status === 'failed') {
+
+          // Show success toast
+          toast({
+            title: "Upload Completed! 🎉",
+            description: `${status.filename} has been processed successfully. ${
+              status.value_count?.toLocaleString() || 0
+            } data points and ${
+              status.embedding_count || 0
+            } embeddings created.`,
+            duration: 5000,
+          });
+
+          // Trigger parent component refresh if callback provided
+          if (onUploadComplete) {
+            onUploadComplete();
+          }
+        } else if (status.status === "failed") {
           setUploadProgress({
             dataset_id: status.id,
             filename: status.filename,
-            status: 'failed',
+            status: "failed",
             progress: 0,
-            message: 'Upload failed',
+            message: "Upload failed",
           });
           clearInterval(pollInterval);
-        } else if (status.status === 'processing') {
+
+          // Show error toast
+          toast({
+            title: "Upload Failed",
+            description: `Processing of ${status.filename} failed. Please check the file and try again.`,
+            variant: "destructive",
+            duration: 5000,
+          });
+        } else if (status.status === "processing") {
           // Calculate progress based on data processing
           const progress = Math.min(
             90,
-            (status.value_count || 0) / Math.max(status.dimensions?.time?.size || 1000, 1) * 90
+            ((status.value_count || 0) /
+              Math.max(status.dimensions?.time?.size || 1000, 1)) *
+              90
           );
 
           setUploadProgress({
             dataset_id: status.id,
             filename: status.filename,
-            status: 'processing',
+            status: "processing",
             progress: progress,
-            message: `Processing data... ${status.value_count || 0} values processed`,
+            message: `Processing data... ${
+              status.value_count || 0
+            } values processed`,
             metadata: {
               variables: status.variables,
               value_count: status.value_count,
               embedding_count: status.embedding_count,
-            }
+            },
           });
         }
       } catch (err) {
-        console.error('Error polling status:', err);
+        console.error("Error polling status:", err);
       }
     }, 2000); // Poll every 2 seconds
 
@@ -217,18 +262,18 @@ const NetCDFUpload: React.FC = () => {
   const resetUpload = () => {
     setSelectedFile(null);
     setUploadProgress(null);
-    setError('');
+    setError("");
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   return (
@@ -248,8 +293,8 @@ const NetCDFUpload: React.FC = () => {
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               isDragOver
-                ? 'border-primary bg-primary/5'
-                : 'border-muted-foreground/25 hover:border-primary/50'
+                ? "border-primary bg-primary/5"
+                : "border-muted-foreground/25 hover:border-primary/50"
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -308,20 +353,30 @@ const NetCDFUpload: React.FC = () => {
               </div>
               <Badge
                 variant={
-                  uploadProgress.status === 'completed' ? 'default' :
-                  uploadProgress.status === 'failed' ? 'destructive' :
-                  'secondary'
+                  uploadProgress.status === "completed"
+                    ? "default"
+                    : uploadProgress.status === "failed"
+                    ? "destructive"
+                    : "secondary"
                 }
               >
-                {uploadProgress.status === 'uploading' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
-                {uploadProgress.status === 'processing' && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
-                {uploadProgress.status === 'completed' && <CheckCircle className="h-3 w-3 mr-1" />}
-                {uploadProgress.status === 'failed' && <AlertCircle className="h-3 w-3 mr-1" />}
+                {uploadProgress.status === "uploading" && (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                )}
+                {uploadProgress.status === "processing" && (
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                )}
+                {uploadProgress.status === "completed" && (
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                )}
+                {uploadProgress.status === "failed" && (
+                  <AlertCircle className="h-3 w-3 mr-1" />
+                )}
                 {uploadProgress.status}
               </Badge>
             </div>
 
-            {uploadProgress.status !== 'failed' && (
+            {uploadProgress.status !== "failed" && (
               <Progress value={uploadProgress.progress} className="w-full" />
             )}
 
@@ -366,7 +421,7 @@ const NetCDFUpload: React.FC = () => {
               </div>
             )}
 
-            {uploadProgress.status === 'completed' && (
+            {uploadProgress.status === "completed" && (
               <Button onClick={resetUpload} className="w-full">
                 Upload Another File
               </Button>
