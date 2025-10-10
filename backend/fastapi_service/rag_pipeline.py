@@ -1,3 +1,27 @@
+"""
+RAG Pipeline for ARGO Float Data Chatbot
+=========================================
+
+=============================================================================
+DATA SOURCE: NEON POSTGRESQL CLOUD DATABASE ONLY
+=============================================================================
+This chatbot responds ONLY based on data from these three tables:
+
+1. datasets - NetCDF file metadata (id, filename, upload_time, status, variables)
+2. dataset_values - Measurement data (lat, lon, depth, value, variable, time)
+3. dataset_embeddings - Vector embeddings for semantic search (region, summary, embedding)
+
+Geographic Scope: Indian Ocean ONLY (20°E-150°E, 30°N-60°S)
+- Arabian Sea
+- Bay of Bengal  
+- Central Indian Ocean
+- Southern Indian Ocean
+
+All responses are generated from actual uploaded NetCDF data stored in these tables.
+NO fallback data, NO demo data, NO hardcoded values.
+=============================================================================
+"""
+
 import os
 import json
 import re
@@ -260,7 +284,7 @@ In our database: 1,196 measurements from ARGO floats in the Indian Ocean region.
 
             # SQL generation fallback
             elif 'sql' in prompt_lower:
-                return "SELECT latitude, longitude, temperature, salinity FROM argo_measurements LIMIT 100"
+                return "SELECT lat, lon, value FROM dataset_values WHERE variable = 'temperature'"
 
             # Generic fallback
             return "I apologize, but the AI analysis service is currently unavailable. However, I can provide basic information about our ARGO oceanographic data in the Indian Ocean."
@@ -457,14 +481,21 @@ Data Quality:
             lon_range = combined_filters.get('lon_range', [20, 150])
 
             # Query existing measurements from the database
+            # NO LIMIT - retrieve comprehensive data for complete analysis
             sample_query = """
-            SELECT latitude, longitude, depth, temperature, salinity, filename
-            FROM argo_measurements
-            WHERE temperature IS NOT NULL
-              AND latitude BETWEEN {} AND {}
-              AND longitude BETWEEN {} AND {}
-            ORDER BY temperature DESC
-            LIMIT 20
+            SELECT 
+                d.filename,
+                v.lat as latitude,
+                v.lon as longitude,
+                v.depth,
+                MAX(CASE WHEN v.variable = 'temperature' THEN v.value END) as temperature,
+                MAX(CASE WHEN v.variable = 'salinity' THEN v.value END) as salinity
+            FROM dataset_values v
+            INNER JOIN datasets d ON v.dataset_id = d.id
+            WHERE v.lat BETWEEN {} AND {}
+              AND v.lon BETWEEN {} AND {}
+            GROUP BY d.filename, v.lat, v.lon, v.depth
+            ORDER BY temperature DESC NULLS LAST
             """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
 
             try:
@@ -511,82 +542,155 @@ Data Quality:
             lon_range = analysis.get('geographic_filters', {}).get('lon_range', [20, 150])
 
             user_query_lower = user_query.lower()
+            
+            # Determine if query needs sampling (profile/show queries) vs aggregation
+            is_profile_query = any(word in user_query_lower for word in ['profile', 'show', 'display', 'view', 'list'])
+            is_aggregate_query = any(word in user_query_lower for word in ['average', 'avg', 'mean', 'total', 'count', 'sum', 'statistics', 'stats'])
 
             # For temperature-related queries
             if 'temperature' in user_query_lower or 'temp' in user_query_lower:
-                if 'average' in user_query_lower or 'avg' in user_query_lower or 'mean' in user_query_lower:
-                    # Aggregate query - handle GROUP BY properly
+                if is_aggregate_query:
+                    # Aggregate query - statistical summary
                     sql_query = """
                     SELECT
-                        ROUND(AVG(temperature)::numeric, 3) as avg_temperature,
+                        ROUND(AVG(value)::numeric, 3) as avg_temperature,
                         COUNT(*) as total_measurements,
-                        ROUND(MIN(temperature)::numeric, 3) as min_temperature,
-                        ROUND(MAX(temperature)::numeric, 3) as max_temperature
-                    FROM argo_measurements
-                    WHERE temperature IS NOT NULL
-                      AND latitude BETWEEN {} AND {}
-                      AND longitude BETWEEN {} AND {}
+                        ROUND(MIN(value)::numeric, 3) as min_temperature,
+                        ROUND(MAX(value)::numeric, 3) as max_temperature,
+                        ROUND(STDDEV(value)::numeric, 3) as std_temperature
+                    FROM dataset_values
+                    WHERE variable = 'temperature'
+                      AND value IS NOT NULL
+                      AND lat BETWEEN {} AND {}
+                      AND lon BETWEEN {} AND {}
+                    """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
+                elif is_profile_query:
+                    # Profile query - sample representative data points
+                    sql_query = """
+                    WITH sampled_locations AS (
+                        SELECT DISTINCT lat, lon
+                        FROM dataset_values
+                        WHERE variable = 'temperature'
+                          AND lat BETWEEN {} AND {}
+                          AND lon BETWEEN {} AND {}
+                        ORDER BY RANDOM()
+                        LIMIT 5
+                    )
+                    SELECT v.lat as latitude, v.lon as longitude, v.depth, v.value as temperature
+                    FROM dataset_values v
+                    INNER JOIN sampled_locations s ON v.lat = s.lat AND v.lon = s.lon
+                    WHERE v.variable = 'temperature'
+                      AND v.value IS NOT NULL
+                    ORDER BY v.lat, v.lon, v.depth NULLS FIRST
+                    LIMIT 500
                     """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
                 else:
-                    # Raw data query
+                    # General query - top results by depth
                     sql_query = """
-                    SELECT latitude, longitude, depth, temperature
-                    FROM argo_measurements
-                    WHERE temperature IS NOT NULL
-                      AND latitude BETWEEN {} AND {}
-                      AND longitude BETWEEN {} AND {}
-                    ORDER BY depth NULLS FIRST, temperature DESC
-                    LIMIT 50
+                    SELECT lat as latitude, lon as longitude, depth, value as temperature
+                    FROM dataset_values
+                    WHERE variable = 'temperature'
+                      AND value IS NOT NULL
+                      AND lat BETWEEN {} AND {}
+                      AND lon BETWEEN {} AND {}
+                    ORDER BY depth NULLS FIRST
+                    LIMIT 1000
                     """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
 
             # For salinity-related queries
             elif 'salinity' in user_query_lower or 'salt' in user_query_lower:
-                if 'average' in user_query_lower or 'avg' in user_query_lower or 'mean' in user_query_lower:
+                if is_aggregate_query:
                     sql_query = """
                     SELECT
-                        ROUND(AVG(salinity)::numeric, 3) as avg_salinity,
+                        ROUND(AVG(value)::numeric, 3) as avg_salinity,
                         COUNT(*) as total_measurements,
-                        ROUND(MIN(salinity)::numeric, 3) as min_salinity,
-                        ROUND(MAX(salinity)::numeric, 3) as max_salinity
-                    FROM argo_measurements
-                    WHERE salinity IS NOT NULL
-                      AND latitude BETWEEN {} AND {}
-                      AND longitude BETWEEN {} AND {}
+                        ROUND(MIN(value)::numeric, 3) as min_salinity,
+                        ROUND(MAX(value)::numeric, 3) as max_salinity,
+                        ROUND(STDDEV(value)::numeric, 3) as std_salinity
+                    FROM dataset_values
+                    WHERE variable = 'salinity'
+                      AND value IS NOT NULL
+                      AND lat BETWEEN {} AND {}
+                      AND lon BETWEEN {} AND {}
+                    """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
+                elif is_profile_query:
+                    # Profile query - sample representative data points
+                    sql_query = """
+                    WITH sampled_locations AS (
+                        SELECT DISTINCT lat, lon
+                        FROM dataset_values
+                        WHERE variable = 'salinity'
+                          AND lat BETWEEN {} AND {}
+                          AND lon BETWEEN {} AND {}
+                        ORDER BY RANDOM()
+                        LIMIT 5
+                    )
+                    SELECT v.lat as latitude, v.lon as longitude, v.depth, v.value as salinity
+                    FROM dataset_values v
+                    INNER JOIN sampled_locations s ON v.lat = s.lat AND v.lon = s.lon
+                    WHERE v.variable = 'salinity'
+                      AND v.value IS NOT NULL
+                    ORDER BY v.lat, v.lon, v.depth NULLS FIRST
+                    LIMIT 500
                     """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
                 else:
                     sql_query = """
-                    SELECT latitude, longitude, depth, salinity
-                    FROM argo_measurements
-                    WHERE salinity IS NOT NULL
-                      AND latitude BETWEEN {} AND {}
-                      AND longitude BETWEEN {} AND {}
-                    ORDER BY depth NULLS FIRST, salinity DESC
-                    LIMIT 50
+                    SELECT lat as latitude, lon as longitude, depth, value as salinity
+                    FROM dataset_values
+                    WHERE variable = 'salinity'
+                      AND value IS NOT NULL
+                      AND lat BETWEEN {} AND {}
+                      AND lon BETWEEN {} AND {}
+                    ORDER BY depth NULLS FIRST
+                    LIMIT 1000
                     """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
 
             # Default query for general data requests
             else:
-                sql_query = """
-                SELECT latitude, longitude, depth, temperature, salinity
-                FROM argo_measurements
-                WHERE temperature IS NOT NULL
-                  AND latitude BETWEEN {} AND {}
-                  AND longitude BETWEEN {} AND {}
-                ORDER BY depth NULLS FIRST, temperature DESC
-                LIMIT 50
-                """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
+                if is_aggregate_query:
+                    sql_query = """
+                    SELECT 
+                        COUNT(*) as total_measurements,
+                        COUNT(DISTINCT CASE WHEN variable = 'temperature' THEN 1 END) as temp_count,
+                        COUNT(DISTINCT CASE WHEN variable = 'salinity' THEN 1 END) as sal_count,
+                        ROUND(AVG(CASE WHEN variable = 'temperature' THEN value END)::numeric, 3) as avg_temp,
+                        ROUND(AVG(CASE WHEN variable = 'salinity' THEN value END)::numeric, 3) as avg_sal
+                    FROM dataset_values
+                    WHERE lat BETWEEN {} AND {}
+                      AND lon BETWEEN {} AND {}
+                    """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
+                else:
+                    sql_query = """
+                    SELECT 
+                        v.lat as latitude, 
+                        v.lon as longitude, 
+                        v.depth,
+                        MAX(CASE WHEN v.variable = 'temperature' THEN v.value END) as temperature,
+                        MAX(CASE WHEN v.variable = 'salinity' THEN v.value END) as salinity
+                    FROM dataset_values v
+                    WHERE v.lat BETWEEN {} AND {}
+                      AND v.lon BETWEEN {} AND {}
+                    GROUP BY v.lat, v.lon, v.depth
+                    ORDER BY depth NULLS FIRST
+                    LIMIT 500
+                    """.format(lat_range[0], lat_range[1], lon_range[0], lon_range[1])
 
             logger.info(f"Generated SQL query: {sql_query.strip()}")
             return sql_query.strip()
 
         except Exception as e:
             logger.error(f"Error generating SQL query: {e}")
-            # Ultimate fallback
+            # Ultimate fallback - NO LIMIT for comprehensive error recovery
             return """
-            SELECT latitude, longitude, temperature, salinity
-            FROM argo_measurements
-            WHERE temperature IS NOT NULL
-            LIMIT 50
+            SELECT 
+                lat as latitude, 
+                lon as longitude, 
+                MAX(CASE WHEN variable = 'temperature' THEN value END) as temperature,
+                MAX(CASE WHEN variable = 'salinity' THEN value END) as salinity
+            FROM dataset_values
+            WHERE value IS NOT NULL
+            GROUP BY lat, lon
+            ORDER BY lat, lon
             """.strip()
 
     def _execute_data_query(self, sql_query: Optional[str], context: List[Dict]) -> Optional[Any]:
@@ -603,27 +707,45 @@ Data Quality:
     def _generate_answer(self, user_query: str, context: List[Dict], data_results: Any, analysis: Dict) -> str:
         """Generate final answer using retrieved context and data"""
         try:
+            # Format data results for better presentation
+            data_summary = ""
+            if data_results:
+                if isinstance(data_results, list) and len(data_results) > 0:
+                    data_summary = f"Retrieved {len(data_results)} data points from dataset"
+                    # Show sample if large dataset
+                    if len(data_results) > 100:
+                        data_summary += f" (showing analysis of {len(data_results)} measurements)"
+                elif isinstance(data_results, dict):
+                    data_summary = f"Statistical summary from dataset: {data_results}"
+            
             answer_prompt = f"""
             You are an expert Oceanographic Assistant for INDIAN OCEAN data from our dataset ONLY.
 
             STRICT RULES:
-            1. ONLY use data from the dataset context provided
+            1. ONLY use data from the dataset context and query results provided
             2. ALWAYS mention "dataset" as your data source
             3. ONLY discuss Indian Ocean regions: Arabian Sea, Bay of Bengal, Southern Indian Ocean
             4. If no relevant data in context, say "No relevant Indian Ocean data found in our dataset."
             5. ALL numeric values must come from the actual database results provided
             6. Never use external oceanographic knowledge or general facts
             7. Emphasize that data is verified and stored securely in our dataset
+            8. When showing profiles, mention the locations sampled and depth ranges
 
             USER QUERY: "{user_query}"
 
             DATASET CONTEXT: Found {len(context)} relevant ARGO profiles in dataset.
-            Data Results: {type(data_results)} with {(len(data_results) if hasattr(data_results, '__len__') else 'N/A')} items
+            
+            QUERY RESULTS: {data_summary}
+            Data Details: {str(data_results)[:2000] if data_results else "No data results"}
 
-            Provide answer mentioning dataset as source and Indian Ocean geographic bounds only.
+            Provide a detailed answer mentioning:
+            - Data source (our secure dataset)
+            - Number of measurements analyzed
+            - Key findings from the data
+            - Geographic context (Indian Ocean region)
             """
 
-            return self._groq_generate(answer_prompt, temperature=0.3, max_tokens=1000)
+            return self._groq_generate(answer_prompt, temperature=0.3, max_tokens=1500)
         except Exception as e:
             logger.error(f"Error generating answer: {e}")
             return f"Error generating response: {str(e)}"

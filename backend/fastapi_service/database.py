@@ -1,6 +1,24 @@
 """
 Database models and operations for ARGO float data with 768-dimensional vector storage.
 Only processes real ARGO NetCDF files - no demo/test data.
+
+=============================================================================
+DATA SOURCE: NEON POSTGRESQL CLOUD DATABASE ONLY
+=============================================================================
+This module queries ONLY the following three tables in the cloud database:
+
+1. datasets - Metadata about uploaded NetCDF files
+   Columns: id (UUID), filename, file_path, upload_time, status, variables, dimensions, uploaded_by_id
+
+2. dataset_values - Flattened ARGO measurement data  
+   Columns: id, dataset_id (FK), variable, time, lat, lon, depth, value
+   Geographic Filter: Indian Ocean (lat: -60 to 30, lon: 20 to 150)
+   
+3. dataset_embeddings - Vector embeddings for semantic search
+   Columns: id, dataset_id (FK), variable, time, region, embedding (768-dim vector), summary
+   
+NO OTHER TABLES ARE USED. All chatbot responses are based solely on data from these tables.
+=============================================================================
 """
 
 import os
@@ -34,20 +52,20 @@ class DatabaseManager:
         with self.engine.connect() as connection:
             try:
                 # Query dataset_values table with JOIN to datasets table
+                # NO LIMIT - returns ALL measurements for complete analysis
                 result = connection.execute(text("""
                     SELECT 
                         d.filename,
-                        v.latitude,
-                        v.longitude,
+                        v.lat,
+                        v.lon,
                         v.time,
                         v.depth,
                         v.value as temperature,
                         v.variable
                     FROM dataset_values v
                     INNER JOIN datasets d ON v.dataset_id = d.id
-                    WHERE v.latitude BETWEEN -60 AND 30
-                      AND v.longitude BETWEEN 20 AND 150
-                    LIMIT 1000
+                    WHERE v.lat BETWEEN -60 AND 30
+                      AND v.lon BETWEEN 20 AND 150
                 """))
 
                 results = []
@@ -150,7 +168,7 @@ class DatabaseManager:
             logger.error(f"Error fixing GROUP BY clause: {e}")
             return sql_query  # Return original if fix fails
 
-    def search_similar_measurements(self, query_embedding: List[float], limit: int = 5) -> List[Dict]:
+    def search_similar_measurements(self, query_embedding: List[float], limit: int = 100) -> List[Dict]:
         '''Search for similar ARGO measurements using vector similarity from Neon database ONLY'''
         try:
             # Use real database search - NO fallbacks
@@ -158,7 +176,7 @@ class DatabaseManager:
             if not measurements:
                 raise Exception("❌ No measurements found in Neon cloud database")
             
-            # Filter to Indian Ocean only and return top results
+            # Filter to Indian Ocean only and return results (increased limit for comprehensive analysis)
             indian_ocean_measurements = []
             for measurement in measurements:
                 lat, lon = measurement.get('latitude', 0), measurement.get('longitude', 0)
@@ -183,8 +201,8 @@ class DatabaseManager:
                 total_result = connection.execute(text("""
                     SELECT COUNT(*) 
                     FROM dataset_values 
-                    WHERE latitude BETWEEN -60 AND 30
-                      AND longitude BETWEEN 20 AND 150
+                    WHERE lat BETWEEN -60 AND 30
+                      AND lon BETWEEN 20 AND 150
                 """))
                 total_measurements = total_result.fetchone()[0]
 
@@ -196,8 +214,8 @@ class DatabaseManager:
                         AVG(value) as avg_temp
                     FROM dataset_values
                     WHERE variable = 'temperature'
-                      AND latitude BETWEEN -60 AND 30
-                      AND longitude BETWEEN 20 AND 150
+                      AND lat BETWEEN -60 AND 30
+                      AND lon BETWEEN 20 AND 150
                 """))
                 temp_row = temp_result.fetchone()
 
@@ -209,8 +227,8 @@ class DatabaseManager:
                         AVG(value) as avg_salinity
                     FROM dataset_values
                     WHERE variable = 'salinity'
-                      AND latitude BETWEEN -60 AND 30
-                      AND longitude BETWEEN 20 AND 150
+                      AND lat BETWEEN -60 AND 30
+                      AND lon BETWEEN 20 AND 150
                 """))
                 salinity_row = salinity_result.fetchone()
 
@@ -315,43 +333,29 @@ def get_ocean_region_stats(db: Optional[DatabaseManager] = None) -> Dict[str, Di
     if db is None:
         db = DatabaseManager()
 
-    # FOR THIS PROJECT: Simplify to focus on Indian Ocean data only
-    # All existing data in our database (Southern Hemisphere coordinates) is considered Indian Ocean data
+    # Query dataset_values table (Indian Ocean data only)
     query = """
     SELECT 'Indian Ocean' as region,
         COUNT(*) as measurement_count,
-        AVG(temperature) as avg_temperature,
-        MIN(temperature) as min_temperature,
-        MAX(temperature) as max_temperature,
-        AVG(salinity) as avg_salinity,
-        MIN(salinity) as min_salinity,
-        MAX(salinity) as max_salinity,
-        COUNT(DISTINCT filename) as unique_files,
-        MIN(latitude) as min_lat,
-        MAX(latitude) as max_lat,
-        MIN(longitude) as min_lon,
-        MAX(longitude) as max_lon
-    FROM argo_measurements
-    WHERE temperature IS NOT NULL
-
-    UNION ALL
-
-    SELECT 'Pacific Ocean' as region, 0 as measurement_count, null, null, null, null, null, null, 0, null, null, null, null
-    WHERE NOT EXISTS (SELECT 1 FROM argo_measurements WHERE latitude >= -60 AND latitude < 60 AND ((longitude >= -100 AND longitude < 20) OR (longitude >= 120 AND longitude < 290)))
-
-    UNION ALL
-
-    SELECT 'Atlantic Ocean' as region, 0 as measurement_count, null, null, null, null, null, null, 0, null, null, null, null
-    WHERE NOT EXISTS (SELECT 1 FROM argo_measurements WHERE latitude >= -35 AND latitude < 60 AND longitude >= -100 AND longitude < 20)
-
-    ORDER BY measurement_count DESC
+        AVG(CASE WHEN variable = 'temperature' THEN value END) as avg_temperature,
+        MIN(CASE WHEN variable = 'temperature' THEN value END) as min_temperature,
+        MAX(CASE WHEN variable = 'temperature' THEN value END) as max_temperature,
+        AVG(CASE WHEN variable = 'salinity' THEN value END) as avg_salinity,
+        MIN(CASE WHEN variable = 'salinity' THEN value END) as min_salinity,
+        MAX(CASE WHEN variable = 'salinity' THEN value END) as max_salinity,
+        COUNT(DISTINCT dataset_id) as unique_files,
+        MIN(lat) as min_lat,
+        MAX(lat) as max_lat,
+        MIN(lon) as min_lon,
+        MAX(lon) as max_lon
+    FROM dataset_values
+    WHERE lat BETWEEN -60 AND 30
+      AND lon BETWEEN 20 AND 150
     """
-    # Fixed: Simple query that puts all data in Indian Ocean for this project
-    fixed_query = query
 
     with db.engine.connect() as connection:
         try:
-            result = connection.execute(text(fixed_query))
+            result = connection.execute(text(query))
             rows = result.fetchall()
             columns = result.keys()
 
@@ -370,6 +374,7 @@ def get_ocean_region_stats(db: Optional[DatabaseManager] = None) -> Dict[str, Di
                     'lon_range': [region_data['min_lon'], region_data['max_lon']]
                 }
 
+            logger.info(f"✅ Retrieved region stats from Neon cloud database")
             return region_stats
 
         except Exception as e:

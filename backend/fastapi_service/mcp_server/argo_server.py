@@ -207,41 +207,30 @@ class ArgoMCPServer:
             logger.error(f"❌ Component initialization failed: {e}")
 
     def _check_and_process_argo_files(self):
-        """Check for and process available ARGO NetCDF files"""
+        """Check for ARGO data in cloud database"""
         try:
-            # Look for ARGO data files in common locations
-            data_dirs = [
-                Path("./data"),
-                Path("../data"),
-                Path("../../data"),
-                Path("./test_data"),
-                Path("./sample_data")
-            ]
-
-            found_files = []
-            for data_dir in data_dirs:
-                if data_dir.exists():
-                    nc_files = list(data_dir.glob("*.nc")) + list(data_dir.glob("*.netcdf"))
-                    found_files.extend(nc_files)
-
-            if found_files:
-                logger.info(f"📁 Found {len(found_files)} ARGO NetCDF files: {[f.name for f in found_files]}")
-
-                # Process first file as example
-                try:
-                    result = self.enhanced_processor.process_file_with_status(str(found_files[0]))
-                    if result["data"] and result["data"]["metadata"]:
-                        logger.info("✅ Successfully processed ARGO file for chatbot use")
-                        self.processed_data = result["data"]
-                    else:
-                        logger.warning("⚠️ File processing completed but no data extracted")
-                except Exception as e:
-                    logger.error(f"❌ File processing failed: {e}")
+            # Check if we have data in the cloud database
+            if self.db_manager:
+                stats = self.db_manager.get_database_stats()
+                total_measurements = stats.get('total_measurements', 0)
+                
+                if total_measurements > 0:
+                    logger.info(f"✅ MCP Server connected to cloud database with {total_measurements:,} measurements")
+                    logger.info("🌊 ARGO data available from Neon PostgreSQL cloud database")
+                    # Mark that we have processed data available
+                    self.processed_data = {
+                        'source': 'cloud_database',
+                        'measurements': total_measurements,
+                        'metadata': stats
+                    }
+                else:
+                    logger.warning("⚠️ MCP Server connected but no measurements found in database")
+                    logger.info("💡 Upload NetCDF files via the frontend to populate the database")
             else:
-                logger.info("ℹ️ No ARGO NetCDF files found, using sample data for demonstration")
-
+                logger.warning("⚠️ MCP Server: No database connection available")
+                
         except Exception as e:
-            logger.error(f"Error checking ARGO files: {e}")
+            logger.error(f"Error checking database data: {e}")
 
     def _register_handlers(self):
         """Register all MCP protocol handlers"""
@@ -1195,11 +1184,13 @@ The visualization has been generated and is ready for display. Use this data to 
                         stats = self.db_manager.get_database_stats()
                         logger.info(f"📊 Cloud database stats: {stats}")
 
-                        if stats.get('total_profiles', 0) > 0:
-                            logger.info("✅ Cloud database contains uploaded ARGO data!")
+                        # Check for actual data (measurements, not profiles)
+                        total_measurements = stats.get('total_measurements', 0)
+                        if total_measurements > 0:
+                            logger.info(f"✅ Cloud database contains {total_measurements:,} ARGO measurements!")
                         else:
-                            logger.warning("⚠️ Cloud database connected but no data found")
-                            logger.info("💡 You may need to insert data using manual_data_insert.py")
+                            logger.warning("⚠️ Cloud database connected but no measurements found")
+                            logger.info("💡 You may need to upload NetCDF files via the frontend")
 
                     except Exception as e:
                         logger.error(f"Failed to get cloud database stats: {e}")
